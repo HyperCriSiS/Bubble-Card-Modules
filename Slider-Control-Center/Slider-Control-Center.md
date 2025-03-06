@@ -1,7 +1,7 @@
 # Slider-Control-Center
 
 **Version:** v1.0
-**Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
+**Creator:** [HyperCriSiS](https://github.com/my_username)
 
 > [!IMPORTANT] 
 > **Unsupported cards:**
@@ -53,7 +53,7 @@ slider_control_center:
   name: Slider Control Center
   version: "v1.0"
   creator: "HyperCriSiS"
-  link: "https://github.com/HyperCriSiS"
+  link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
   description: Comprehensive customization tool for Bubble Card elements. Adjust sizes, spacing, colors, and visual effects with focus on slider controls.
   unsupported:
       - cover
