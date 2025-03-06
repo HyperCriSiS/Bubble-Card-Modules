@@ -42,7 +42,7 @@ sub_button:
 
 <details>
 
-<summary><b>?? Get this Module</b></summary>
+<summary><b>ðŸ§© Get this Module</b></summary>
 
 <br>
 
@@ -78,7 +78,7 @@ slider_control_center:
               max: 5.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "×"
+              unit_of_measurement: "Ã—"
     - type: expandable
       title: "Margin & Spacing Adjustments"
       icon: "mdi:arrow-expand"
@@ -146,7 +146,7 @@ slider_control_center:
               max: 3.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "×"
+              unit_of_measurement: "Ã—"
         - name: icon_background_ratio
           label: "Icon Background Ratio"
           default: 1
@@ -156,7 +156,7 @@ slider_control_center:
               max: 1.4
               step: 0.05
               mode: slider
-              unit_of_measurement: "×"
+              unit_of_measurement: "Ã—"
         - name: subicon_size_multiplier
           label: "Sub-icon Size Multiplier"
           default: 1
@@ -166,7 +166,7 @@ slider_control_center:
               max: 3.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "×"
+              unit_of_measurement: "Ã—"
         - name: subbutton_background_ratio
           label: "Sub-button Background Ratio"
           default: 1
@@ -176,7 +176,7 @@ slider_control_center:
               max: 1.4
               step: 0.05
               mode: slider
-              unit_of_measurement: "×"
+              unit_of_measurement: "Ã—"
     - type: expandable
       title: "Visual Enhancements"
       icon: "mdi:palette"
