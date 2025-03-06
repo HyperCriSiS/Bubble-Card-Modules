@@ -1,4 +1,4 @@
-# -> Slider-Control-Center
+# Slider-Control-Center
 
 **Version:** v1.0
 **Creator:** -> [HyperCriSiS](https://github.com/my_username)
@@ -14,7 +14,7 @@
 >  - Select
 >  - Separator
 
--> Comprehensive customization tool for Bubble Card elements. Adjust sizes, spacing, colors, and visual effects.
+Comprehensive customization tool for Bubble Card elements. Adjust sizes, spacing, colors, and visual effects.
 Optimized for Slider and 2-row-sub-buttons, but also works for normal layouts.
 
 Configure this module via the editor or in YAML, for example: 
