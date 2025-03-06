@@ -1,7 +1,7 @@
 # Slider-Control-Center
 
 **Version:** v1.0
-**Creator:** -> [HyperCriSiS](https://github.com/my_username)
+**Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
 > **Unsupported cards:**
