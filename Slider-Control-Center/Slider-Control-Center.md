@@ -5,7 +5,6 @@
 
 > [!IMPORTANT] 
 > **Unsupported cards:**
->  - Button
 >  - Cover
 >  - Climate
 >  - Horizontal buttons stack
