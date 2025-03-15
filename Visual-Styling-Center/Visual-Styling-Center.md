@@ -1,4 +1,4 @@
-# Slider-Control-Center
+# Visual Styling Center
 
 **Version:** v2025.03.15
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
@@ -77,14 +77,14 @@ The Icon Contrast Helper adds circular background behind icons to improve visibi
 ### Basic Height Adjustment
 
 ```yaml
-slider_control_center:
+visual_styling_center:
   height_multiplier: 1.5
 ```
 
 ### Custom Colors with Icon Helper
 
 ```yaml
-slider_control_center:
+visual_styling_center:
   custom_icon_color: [255, 255, 255]
   custom_icon_background_color: [0, 0, 0]
   enable_icon_helper: true
@@ -98,7 +98,7 @@ slider_control_center:
 ### Dynamic Gradient Effects
 
 ```yaml
-slider_control_center:
+visual_styling_center:
   enable_gradient: true
   gradient_target: background
   gradient_entity: light.living_room_group
@@ -117,8 +117,8 @@ slider_control_center:
 > To use this module, simply copy and paste the following configuration into your `/www/bubble/bubble-modules.yaml` file.
 
 ```yaml
-slider_control_center:
-  name: "Slider Control Center"
+visual_styling_center:
+  name: "Visual Styling Center"
   version: "v2025.03.15"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
@@ -395,7 +395,7 @@ slider_control_center:
               mode: slider
   code: |
    ${(() => {
-      const config = this.config.slider_control_center || {};
+      const config = this.config.visual_styling_center || {};
 
       // Default gradient configuration
       if (config.gradient_target === undefined) {
@@ -933,6 +933,10 @@ slider_control_center:
     .bubble-icon-container:focus .bubble-icon {
       filter: brightness(1.2) !important;
     }
+
+   return '';
+    })()}
+
 
 
 ```
