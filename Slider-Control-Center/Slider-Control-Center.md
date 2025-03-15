@@ -34,7 +34,6 @@ The Slider Control Center module offers advanced customization options for Bubbl
 ### Card Size Adjustments
 
 - **Card Height Multiplier**: Scale the overall height of your Bubble Card 
-- **Inner Card Padding**: Add padding inside the card for more spacing
 
 ### Margin & Spacing Adjustments
 
@@ -42,6 +41,7 @@ The Slider Control Center module offers advanced customization options for Bubbl
 - **Sub-button Container Right Margin**: Control the right margin of the sub-button container 
 - **Sub-button Row Spacing**: Set the spacing between rows of sub-buttons 
 - **Sub-button Column Spacing**: Set the spacing between columns of sub-buttons 
+- **Inner Card Padding**: Add padding inside the card for more spacing
 
 ### Icon Size Adjustments
 
@@ -120,7 +120,7 @@ slider_control_center:
 slider_control_center:
   name: "Slider Control Center"
   version: "v2025.03.15"
-  creator: "HyperCriSiS & Claude"
+  creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
   description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
   unsupported:
