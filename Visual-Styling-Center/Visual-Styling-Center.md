@@ -946,5 +946,4 @@ visual_styling_center:
 ---
 
 ### Screenshot:
-![Slider-Control-Center](https://github.com/HyperCriSiS/Bubble-Card-Modules/blob/main/Slider-Control-Center/Slider-Control-Center.png)
 
