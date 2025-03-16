@@ -172,6 +172,24 @@ badgy-condition-helper:
     - Badge effects (entity vs. icon)
 
 
+  badgy-condition-helper:
+  name: "Badgy Condition Helper"
+  version: "v1.0"
+  creator: "Claude AI"
+  link: "https://github.com/Clooos/Bubble-Card"
+  description: |
+    Advanced badge and effect helper module with conditional logic.
+
+    Features:
+    - Entity badges: Display entity states or attributes on sub-buttons
+    - Icon badges: Show icon indicators on sub-buttons
+    - Sub-button backgrounds: Change background colors based on conditions
+    - Icon effects: Apply animations to main and sub-button icons
+    - Badge effects: Apply animations to badges
+    - Main icon background: Change the main icon background conditionally
+
+    All features support Home Assistant-style conditions for state-based logic.
+
   code: |
     /* =============================
        CSS for the badge visuals
@@ -301,7 +319,7 @@ badgy-condition-helper:
 
     ${(() => {
       try {
-        // ===== Gloabal variables for tracking =====
+        // ===== Global variables for tracking =====
         const DEBUG = false;
         let trackedEntities = new Set(); 
 
@@ -629,18 +647,20 @@ badgy-condition-helper:
           if(scale!==1){
             badge.style.setProperty('--badge-scale', scale);
           }
-          const bw=sb.offsetWidth, bh=sb.offsetHeight;
+
+          // Store direct position values for persistence (fixed positioning)
           if(badgeType==='entity-badge'){
-            const tp = Math.max(-10, Math.min(bh+10,(bh/2)+vPos));
-            const rt = Math.max(-10, Math.min(bw+10,(bw/2)+hPos));
-            badge.style.top = `${tp}px`;
-            badge.style.right = `${rt}px`;
+            badge.style.top = `${vPos}px`;
+            badge.style.right = `${hPos}px`;
           } else {
-            const tp = Math.max(-10, Math.min(bh+10,(bh/2)+vPos));
-            const lf = Math.max(-10, Math.min(bw+10,(bw/2)+hPos));
-            badge.style.top = `${tp}px`;
-            badge.style.left = `${lf}px`;
+            badge.style.top = `${vPos}px`;
+            badge.style.left = `${hPos}px`;
           }
+
+          // Store the original position values as data attributes for persistence
+          badge.dataset.hPos = hPos;
+          badge.dataset.vPos = vPos;
+
           if(badgeColor) badge.style.setProperty('--badge-color', processColor(badgeColor));
           if(textColor) badge.style.color = processColor(textColor);
 
@@ -684,7 +704,12 @@ badgy-condition-helper:
               let colorStr = '';
 
               if(type==='solid'){
-                colorStr = processColor(bgC.color || '#ff0000');
+                if(bgC.color) { // Only set color if defined
+                  colorStr = processColor(bgC.color);
+                } else {
+                  // No color set, don't apply background
+                  continue;
+                }
               }
               else if(type==='two-color'){
                 const c1 = processColor(bgC.color1 || '#ff0000');
@@ -835,10 +860,9 @@ badgy-condition-helper:
           mainCont.style.removeProperty('opacity');
 
           const conditionMet = checkAllConditions(mBg.condition,hass);
-          if(conditionMet) {
-            const color = mBg.color || '#4400ff';
-            const op    = (mBg.opacity!==undefined) ? mBg.opacity : 1.0;
-            const cProc = processColor(color);
+          if(conditionMet && mBg.color) { // Only apply if color is specified
+            const op = (mBg.opacity!==undefined) ? mBg.opacity : 1.0;
+            const cProc = processColor(mBg.color);
             mainCont.style.setProperty('background', cProc, 'important');
             mainCont.style.setProperty('opacity', op, 'important');
           }
@@ -874,6 +898,381 @@ badgy-condition-helper:
         - type: expandable
           title: "Sub-Button 1"
           name: "0"
+          schema:
+            - name: entity
+              label: "Entity"
+              selector:
+                entity: {}
+            - name: attribute
+              label: "Attribute (optional)"
+              selector:
+                attribute: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: decimals
+              label: "Decimal Places (for numbers)"
+              selector:
+                number:
+                  min: 0
+                  max: 5
+                  mode: slider
+                  step: 1
+            - name: show_unit
+              label: "Show Unit"
+              default: true
+              selector:
+                boolean: {}
+            - name: show_if_off
+              label: "Show When 'off'"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 2"
+          name: "1"
+          schema:
+            - name: entity
+              label: "Entity"
+              selector:
+                entity: {}
+            - name: attribute
+              label: "Attribute (optional)"
+              selector:
+                attribute: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: decimals
+              label: "Decimal Places (for numbers)"
+              selector:
+                number:
+                  min: 0
+                  max: 5
+                  mode: slider
+                  step: 1
+            - name: show_unit
+              label: "Show Unit"
+              default: true
+              selector:
+                boolean: {}
+            - name: show_if_off
+              label: "Show When 'off'"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 3"
+          name: "2"
+          schema:
+            - name: entity
+              label: "Entity"
+              selector:
+                entity: {}
+            - name: attribute
+              label: "Attribute (optional)"
+              selector:
+                attribute: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: decimals
+              label: "Decimal Places (for numbers)"
+              selector:
+                number:
+                  min: 0
+                  max: 5
+                  mode: slider
+                  step: 1
+            - name: show_unit
+              label: "Show Unit"
+              default: true
+              selector:
+                boolean: {}
+            - name: show_if_off
+              label: "Show When 'off'"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 4"
+          name: "3"
+          schema:
+            - name: entity
+              label: "Entity"
+              selector:
+                entity: {}
+            - name: attribute
+              label: "Attribute (optional)"
+              selector:
+                attribute: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: decimals
+              label: "Decimal Places (for numbers)"
+              selector:
+                number:
+                  min: 0
+                  max: 5
+                  mode: slider
+                  step: 1
+            - name: show_unit
+              label: "Show Unit"
+              default: true
+              selector:
+                boolean: {}
+            - name: show_if_off
+              label: "Show When 'off'"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 5"
+          name: "4"
+          schema:
+            - name: entity
+              label: "Entity"
+              selector:
+                entity: {}
+            - name: attribute
+              label: "Attribute (optional)"
+              selector:
+                attribute: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: decimals
+              label: "Decimal Places (for numbers)"
+              selector:
+                number:
+                  min: 0
+                  max: 5
+                  mode: slider
+                  step: 1
+            - name: show_unit
+              label: "Show Unit"
+              default: true
+              selector:
+                boolean: {}
+            - name: show_if_off
+              label: "Show When 'off'"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 6"
+          name: "5"
           schema:
             - name: entity
               label: "Entity"
@@ -1004,6 +1403,271 @@ badgy-condition-helper:
               selector:
                 condition: {}
 
+        - type: expandable
+          title: "Sub-Button 2"
+          name: "1"
+          schema:
+            - name: icon
+              label: "Icon"
+              selector:
+                icon: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 3"
+          name: "2"
+          schema:
+            - name: icon
+              label: "Icon"
+              selector:
+                icon: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 4"
+          name: "3"
+          schema:
+            - name: icon
+              label: "Icon"
+              selector:
+                icon: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 5"
+          name: "4"
+          schema:
+            - name: icon
+              label: "Icon"
+              selector:
+                icon: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 6"
+          name: "5"
+          schema:
+            - name: icon
+              label: "Icon"
+              selector:
+                icon: {}
+            - name: color
+              label: "Badge Color"
+              selector:
+                ui_color: {}
+            - name: text_color
+              label: "Text Color"
+              selector:
+                ui_color: {}
+            - name: show_background
+              label: "Show Background"
+              default: true
+              selector:
+                boolean: {}
+            - name: scale
+              label: "Badge Size (scale)"
+              default: 1
+              selector:
+                number:
+                  min: 0.5
+                  max: 3
+                  mode: slider
+                  step: 0.1
+            - name: h_pos
+              label: "Horizontal Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -500
+                  max: 500
+                  mode: slider
+                  step: 1
+            - name: v_pos
+              label: "Vertical Position (px)"
+              default: -8
+              selector:
+                number:
+                  min: -100
+                  max: 100
+                  mode: slider
+                  step: 1
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
     - type: expandable
       title: "Sub-Buttons Background"
       icon: "mdi:format-color-fill"
@@ -1027,7 +1691,8 @@ badgy-condition-helper:
             - name: color
               label: "Solid Color"
               selector:
-                ui_color: {}
+                ui_color:
+                  include_none: true
             - name: color1
               label: "Gradient Color 1"
               selector:
@@ -1037,7 +1702,7 @@ badgy-condition-helper:
               selector:
                 ui_color: {}
             - name: color3
-              label: "Gradient Color 3 (3-color only)"
+              label: "Gradient Color 3"
               selector:
                 ui_color: {}
             - name: opacity
@@ -1360,6 +2025,196 @@ badgy-condition-helper:
               selector:
                 condition: {}
 
+        - type: expandable
+          title: "Sub-Button Icon 2"
+          name: "1"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button Icon 3"
+          name: "2"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button Icon 4"
+          name: "3"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button Icon 5"
+          name: "4"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button Icon 6"
+          name: "5"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
     - type: expandable
       title: "Entity Badge Effects"
       icon: "mdi:tag-text"
@@ -1368,6 +2223,196 @@ badgy-condition-helper:
         - type: expandable
           title: "Sub-Button 1"
           name: "0"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 2"
+          name: "1"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 3"
+          name: "2"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 4"
+          name: "3"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 5"
+          name: "4"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 6"
+          name: "5"
           schema:
             - name: effect
               label: "Effect Type"
@@ -1446,6 +2491,196 @@ badgy-condition-helper:
               selector:
                 condition: {}
 
+        - type: expandable
+          title: "Sub-Button 2"
+          name: "1"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 3"
+          name: "2"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 4"
+          name: "3"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 5"
+          name: "4"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 6"
+          name: "5"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
     - type: expandable
       title: "Main Icon Background"
       icon: "mdi:format-color-fill"
@@ -1468,7 +2703,6 @@ badgy-condition-helper:
           label: "Condition (optional)"
           selector:
             condition: {}
-
 ```
 
 </details>
