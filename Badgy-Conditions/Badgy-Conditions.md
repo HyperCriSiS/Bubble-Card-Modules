@@ -1,6 +1,6 @@
 # Badgy Condition Helper
 
-**Version:** v2025.03.16
+**Version:** v2025.03.16-fixed
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT]
@@ -43,9 +43,11 @@ Badgy Condition Helper adds dynamic visual elements to your Bubble Card - displa
 - Separate effects for entity and icon badges
 - Various animations and color options
 
+### Sub-Button Effects
+- Various animations and color options
+
 ### Supported Animation Types
-- Standard: Pulse, Rotation, Glow, Shake, Float, Zoom, Heartbeat
-- Additional: Spin-360, Flip, Vibrate
+- Standard: Pulse, Rotation, Glow, Shake, Float, Zoom, Heartbeat, Spin-360, Flip, Vibrate
 
 
 Configure this module via the editor or in YAML, for example: 
@@ -152,31 +154,9 @@ modules:
 
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2025.03.16"
+  version: "v2025.03.16-mod"
   creator: "HyperCriSiS"
-  link: "https://github.com/Clooos/Bubble-Card/discussions"
-
-  unsupported:
-    - horizontal-buttons-stack
-    - separator
-    - pop-up
-    - empty-column
-    - cover
-
-  description: |
-    This module adds:
-    - Badges to sub-buttons (entity or icon),
-    - Conditional backgrounds (solid colour, two-color/three-color gradient) for sub-buttons
-    - Main icon background
-    - Icon effects
-    - Badge effects (entity vs. icon)
-
-
-  badgy-condition-helper:
-  name: "Badgy Condition Helper"
-  version: "v1.0"
-  creator: "Claude AI"
-  link: "https://github.com/Clooos/Bubble-Card"
+  link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   description: |
     Advanced badge and effect helper module with conditional logic.
 
@@ -187,9 +167,9 @@ badgy-condition-helper:
     - Icon effects: Apply animations to main and sub-button icons
     - Badge effects: Apply animations to badges
     - Main icon background: Change the main icon background conditionally
+    - Sub-button effects: Apply animations (including color for glow) to the entire sub-button container
 
     All features support Home Assistant-style conditions for state-based logic.
-
   code: |
     /* =============================
        CSS for the badge visuals
@@ -207,11 +187,12 @@ badgy-condition-helper:
       align-items: center;
       justify-content: center;
       padding: 0 4px;
-      z-index: 10;
+      z-index: 1; /* reduziert, damit Badges nicht Popups überlagern */
       box-sizing: border-box;
       box-shadow: 0 1px 2px rgba(0,0,0,0.2);
       transform: scale(var(--badge-scale, 1));
       transform-origin: center;
+      pointer-events: none;
     }
     .entity-badge { top: 0; right: 0; }
     .icon-badge   { top: 0; left: 0;  }
@@ -321,7 +302,7 @@ badgy-condition-helper:
       try {
         // ===== Global variables for tracking =====
         const DEBUG = false;
-        let trackedEntities = new Set(); 
+        let trackedEntities = new Set();
 
         // ===== Helper functions for conditions =====
         function evaluateSingleCondition(condObj, hass) {
@@ -331,39 +312,51 @@ badgy-condition-helper:
           switch (t) {
             case 'state': {
               const eid = condObj.entity_id || condObj.entity;
-              if(!eid || !hass.states[eid]) return false;
-              const st = hass.states[eid].state;
-              if(Array.isArray(condObj.state)){
-                return condObj.state.includes(st);
+              if (!eid || !hass.states[eid]) return false;
+              let val;
+              if (condObj.attribute) {
+                val = hass.states[eid].attributes[condObj.attribute];
+                if (val === undefined) return false;
               } else {
-                return st === condObj.state;
+                val = hass.states[eid].state;
+              }
+              if (Array.isArray(condObj.state)) {
+                return condObj.state.includes(val);
+              } else {
+                return val === condObj.state;
               }
             }
             case 'numeric_state': {
               const eid = condObj.entity_id || condObj.entity;
-              if(!eid || !hass.states[eid]) return false;
-              const val = parseFloat(hass.states[eid].state);
-              if(isNaN(val)) return false;
-              let ok=true;
-              if(condObj.above !==undefined) {
-                ok= ok && (val > parseFloat(condObj.above));
+              if (!eid || !hass.states[eid]) return false;
+              let val;
+              if (condObj.attribute) {
+                val = hass.states[eid].attributes[condObj.attribute];
+              } else {
+                val = hass.states[eid].state;
               }
-              if(condObj.below !==undefined) {
-                ok= ok && (val < parseFloat(condObj.below));
+              const numVal = parseFloat(val);
+              if (isNaN(numVal)) return false;
+              let ok = true;
+              if (condObj.above !== undefined) {
+                ok = ok && (numVal > parseFloat(condObj.above));
+              }
+              if (condObj.below !== undefined) {
+                ok = ok && (numVal < parseFloat(condObj.below));
               }
               return ok;
             }
             case 'and':
-              if(!Array.isArray(condObj.conditions)) return false;
+              if (!Array.isArray(condObj.conditions)) return false;
               return condObj.conditions.every(sc => evaluateSingleCondition(sc, hass));
             case 'or':
-              if(!Array.isArray(condObj.conditions)) return false;
+              if (!Array.isArray(condObj.conditions)) return false;
               return condObj.conditions.some(sc => evaluateSingleCondition(sc, hass));
             case 'not':
-              if(Array.isArray(condObj.conditions) && condObj.conditions.length>0){
+              if (Array.isArray(condObj.conditions) && condObj.conditions.length > 0) {
                 return !evaluateSingleCondition(condObj.conditions[0], hass);
               }
-              if(condObj.condition_obj){
+              if (condObj.condition_obj) {
                 return !evaluateSingleCondition(condObj.condition_obj, hass);
               }
               return false;
@@ -372,20 +365,19 @@ badgy-condition-helper:
           }
         }
 
-        function checkAllConditions(cProp, hass){
-          if(!cProp) return true; // if no condition is defined -> true
-          if(Array.isArray(cProp)){
+        function checkAllConditions(cProp, hass) {
+          if (!cProp) return true;
+          if (Array.isArray(cProp)) {
             return cProp.every(x => evaluateSingleCondition(x, hass));
           }
           return evaluateSingleCondition(cProp, hass);
         }
 
-        function processColor(color){
-          if(!color) return null;
-          if(color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) {
+        function processColor(color) {
+          if (!color) return null;
+          if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) {
             return color;
           }
-          // Assumption: color refers to var(--xxx-color)
           return `var(--${color}-color)`;
         }
 
@@ -395,15 +387,13 @@ badgy-condition-helper:
           const entities = [];
           const t = condObj.condition;
           if (!t) return entities;
-
           switch (t) {
             case 'state':
-            case 'numeric_state':
-              {
-                const eid = condObj.entity_id || condObj.entity;
-                if (eid && typeof eid === 'string') entities.push(eid);
-              }
+            case 'numeric_state': {
+              const eid = condObj.entity_id || condObj.entity;
+              if (eid && typeof eid === 'string') entities.push(eid);
               break;
+            }
             case 'and':
             case 'or':
               if (Array.isArray(condObj.conditions)) {
@@ -481,7 +471,13 @@ badgy-condition-helper:
           if (mBg?.condition) {
             collectEntitiesFromCondition(mBg.condition).forEach(e => allEntities.add(e));
           }
-
+          // 8) Sub-Button Effects
+          const sBE = cfg.sub_button_effects || {};
+          for (const eff of Object.values(sBE)) {
+            if (eff?.condition) {
+              collectEntitiesFromCondition(eff.condition).forEach(e => allEntities.add(e));
+            }
+          }
           return allEntities;
         }
 
@@ -489,36 +485,30 @@ badgy-condition-helper:
         function setupStateChangeListener() {
           const cardEl = card;
           const connection = hass.connection;
-
           if (cardEl._badgyStateChangeHandler) {
             connection.removeEventListener('state_changed', cardEl._badgyStateChangeHandler);
           }
-
           cardEl._badgyStateChangeHandler = (event) => {
             const entityId = event.data.entity_id;
             if (trackedEntities.has(entityId)) {
               if (DEBUG) console.log(`[badgy-helper] State changed for tracked entity: ${entityId}`);
-
-              // Re-run all processes
               processEntityBadges();
               processIconBadges();
               processSubButtonBackgrounds();
               processIconEffects();
+              processSubButtonEffects();
               processEntityBadgeEffects();
               processIconBadgeEffects();
               processMainIconBackground();
             }
           };
-
           connection.addEventListener('state_changed', cardEl._badgyStateChangeHandler);
-
           if (DEBUG) console.log('[badgy-helper] Registered state_changed listener');
         }
 
         // ===== Clean up event listeners when card is disconnected =====
         if (!card._badgyCleanupHandlerAdded) {
           card._badgyCleanupHandlerAdded = true;
-
           const originalDisconnectedCallback = card.disconnectedCallback;
           card.disconnectedCallback = function() {
             if (DEBUG) console.log('[badgy-helper] Card removed, cleaning up...');
@@ -540,30 +530,25 @@ badgy-condition-helper:
         function processEntityBadges(){
           const eBadges = config.entity_badges || {};
           const currentEntityBadges = new Set();
-
-          for(const [k,bc] of Object.entries(eBadges)){
-            if(!bc?.entity) continue;
-            const sbNum = parseInt(k)+1;
-            if(!hass.states[bc.entity]) continue;
-
-            // Condition check
-            const conditionMet = checkAllConditions(bc.condition,hass);
-            const showBadge = conditionMet && !(bc.show_if_off===false && hass.states[bc.entity].state==='off');
-
-            if(showBadge) {
+          for (const [k, bc] of Object.entries(eBadges)) {
+            if (!bc?.entity) continue;
+            const sbNum = parseInt(k) + 1;
+            if (!hass.states[bc.entity]) continue;
+            const conditionMet = checkAllConditions(bc.condition, hass);
+            const showBadge = conditionMet && !(bc.show_if_off === false && hass.states[bc.entity].state === 'off');
+            if (showBadge) {
               currentEntityBadges.add(sbNum);
-
               let dispVal;
-              const stObj=hass.states[bc.entity];
-              if(bc.attribute && stObj.attributes[bc.attribute]!==undefined){
+              const stObj = hass.states[bc.entity];
+              if (bc.attribute && stObj.attributes[bc.attribute] !== undefined) {
                 dispVal = stObj.attributes[bc.attribute];
               } else {
                 dispVal = stObj.state;
               }
-              if(bc.decimals!==undefined && !isNaN(parseFloat(dispVal))){
+              if (bc.decimals !== undefined && !isNaN(parseFloat(dispVal))) {
                 dispVal = parseFloat(dispVal).toFixed(parseInt(bc.decimals));
               }
-              if(bc.show_unit!==false && stObj.attributes.unit_of_measurement){
+              if (bc.show_unit !== false && stObj.attributes.unit_of_measurement) {
                 dispVal += stObj.attributes.unit_of_measurement;
               }
               createBadge({
@@ -574,19 +559,17 @@ badgy-condition-helper:
                 hPos: bc.h_pos ?? -8,
                 vPos: bc.v_pos ?? -8,
                 scale: bc.scale ?? 1,
-                showBackground: bc.show_background!==false,
+                showBackground: bc.show_background !== false,
                 badgeType: 'entity-badge'
               });
             }
           }
-
-          // remove old
-          for(let i=1; i<=10; i++){
-            if(!currentEntityBadges.has(i)){
+          for (let i = 1; i <= 10; i++) {
+            if (!currentEntityBadges.has(i)) {
               const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
-              if(sb){
+              if (sb) {
                 const badge = sb.querySelector('.entity-badge');
-                if(badge) sb.removeChild(badge);
+                if (badge) sb.removeChild(badge);
               }
             }
           }
@@ -594,16 +577,13 @@ badgy-condition-helper:
 
         // ========== PROCESS: Icon Badges ==========
         function processIconBadges(){
-          const iBadges = config.icon_badges||{};
+          const iBadges = config.icon_badges || {};
           const currentIconBadges = new Set();
-
-          for(const [k,bc] of Object.entries(iBadges)){
-            if(!bc?.icon) continue;
-            const sbNum = parseInt(k)+1;
-
-            // condition check
-            const conditionMet = checkAllConditions(bc.condition,hass);
-            if(conditionMet) {
+          for (const [k, bc] of Object.entries(iBadges)) {
+            if (!bc?.icon) continue;
+            const sbNum = parseInt(k) + 1;
+            const conditionMet = checkAllConditions(bc.condition, hass);
+            if (conditionMet) {
               currentIconBadges.add(sbNum);
               createBadge({
                 subButtonNumber: sbNum,
@@ -613,178 +593,160 @@ badgy-condition-helper:
                 hPos: bc.h_pos ?? -8,
                 vPos: bc.v_pos ?? -8,
                 scale: bc.scale ?? 1,
-                showBackground: bc.show_background!==false,
+                showBackground: bc.show_background !== false,
                 badgeType: 'icon-badge'
               });
             }
           }
-
-          // remove old
-          for(let i=1; i<=10; i++){
-            if(!currentIconBadges.has(i)){
+          for (let i = 1; i <= 10; i++) {
+            if (!currentIconBadges.has(i)) {
               const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
-              if(sb){
+              if (sb) {
                 const badge = sb.querySelector('.icon-badge');
-                if(badge) sb.removeChild(badge);
+                if (badge) sb.removeChild(badge);
               }
             }
           }
         }
 
         // ========== HELPER: createBadge ==========
-        function createBadge({subButtonNumber,content,icon,badgeColor,textColor,hPos,vPos,scale,showBackground,badgeType}){
+        function createBadge({subButtonNumber, content, icon, badgeColor, textColor, hPos, vPos, scale, showBackground, badgeType}) {
           const sb = cardEl.querySelector(`.bubble-sub-button-${subButtonNumber}`);
-          if(!sb) return;
-          if(getComputedStyle(sb).position==='static'){
-            sb.style.position='relative';
+          if (!sb) return;
+          if (getComputedStyle(sb).position === 'static') {
+            sb.style.position = 'relative';
           }
-          // remove old
           const old = sb.querySelector(`.${badgeType}`);
-          if(old) sb.removeChild(old);
-
+          if (old) sb.removeChild(old);
           const badge = document.createElement('div');
-          badge.className=`bubble-sub-button-badge ${badgeType} `+(showBackground?'':'without-background');
-          if(scale!==1){
+          badge.className = `bubble-sub-button-badge ${badgeType} ` + (showBackground ? '' : 'without-background');
+          if (scale !== 1) {
             badge.style.setProperty('--badge-scale', scale);
           }
-
-          // Store direct position values for persistence (fixed positioning)
-          if(badgeType==='entity-badge'){
+          if (badgeType === 'entity-badge') {
             badge.style.top = `${vPos}px`;
             badge.style.right = `${hPos}px`;
           } else {
             badge.style.top = `${vPos}px`;
             badge.style.left = `${hPos}px`;
           }
-
-          // Store the original position values as data attributes for persistence
           badge.dataset.hPos = hPos;
           badge.dataset.vPos = vPos;
-
-          if(badgeColor) badge.style.setProperty('--badge-color', processColor(badgeColor));
-          if(textColor) badge.style.color = processColor(textColor);
-
-          if(icon){
+          if (badgeColor) badge.style.setProperty('--badge-color', processColor(badgeColor));
+          if (textColor) badge.style.color = processColor(textColor);
+          if (icon) {
             const ic = document.createElement('ha-icon');
             ic.setAttribute('icon', icon);
             ic.className = 'badge-icon';
             badge.appendChild(ic);
-          } else if(content){
+          } else if (content) {
             badge.textContent = content;
           }
           sb.appendChild(badge);
         }
 
-        // ========== PROCESS: Sub-Button Backgrounds (direct) ==========
+        // ========== PROCESS: Sub-Button Backgrounds ==========
         function processSubButtonBackgrounds(){
           const sbBg = config.sub_buttons_background || {};
-          const currentBackgrounds = new Set();
-
-          // 1) First, reset all sub-buttons to default
-          for(let i=1;i<=10;i++){
-            const sb=cardEl.querySelector(`.bubble-sub-button-${i}`);
-            if(!sb) continue;
-            // remove .sub-button-direct-bg
+          for (let i = 1; i <= 10; i++) {
+            const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
+            if (!sb) continue;
             sb.classList.remove('sub-button-direct-bg');
             sb.style.removeProperty('background');
             sb.style.removeProperty('opacity');
           }
-
-          // 2) Apply new settings
-          for(const [k,bgC] of Object.entries(sbBg)){
-            if(!bgC) continue;
-            const sbN = parseInt(k)+1;
-
-            const conditionMet = checkAllConditions(bgC.condition,hass);
-            if(conditionMet) {
-              currentBackgrounds.add(sbN);
-
+          for (const [k, bgC] of Object.entries(sbBg)) {
+            if (!bgC) continue;
+            const sbN = parseInt(k) + 1;
+            const conditionMet = checkAllConditions(bgC.condition, hass);
+            if (conditionMet) {
               const type = bgC.type ?? 'solid';
-              const op = (bgC.opacity!==undefined) ? bgC.opacity : 1.0;
+              const op = (bgC.opacity !== undefined) ? bgC.opacity : 1.0;
               let colorStr = '';
-
-              if(type==='solid'){
-                if(bgC.color) { // Only set color if defined
+              if (type === 'solid') {
+                if (bgC.color) {
                   colorStr = processColor(bgC.color);
                 } else {
-                  // No color set, don't apply background
                   continue;
                 }
               }
-              else if(type==='two-color'){
+              else if (type === 'two-color') {
                 const c1 = processColor(bgC.color1 || '#ff0000');
                 const c2 = processColor(bgC.color2 || '#0000ff');
-                // linear gradient
                 colorStr = `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`;
               }
-              else if(type==='three-color'){
+              else if (type === 'three-color') {
                 const c1 = processColor(bgC.color1 || '#ff0000');
                 const c2 = processColor(bgC.color2 || '#00ff00');
                 const c3 = processColor(bgC.color3 || '#0000ff');
                 colorStr = `linear-gradient(135deg, ${c1} 0%, ${c2} 50%, ${c3} 100%)`;
               }
-
               applySubButtonBg(sbN, colorStr, op);
             }
           }
         }
 
         function applySubButtonBg(subButtonNum, bgValue, opacity) {
-          const sb=cardEl.querySelector(`.bubble-sub-button-${subButtonNum}`);
-          if(!sb) return;
+          const sb = cardEl.querySelector(`.bubble-sub-button-${subButtonNum}`);
+          if (!sb) return;
           sb.classList.add('sub-button-direct-bg');
           sb.style.setProperty('background', bgValue, 'important');
           sb.style.setProperty('opacity', opacity, 'important');
         }
 
-        // ========== PROCESS: Icon Effects ==========
+        // ========== PROCESS: Icon Effects (for Main Icon and Sub-Button Icons) ==========
         function processIconEffects(){
           const iE = config.icon_effects || {};
-          // main icon
           const mCfg = iE.main_icon || {};
           const mainIconEl = cardEl.querySelector('.bubble-icon');
-          if(mainIconEl){
+          if (mainIconEl) {
             mainIconEl.classList.remove(
               'effect-pulse','effect-rotate','effect-glow','effect-shake',
               'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
               'effect-flip','effect-vibrate','has-effect'
             );
             mainIconEl.style.removeProperty('--effect-color');
-
-            const conditionMet = checkAllConditions(mCfg.condition,hass);
-            if(conditionMet && mCfg.effect){
-              mainIconEl.classList.add(`effect-${mCfg.effect}`,'has-effect');
-              if(mCfg.color){
+            const conditionMet = checkAllConditions(mCfg.condition, hass);
+            if (conditionMet && mCfg.effect) {
+              mainIconEl.classList.add(`effect-${mCfg.effect}`, 'has-effect');
+              if (mCfg.color) {
                 mainIconEl.style.setProperty('--effect-color', processColor(mCfg.color));
               }
             }
           }
-
-          // sub-button icons
-          const sbIcons = iE.sub_button_icon || {};
-          // remove old
-          for(let i=1; i<=10; i++){
-            const sbIcon=cardEl.querySelector(`.bubble-sub-button-${i} .bubble-sub-button-icon`);
-            if(sbIcon){
-              sbIcon.classList.remove(
-                'effect-pulse','effect-rotate','effect-glow','effect-shake',
-                'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
-                'effect-flip','effect-vibrate','has-effect'
-              );
-              sbIcon.style.removeProperty('--effect-color');
+          // Neu: Sub-Button ICON Effekte – über Schleife von 0 bis 9
+          for (let i = 0; i < 10; i++) {
+            const eC = iE.sub_button_icon && iE.sub_button_icon[i.toString()];
+            if (eC && eC.effect) {
+              const conditionMet = checkAllConditions(eC.condition, hass);
+              if (conditionMet) {
+                const el = cardEl.querySelector(`.bubble-sub-button-${i+1} .bubble-sub-button-icon`);
+                if (el) {
+                  el.classList.add(`effect-${eC.effect}`, 'has-effect');
+                  if (eC.color) {
+                    el.style.setProperty('--effect-color', processColor(eC.color));
+                  }
+                }
+              }
             }
           }
+        }
 
-          for(const [k,eC] of Object.entries(sbIcons)){
-            if(!eC?.effect) continue;
-            const sbN = parseInt(k)+1;
-            const conditionMet = checkAllConditions(eC.condition,hass);
-            if(conditionMet) {
-              const el=cardEl.querySelector(`.bubble-sub-button-${sbN} .bubble-sub-button-icon`);
-              if(!el) continue;
-              el.classList.add(`effect-${eC.effect}`,'has-effect');
-              if(eC.color){
-                el.style.setProperty('--effect-color', processColor(eC.color));
+        // ========== PROCESS: Sub-Button Effects (on the container) ==========
+        function processSubButtonEffects(){
+          const sBE = config.sub_button_effects || {};
+          for (let i = 0; i < 10; i++){
+            const eff = sBE && sBE[i.toString()];
+            if (eff && eff.effect) {
+              const conditionMet = checkAllConditions(eff.condition, hass);
+              if (conditionMet) {
+                const sb = cardEl.querySelector(`.bubble-sub-button-${i+1}`);
+                if (sb) {
+                  sb.classList.add(`effect-${eff.effect}`, 'has-effect');
+                  if (eff.color) {
+                    sb.style.setProperty('--effect-color', processColor(eff.color));
+                  }
+                }
               }
             }
           }
@@ -792,11 +754,9 @@ badgy-condition-helper:
 
         // ========== PROCESS: Entity-Badge Effects ==========
         function processEntityBadgeEffects(){
-          const eBE = config.entity_badge_effects||{};
-
-          // remove old
-          const allEntBadges=cardEl.querySelectorAll('.bubble-sub-button-badge.entity-badge');
-          allEntBadges.forEach(b=>{
+          const eBE = config.entity_badge_effects || {};
+          const allEntBadges = cardEl.querySelectorAll('.bubble-sub-button-badge.entity-badge');
+          allEntBadges.forEach(b => {
             b.classList.remove(
               'effect-pulse','effect-rotate','effect-glow','effect-shake',
               'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
@@ -804,16 +764,15 @@ badgy-condition-helper:
             );
             b.style.removeProperty('--effect-color');
           });
-
-          for(const [k,ef] of Object.entries(eBE)){
-            if(!ef?.effect) continue;
-            const sbN = parseInt(k)+1;
-            const conditionMet = checkAllConditions(ef.condition,hass);
-            if(conditionMet) {
+          for (const [k, ef] of Object.entries(eBE)){
+            if (!ef?.effect) continue;
+            const sbN = parseInt(k) + 1;
+            const conditionMet = checkAllConditions(ef.condition, hass);
+            if (conditionMet) {
               const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .entity-badge`);
-              if(!badge) continue;
-              badge.classList.add(`effect-${ef.effect}`,'has-effect');
-              if(ef.color){
+              if (!badge) continue;
+              badge.classList.add(`effect-${ef.effect}`, 'has-effect');
+              if (ef.color) {
                 badge.style.setProperty('--effect-color', processColor(ef.color));
               }
             }
@@ -822,11 +781,9 @@ badgy-condition-helper:
 
         // ========== PROCESS: Icon-Badge Effects ==========
         function processIconBadgeEffects(){
-          const iBE = config.icon_badge_effects||{};
-
-          // remove old
-          const allIconBadges=cardEl.querySelectorAll('.bubble-sub-button-badge.icon-badge');
-          allIconBadges.forEach(b=>{
+          const iBE = config.icon_badge_effects || {};
+          const allIconBadges = cardEl.querySelectorAll('.bubble-sub-button-badge.icon-badge');
+          allIconBadges.forEach(b => {
             b.classList.remove(
               'effect-pulse','effect-rotate','effect-glow','effect-shake',
               'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
@@ -834,16 +791,15 @@ badgy-condition-helper:
             );
             b.style.removeProperty('--effect-color');
           });
-
-          for(const [k,ef] of Object.entries(iBE)){
-            if(!ef?.effect) continue;
-            const sbN = parseInt(k)+1;
-            const conditionMet = checkAllConditions(ef.condition,hass);
-            if(conditionMet) {
+          for (const [k, ef] of Object.entries(iBE)){
+            if (!ef?.effect) continue;
+            const sbN = parseInt(k) + 1;
+            const conditionMet = checkAllConditions(ef.condition, hass);
+            if (conditionMet) {
               const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .icon-badge`);
-              if(!badge) continue;
-              badge.classList.add(`effect-${ef.effect}`,'has-effect');
-              if(ef.color){
+              if (!badge) continue;
+              badge.classList.add(`effect-${ef.effect}`, 'has-effect');
+              if (ef.color) {
                 badge.style.setProperty('--effect-color', processColor(ef.color));
               }
             }
@@ -852,44 +808,42 @@ badgy-condition-helper:
 
         // ========== PROCESS: Main Icon Background ==========
         function processMainIconBackground(){
-          const mBg = config.main_icon_background||{};
+          const mBg = config.main_icon_background || {};
           const mainCont = cardEl.querySelector('.bubble-icon-container');
-          if(!mainCont) return;
-          // remove old
+          if (!mainCont) return;
           mainCont.style.removeProperty('background');
           mainCont.style.removeProperty('opacity');
-
-          const conditionMet = checkAllConditions(mBg.condition,hass);
-          if(conditionMet && mBg.color) { // Only apply if color is specified
-            const op = (mBg.opacity!==undefined) ? mBg.opacity : 1.0;
+          const conditionMet = checkAllConditions(mBg.condition, hass);
+          if (conditionMet && mBg.color) {
+            const op = (mBg.opacity !== undefined) ? mBg.opacity : 1.0;
             const cProc = processColor(mBg.color);
             mainCont.style.setProperty('background', cProc, 'important');
             mainCont.style.setProperty('opacity', op, 'important');
           }
         }
 
-        // ===== Start: States track + Listen + Initial Pass =====
+        // ===== Start: State tracking, Listener, and Initial Pass =====
         trackedEntities.clear();
         collectAllTrackedEntities.call(this).forEach(e => trackedEntities.add(e));
-        if(DEBUG) console.log('[badgy-helper] Entities tracked:', [...trackedEntities]);
-
+        if (DEBUG) console.log('[badgy-helper] Entities tracked:', [...trackedEntities]);
         setupStateChangeListener.call(this);
 
         processEntityBadges();
         processIconBadges();
         processSubButtonBackgrounds();
         processIconEffects();
+        processSubButtonEffects();
         processEntityBadgeEffects();
         processIconBadgeEffects();
         processMainIconBackground();
 
-      } catch(err) {
-        console.error("Error in badgy-condition-helper module:",err);
+      } catch (err) {
+        console.error("Error in badgy-condition-helper module:", err);
       }
       return '';
     })()}
-
   editor:
+    # Entity Badges
     - type: expandable
       title: "Entity Badges"
       icon: "mdi:tag-text"
@@ -1345,6 +1299,7 @@ badgy-condition-helper:
               selector:
                 condition: {}
 
+    # Icon Badges
     - type: expandable
       title: "Icon Badges"
       icon: "mdi:tag-outline"
@@ -1668,6 +1623,31 @@ badgy-condition-helper:
               selector:
                 condition: {}
 
+    # Main Icon Background
+    - type: expandable
+      title: "Main Icon Background"
+      icon: "mdi:format-color-fill"
+      name: main_icon_background
+      schema:
+        - name: color
+          label: "Background Color"
+          selector:
+            ui_color: {}
+        - name: opacity
+          label: "Opacity"
+          default: 1.0
+          selector:
+            number:
+              min: 0
+              max: 1
+              step: 0.05
+              mode: slider
+        - name: condition
+          label: "Condition (optional)"
+          selector:
+            condition: {}
+
+    # Sub-Buttons Background
     - type: expandable
       title: "Sub-Buttons Background"
       icon: "mdi:format-color-fill"
@@ -1737,7 +1717,8 @@ badgy-condition-helper:
             - name: color
               label: "Solid Color"
               selector:
-                ui_color: {}
+                ui_color:
+                  include_none: true
             - name: color1
               label: "Gradient Color 1"
               selector:
@@ -1747,7 +1728,7 @@ badgy-condition-helper:
               selector:
                 ui_color: {}
             - name: color3
-              label: "Gradient Color 3 (3-color only)"
+              label: "Gradient Color 3"
               selector:
                 ui_color: {}
             - name: opacity
@@ -1782,7 +1763,8 @@ badgy-condition-helper:
             - name: color
               label: "Solid Color"
               selector:
-                ui_color: {}
+                ui_color:
+                  include_none: true
             - name: color1
               label: "Gradient Color 1"
               selector:
@@ -1792,7 +1774,7 @@ badgy-condition-helper:
               selector:
                 ui_color: {}
             - name: color3
-              label: "Gradient Color 3 (3-color only)"
+              label: "Gradient Color 3"
               selector:
                 ui_color: {}
             - name: opacity
@@ -1827,7 +1809,8 @@ badgy-condition-helper:
             - name: color
               label: "Solid Color"
               selector:
-                ui_color: {}
+                ui_color:
+                  include_none: true
             - name: color1
               label: "Gradient Color 1"
               selector:
@@ -1837,7 +1820,7 @@ badgy-condition-helper:
               selector:
                 ui_color: {}
             - name: color3
-              label: "Gradient Color 3 (3-color only)"
+              label: "Gradient Color 3"
               selector:
                 ui_color: {}
             - name: opacity
@@ -1872,7 +1855,8 @@ badgy-condition-helper:
             - name: color
               label: "Solid Color"
               selector:
-                ui_color: {}
+                ui_color:
+                  include_none: true
             - name: color1
               label: "Gradient Color 1"
               selector:
@@ -1882,7 +1866,7 @@ badgy-condition-helper:
               selector:
                 ui_color: {}
             - name: color3
-              label: "Gradient Color 3 (3-color only)"
+              label: "Gradient Color 3"
               selector:
                 ui_color: {}
             - name: opacity
@@ -1917,7 +1901,8 @@ badgy-condition-helper:
             - name: color
               label: "Solid Color"
               selector:
-                ui_color: {}
+                ui_color:
+                  include_none: true
             - name: color1
               label: "Gradient Color 1"
               selector:
@@ -1927,7 +1912,7 @@ badgy-condition-helper:
               selector:
                 ui_color: {}
             - name: color3
-              label: "Gradient Color 3 (3-color only)"
+              label: "Gradient Color 3"
               selector:
                 ui_color: {}
             - name: opacity
@@ -1944,277 +1929,7 @@ badgy-condition-helper:
               selector:
                 condition: {}
 
-    - type: expandable
-      title: "Icon Effects (Main + Sub-Buttons)"
-      icon: "mdi:weather-windy-variant"
-      name: icon_effects
-      schema:
-        - type: expandable
-          title: "Main Icon"
-          name: main_icon
-          schema:
-            - name: effect
-              label: "Effect Type"
-              selector:
-                select:
-                  options:
-                    - label: "Pulse (Scale)"
-                      value: "pulse"
-                    - label: "Gentle Rotation"
-                      value: "rotate"
-                    - label: "Glow Effect"
-                      value: "glow"
-                    - label: "Gentle Shake"
-                      value: "shake"
-                    - label: "Float Up & Down"
-                      value: "float"
-                    - label: "Zoom"
-                      value: "zoom"
-                    - label: "Heartbeat"
-                      value: "heartbeat"
-                    - label: "Spin 360"
-                      value: "spin-360"
-                    - label: "Flip"
-                      value: "flip"
-                    - label: "Vibrate"
-                      value: "vibrate"
-            - name: color
-              label: "Effect Color"
-              selector:
-                ui_color: {}
-            - name: condition
-              label: "Condition (optional)"
-              selector:
-                condition: {}
-
-        - type: expandable
-          title: "Sub-Button Icon 1"
-          name: "0"
-          schema:
-            - name: effect
-              label: "Effect Type"
-              selector:
-                select:
-                  options:
-                    - label: "Pulse (Scale)"
-                      value: "pulse"
-                    - label: "Gentle Rotation"
-                      value: "rotate"
-                    - label: "Glow Effect"
-                      value: "glow"
-                    - label: "Gentle Shake"
-                      value: "shake"
-                    - label: "Float Up & Down"
-                      value: "float"
-                    - label: "Zoom"
-                      value: "zoom"
-                    - label: "Heartbeat"
-                      value: "heartbeat"
-                    - label: "Spin 360"
-                      value: "spin-360"
-                    - label: "Flip"
-                      value: "flip"
-                    - label: "Vibrate"
-                      value: "vibrate"
-            - name: color
-              label: "Effect Color"
-              selector:
-                ui_color: {}
-            - name: condition
-              label: "Condition (optional)"
-              selector:
-                condition: {}
-
-        - type: expandable
-          title: "Sub-Button Icon 2"
-          name: "1"
-          schema:
-            - name: effect
-              label: "Effect Type"
-              selector:
-                select:
-                  options:
-                    - label: "Pulse (Scale)"
-                      value: "pulse"
-                    - label: "Gentle Rotation"
-                      value: "rotate"
-                    - label: "Glow Effect"
-                      value: "glow"
-                    - label: "Gentle Shake"
-                      value: "shake"
-                    - label: "Float Up & Down"
-                      value: "float"
-                    - label: "Zoom"
-                      value: "zoom"
-                    - label: "Heartbeat"
-                      value: "heartbeat"
-                    - label: "Spin 360"
-                      value: "spin-360"
-                    - label: "Flip"
-                      value: "flip"
-                    - label: "Vibrate"
-                      value: "vibrate"
-            - name: color
-              label: "Effect Color"
-              selector:
-                ui_color: {}
-            - name: condition
-              label: "Condition (optional)"
-              selector:
-                condition: {}
-
-        - type: expandable
-          title: "Sub-Button Icon 3"
-          name: "2"
-          schema:
-            - name: effect
-              label: "Effect Type"
-              selector:
-                select:
-                  options:
-                    - label: "Pulse (Scale)"
-                      value: "pulse"
-                    - label: "Gentle Rotation"
-                      value: "rotate"
-                    - label: "Glow Effect"
-                      value: "glow"
-                    - label: "Gentle Shake"
-                      value: "shake"
-                    - label: "Float Up & Down"
-                      value: "float"
-                    - label: "Zoom"
-                      value: "zoom"
-                    - label: "Heartbeat"
-                      value: "heartbeat"
-                    - label: "Spin 360"
-                      value: "spin-360"
-                    - label: "Flip"
-                      value: "flip"
-                    - label: "Vibrate"
-                      value: "vibrate"
-            - name: color
-              label: "Effect Color"
-              selector:
-                ui_color: {}
-            - name: condition
-              label: "Condition (optional)"
-              selector:
-                condition: {}
-
-        - type: expandable
-          title: "Sub-Button Icon 4"
-          name: "3"
-          schema:
-            - name: effect
-              label: "Effect Type"
-              selector:
-                select:
-                  options:
-                    - label: "Pulse (Scale)"
-                      value: "pulse"
-                    - label: "Gentle Rotation"
-                      value: "rotate"
-                    - label: "Glow Effect"
-                      value: "glow"
-                    - label: "Gentle Shake"
-                      value: "shake"
-                    - label: "Float Up & Down"
-                      value: "float"
-                    - label: "Zoom"
-                      value: "zoom"
-                    - label: "Heartbeat"
-                      value: "heartbeat"
-                    - label: "Spin 360"
-                      value: "spin-360"
-                    - label: "Flip"
-                      value: "flip"
-                    - label: "Vibrate"
-                      value: "vibrate"
-            - name: color
-              label: "Effect Color"
-              selector:
-                ui_color: {}
-            - name: condition
-              label: "Condition (optional)"
-              selector:
-                condition: {}
-
-        - type: expandable
-          title: "Sub-Button Icon 5"
-          name: "4"
-          schema:
-            - name: effect
-              label: "Effect Type"
-              selector:
-                select:
-                  options:
-                    - label: "Pulse (Scale)"
-                      value: "pulse"
-                    - label: "Gentle Rotation"
-                      value: "rotate"
-                    - label: "Glow Effect"
-                      value: "glow"
-                    - label: "Gentle Shake"
-                      value: "shake"
-                    - label: "Float Up & Down"
-                      value: "float"
-                    - label: "Zoom"
-                      value: "zoom"
-                    - label: "Heartbeat"
-                      value: "heartbeat"
-                    - label: "Spin 360"
-                      value: "spin-360"
-                    - label: "Flip"
-                      value: "flip"
-                    - label: "Vibrate"
-                      value: "vibrate"
-            - name: color
-              label: "Effect Color"
-              selector:
-                ui_color: {}
-            - name: condition
-              label: "Condition (optional)"
-              selector:
-                condition: {}
-
-        - type: expandable
-          title: "Sub-Button Icon 6"
-          name: "5"
-          schema:
-            - name: effect
-              label: "Effect Type"
-              selector:
-                select:
-                  options:
-                    - label: "Pulse (Scale)"
-                      value: "pulse"
-                    - label: "Gentle Rotation"
-                      value: "rotate"
-                    - label: "Glow Effect"
-                      value: "glow"
-                    - label: "Gentle Shake"
-                      value: "shake"
-                    - label: "Float Up & Down"
-                      value: "float"
-                    - label: "Zoom"
-                      value: "zoom"
-                    - label: "Heartbeat"
-                      value: "heartbeat"
-                    - label: "Spin 360"
-                      value: "spin-360"
-                    - label: "Flip"
-                      value: "flip"
-                    - label: "Vibrate"
-                      value: "vibrate"
-            - name: color
-              label: "Effect Color"
-              selector:
-                ui_color: {}
-            - name: condition
-              label: "Condition (optional)"
-              selector:
-                condition: {}
-
+    # Entity Badge Effects
     - type: expandable
       title: "Entity Badge Effects"
       icon: "mdi:tag-text"
@@ -2448,6 +2163,7 @@ badgy-condition-helper:
               selector:
                 condition: {}
 
+    # Icon Badge Effects
     - type: expandable
       title: "Icon Badge Effects"
       icon: "mdi:tag-outline"
@@ -2681,33 +2397,521 @@ badgy-condition-helper:
               selector:
                 condition: {}
 
+    # Icon Effects
     - type: expandable
-      title: "Main Icon Background"
-      icon: "mdi:format-color-fill"
-      name: main_icon_background
+      title: "Icon Effects"
+      icon: "mdi:weather-windy-variant"
+      name: icon_effects
       schema:
-        - name: color
-          label: "Background Color"
-          selector:
-            ui_color: {}
-        - name: opacity
-          label: "Opacity"
-          default: 1.0
-          selector:
-            number:
-              min: 0
-              max: 1
-              step: 0.05
-              mode: slider
-        - name: condition
-          label: "Condition (optional)"
-          selector:
-            condition: {}
+        - type: expandable
+          title: "Main Icon"
+          name: main_icon
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button Icon Effects"
+          name: sub_button_icon
+          schema:
+            - type: expandable
+              title: "Sub-Button Icon 1"
+              name: "0"
+              schema:
+                - name: effect
+                  label: "Effect Type"
+                  selector:
+                    select:
+                      options:
+                        - label: "Pulse (Scale)"
+                          value: "pulse"
+                        - label: "Gentle Rotation"
+                          value: "rotate"
+                        - label: "Glow Effect"
+                          value: "glow"
+                        - label: "Gentle Shake"
+                          value: "shake"
+                        - label: "Float Up & Down"
+                          value: "float"
+                        - label: "Zoom"
+                          value: "zoom"
+                        - label: "Heartbeat"
+                          value: "heartbeat"
+                        - label: "Spin 360"
+                          value: "spin-360"
+                        - label: "Flip"
+                          value: "flip"
+                        - label: "Vibrate"
+                          value: "vibrate"
+                - name: color
+                  label: "Effect Color"
+                  selector:
+                    ui_color: {}
+                - name: condition
+                  label: "Condition (optional)"
+                  selector:
+                    condition: {}
+
+            - type: expandable
+              title: "Sub-Button Icon 2"
+              name: "1"
+              schema:
+                - name: effect
+                  label: "Effect Type"
+                  selector:
+                    select:
+                      options:
+                        - label: "Pulse (Scale)"
+                          value: "pulse"
+                        - label: "Gentle Rotation"
+                          value: "rotate"
+                        - label: "Glow Effect"
+                          value: "glow"
+                        - label: "Gentle Shake"
+                          value: "shake"
+                        - label: "Float Up & Down"
+                          value: "float"
+                        - label: "Zoom"
+                          value: "zoom"
+                        - label: "Heartbeat"
+                          value: "heartbeat"
+                        - label: "Spin 360"
+                          value: "spin-360"
+                        - label: "Flip"
+                          value: "flip"
+                        - label: "Vibrate"
+                          value: "vibrate"
+                - name: color
+                  label: "Effect Color"
+                  selector:
+                    ui_color: {}
+                - name: condition
+                  label: "Condition (optional)"
+                  selector:
+                    condition: {}
+
+            - type: expandable
+              title: "Sub-Button Icon 3"
+              name: "2"
+              schema:
+                - name: effect
+                  label: "Effect Type"
+                  selector:
+                    select:
+                      options:
+                        - label: "Pulse (Scale)"
+                          value: "pulse"
+                        - label: "Gentle Rotation"
+                          value: "rotate"
+                        - label: "Glow Effect"
+                          value: "glow"
+                        - label: "Gentle Shake"
+                          value: "shake"
+                        - label: "Float Up & Down"
+                          value: "float"
+                        - label: "Zoom"
+                          value: "zoom"
+                        - label: "Heartbeat"
+                          value: "heartbeat"
+                        - label: "Spin 360"
+                          value: "spin-360"
+                        - label: "Flip"
+                          value: "flip"
+                        - label: "Vibrate"
+                          value: "vibrate"
+                - name: color
+                  label: "Effect Color"
+                  selector:
+                    ui_color: {}
+                - name: condition
+                  label: "Condition (optional)"
+                  selector:
+                    condition: {}
+
+            - type: expandable
+              title: "Sub-Button Icon 4"
+              name: "3"
+              schema:
+                - name: effect
+                  label: "Effect Type"
+                  selector:
+                    select:
+                      options:
+                        - label: "Pulse (Scale)"
+                          value: "pulse"
+                        - label: "Gentle Rotation"
+                          value: "rotate"
+                        - label: "Glow Effect"
+                          value: "glow"
+                        - label: "Gentle Shake"
+                          value: "shake"
+                        - label: "Float Up & Down"
+                          value: "float"
+                        - label: "Zoom"
+                          value: "zoom"
+                        - label: "Heartbeat"
+                          value: "heartbeat"
+                        - label: "Spin 360"
+                          value: "spin-360"
+                        - label: "Flip"
+                          value: "flip"
+                        - label: "Vibrate"
+                          value: "vibrate"
+                - name: color
+                  label: "Effect Color"
+                  selector:
+                    ui_color: {}
+                - name: condition
+                  label: "Condition (optional)"
+                  selector:
+                    condition: {}
+
+            - type: expandable
+              title: "Sub-Button Icon 5"
+              name: "4"
+              schema:
+                - name: effect
+                  label: "Effect Type"
+                  selector:
+                    select:
+                      options:
+                        - label: "Pulse (Scale)"
+                          value: "pulse"
+                        - label: "Gentle Rotation"
+                          value: "rotate"
+                        - label: "Glow Effect"
+                          value: "glow"
+                        - label: "Gentle Shake"
+                          value: "shake"
+                        - label: "Float Up & Down"
+                          value: "float"
+                        - label: "Zoom"
+                          value: "zoom"
+                        - label: "Heartbeat"
+                          value: "heartbeat"
+                        - label: "Spin 360"
+                          value: "spin-360"
+                        - label: "Flip"
+                          value: "flip"
+                        - label: "Vibrate"
+                          value: "vibrate"
+                - name: color
+                  label: "Effect Color"
+                  selector:
+                    ui_color: {}
+                - name: condition
+                  label: "Condition (optional)"
+                  selector:
+                    condition: {}
+
+            - type: expandable
+              title: "Sub-Button Icon 6"
+              name: "5"
+              schema:
+                - name: effect
+                  label: "Effect Type"
+                  selector:
+                    select:
+                      options:
+                        - label: "Pulse (Scale)"
+                          value: "pulse"
+                        - label: "Gentle Rotation"
+                          value: "rotate"
+                        - label: "Glow Effect"
+                          value: "glow"
+                        - label: "Gentle Shake"
+                          value: "shake"
+                        - label: "Float Up & Down"
+                          value: "float"
+                        - label: "Zoom"
+                          value: "zoom"
+                        - label: "Heartbeat"
+                          value: "heartbeat"
+                        - label: "Spin 360"
+                          value: "spin-360"
+                        - label: "Flip"
+                          value: "flip"
+                        - label: "Vibrate"
+                          value: "vibrate"
+                - name: color
+                  label: "Effect Color"
+                  selector:
+                    ui_color: {}
+                - name: condition
+                  label: "Condition (optional)"
+                  selector:
+                    condition: {}
+
+    # Sub-Button Effects
+    - type: expandable
+      title: "Sub-Button Effects"
+      icon: "mdi:animation-outline"
+      name: sub_button_effects
+      schema:
+        - type: expandable
+          title: "Sub-Button 1"
+          name: "0"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color (e.g. for Glow)"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 2"
+          name: "1"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color (e.g. for Glow)"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 3"
+          name: "2"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color (e.g. for Glow)"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 4"
+          name: "3"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color (e.g. for Glow)"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 5"
+          name: "4"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color (e.g. for Glow)"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
+
+        - type: expandable
+          title: "Sub-Button 6"
+          name: "5"
+          schema:
+            - name: effect
+              label: "Effect Type"
+              selector:
+                select:
+                  options:
+                    - label: "Pulse (Scale)"
+                      value: "pulse"
+                    - label: "Gentle Rotation"
+                      value: "rotate"
+                    - label: "Glow Effect"
+                      value: "glow"
+                    - label: "Gentle Shake"
+                      value: "shake"
+                    - label: "Float Up & Down"
+                      value: "float"
+                    - label: "Zoom"
+                      value: "zoom"
+                    - label: "Heartbeat"
+                      value: "heartbeat"
+                    - label: "Spin 360"
+                      value: "spin-360"
+                    - label: "Flip"
+                      value: "flip"
+                    - label: "Vibrate"
+                      value: "vibrate"
+            - name: color
+              label: "Effect Color (e.g. for Glow)"
+              selector:
+                ui_color: {}
+            - name: condition
+              label: "Condition (optional)"
+              selector:
+                condition: {}
 ```
 
 </details>
 
 ---
 
-### Screenshot:
-Will add soon
+### Screenshots:
+![Options](https://github.com/user-attachments/assets/05af8dac-5a6b-4c0d-8edc-5572ff2836e2)
+![Badgy_sample](https://github.com/user-attachments/assets/8983ea13-0adb-4e94-ac95-d465ef2c94f4)
