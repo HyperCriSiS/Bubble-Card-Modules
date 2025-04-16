@@ -1,6 +1,6 @@
 # Visual Styling Center
 
-**Version:** v2025.03.15
+**Version:** v2025.04.16
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
@@ -13,18 +13,29 @@
 >  - Select
 >  - Separator
 
-A comprehensive customization module for Bubble Card with focus on gradient effects and icon styling for both cards and sub-buttons, most awesome with light entities.
 
 ## Overview
 
-The Slider Control Center module offers advanced customization options for Bubble Card elements with a focus on visual enhancements. It provides precise control over sizes, spacing, colors, and visual effects for all supported card types.
+The Slider Control Center module offers advanced customization options for Bubble Card elements with a focus on visual enhancements.
+It provides precise control over Icon and card sizes, spacing, colors, and visual effects like gradients.
+
+## IMPORTANT
+Due to the nature of the sections layout, you have to use the HA internal mechanism to resize the card.
+It means that the "Card Height Multiplier" only works with the other layouts.
+Also with sections layout, you need to use the bubble-card grid layout if you use two row sub-buttons layout.
+So generally, if something does not work out as expected, try out a different bubble-card layout.
+
+```markdown
+# Visual Styling Center for Bubble Card
 
 ## Core Features
-
-- **Comprehensive size adjustments** for cards, icons, and sub-buttons
+- **Comprehensive size and margin adjustments** for cards, icons, and sub-buttons
 - **Advanced color options** for all elements
+- **Entity state-based icon coloring** for both main and sub-button icons
+- **Function button styling** for inactive states and functional entities
 - **Icon Contrast Helper** for better readability with radial background effects
 - **Dynamic gradient effects** based on light entities
+- **Slider Contrast Helper** for improved visibility with background gradients
 - **Hover effects** for improved user experience
 - **Automatic adjustments** for optimal display
 - **Custom Slider** to see more of the visuals 
@@ -32,11 +43,9 @@ The Slider Control Center module offers advanced customization options for Bubbl
 ## Detailed Feature Description
 
 ### Card Size Adjustments
-
 - **Card Height Multiplier**: Scale the overall height of your Bubble Card 
 
 ### Margin & Spacing Adjustments
-
 - **Main Icon Vertical Margin**: Adjust vertical spacing for the main icon 
 - **Sub-button Container Right Margin**: Control the right margin of the sub-button container 
 - **Sub-button Row Spacing**: Set the spacing between rows of sub-buttons 
@@ -44,24 +53,22 @@ The Slider Control Center module offers advanced customization options for Bubbl
 - **Inner Card Padding**: Add padding inside the card for more spacing
 
 ### Icon Size Adjustments
-
 - **Main Icon Size Multiplier**: Scale the size of the main icon 
 - **Icon Background Ratio**: Adjust the size ratio of the icon background 
 - **Sub-icon Size Multiplier**: Scale the size of sub-button icons 
 - **Sub-button Background Ratio**: Adjust the size ratio of sub-button backgrounds 
 
 ### Visual Enhancements
-
 - **Hide Icon Background**: Remove the background from the main icon
 - **Hide Sub-button Backgrounds**: Remove backgrounds from all sub-buttons
 - **Custom Icon Colors**: Set custom colors for main icon and sub-icons
 - **Custom Background Colors**: Set custom colors for icon and sub-button backgrounds
+- **Entity-Colored Main Icon**: Automatically color the main icon based on its entity state
 - **Entity-Colored Sub-Icons**: Automatically color sub-buttons based on their entity state
+- **Custom Offline/Function Button Color**: Apply a custom color to icons for inactive states, functional entities (scenes, scripts, automations), or entities without states
 
 ### Icon Contrast Helper
-
 The Icon Contrast Helper adds circular background behind icons to improve visibility and contrast regardless of the card's background color.
-
 - **Enable Icon Contrast Helper**: Toggle the helper feature on/off
 - **Apply to Main/Sub Icons**: Choose which icons get the contrast helper
 - **Helper Color**: Select the background color for the helper
@@ -69,6 +76,28 @@ The Icon Contrast Helper adds circular background behind icons to improve visibi
 - **Helper Size Ratio**: Adjust how much of the icon the background covers 
 - **Radial Fade Effect**: Enable a smooth fade from color to transparent
 - **Fade Strength**: Control how gradual the fade effect is 
+
+### Gradient Effects
+- **Enable Gradient Effects**: Toggle dynamic gradients on/off
+- **Apply Gradient to**: Choose between slider fill or card background
+- **Gradient Entity**: Select a light group or single light to base the gradient on
+- **Hide Gradient When All Lights Off**: Option to show/hide gradient when no lights are active
+
+### Slider Contrast Helper
+When using background gradients, this feature improves the visibility of the slider element.
+- **Enable Slider Contrast Helper**: Toggle the helper for slider with background gradients
+- **Slider Helper Color**: Select the background/glow color for the slider
+- **Slider Helper Opacity**: Control the transparency of the helper effect
+- **Slider Helper Size Ratio**: Adjust the size of the helper effect
+- **Enable Radial Fade Effect**: Add a smooth fade to the slider glow
+- **Slider Fade Strength**: Control the intensity of the fade effect
+- **Slider Brightness**: Adjust the opacity of the slider when using background gradients
+
+### Compatibility
+- Works with all button layouts (normal, large, multi-row)
+- Compatible with entity state tracking for dynamic changes
+- Handles entities without states or non-existent entities
+```
 
 > **Note**: When enabling the Icon Contrast Helper, sub-button backgrounds are automatically hidden to prevent visual conflicts.
 
@@ -118,13 +147,13 @@ visual_styling_center:
 
 ```yaml
 visual_styling_center:
-  name: "Visual Styling Center"
+  name: "Visual Styling Center"```
   version: "v2025.03.30"
-  creator: "HyperCriSiS"
+  creator: "HyperCriSiS"</details>
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
-  description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
+  description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.---
   unsupported:
-    - cover
+    - cover### Screenshot:
     - climate
     - horizontal-buttons-stack
     - media-player
@@ -400,13 +429,18 @@ visual_styling_center:
           label: "Manual Sub-Button Background Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
           selector:
             text: {}
+        - name: enable_entity_colored_main_icon
+          label: "Color Main Icon by Entity State"
+          default: false
+          selector:
+            boolean: {}
         - name: enable_entity_colored_subicons
           label: "Color Sub-Button Icons by Entity State"
           default: false
           selector:
             boolean: {}
         - name: enable_function_button_color
-          label: "Enable Custom Offline/Function Button Color"
+          label: "Custom Offline/Function Button Color"
           default: false
           selector:
             boolean: {}
@@ -596,43 +630,138 @@ visual_styling_center:
         }
       });
 
-      // Apply entity-colored sub-icons
-      if (config.enable_entity_colored_subicons === true) {
-        const subButtons = this.config.sub_button || [];
-        function getEntityColor(entityId) {
-          if (!entityId || !hass.states[entityId]) return null;
-          const entity = hass.states[entityId];
-          if (entity.state === 'on' && entity.attributes.rgb_color) {
-            const rgb = entity.attributes.rgb_color;
-            return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-          }
-          const activeStates = ['on', 'home', 'active', 'open', 'unlocked', 'detected'];
-          const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear'];
-          const errorStates = ['unavailable', 'unknown'];
+      // Helper function to get entity color based on state
+      function getEntityColor(entityId) {
+        if (!entityId || !hass.states[entityId]) return null;
+        const entity = hass.states[entityId];
+        if (entity.state === 'on' && entity.attributes.rgb_color) {
+          const rgb = entity.attributes.rgb_color;
+          return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+        }
+        const activeStates = ['on', 'home', 'active', 'open', 'unlocked', 'detected'];
+        const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear'];
+        const errorStates = ['unavailable', 'unknown'];
 
-          // Check if this is a scene or functional button (these don't have typical states)
-          const isFunctionButton = entityId.startsWith('scene.') || 
+        // Check if this is a scene or functional button (these don't have typical states)
+        const isFunctionButton = entityId.startsWith('scene.') || 
+                              entityId.startsWith('script.') || 
+                              entityId.startsWith('automation.');
+
+        if (isFunctionButton && config.enable_function_button_color) {
+          return card.style.getPropertyValue('--function-button-color');
+        } else if (activeStates.indexOf(entity.state) >= 0) {
+          return `rgb(140, 200, 105)`;
+        } else if (inactiveStates.indexOf(entity.state) >= 0 && config.enable_function_button_color) {
+          // Apply the function button color to inactive states too when enabled
+          return card.style.getPropertyValue('--function-button-color');
+        } else if (inactiveStates.indexOf(entity.state) >= 0) {
+          return `rgb(150, 150, 150)`;
+        } else if (errorStates.indexOf(entity.state) >= 0 && config.enable_function_button_color) {
+          // Apply the function button color to error states too when enabled
+          return card.style.getPropertyValue('--function-button-color');
+        } else if (errorStates.indexOf(entity.state) >= 0) {
+          return `rgb(180, 180, 180)`;
+        }
+        return null;
+      }
+
+      // Apply function button color directly to main icon if enabled
+      if (config.enable_function_button_color === true) {
+        const mainIcon = card.querySelector('.bubble-icon');
+        if (mainIcon) {
+          const entityId = this.config.entity;
+          const functionColor = card.style.getPropertyValue('--function-button-color');
+
+          // Check if entity exists and has a state
+          if (!entityId || !hass.states[entityId]) {
+            // No entity defined or entity not found - apply function color
+            if (functionColor) {
+              mainIcon.style.setProperty('color', functionColor, 'important');
+            }
+          } else {
+            // Entity exists - check state
+            const entityState = hass.states[entityId];
+            const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'];
+            const isFunctionButton = entityId.startsWith('scene.') || 
                                   entityId.startsWith('script.') || 
                                   entityId.startsWith('automation.');
 
-          if (isFunctionButton && config.enable_function_button_color) {
-            return card.style.getPropertyValue('--function-button-color');
-          } else if (activeStates.indexOf(entity.state) >= 0) {
-            return `rgb(140, 200, 105)`;
-          } else if (inactiveStates.indexOf(entity.state) >= 0 && config.enable_function_button_color) {
-            // Apply the function button color to inactive states too when enabled
-            return card.style.getPropertyValue('--function-button-color');
-          } else if (inactiveStates.indexOf(entity.state) >= 0) {
-            return `rgb(150, 150, 150)`;
-          } else if (errorStates.indexOf(entity.state) >= 0 && config.enable_function_button_color) {
-            // Apply the function button color to error states too when enabled
-            return card.style.getPropertyValue('--function-button-color');
-          } else if (errorStates.indexOf(entity.state) >= 0) {
-            return `rgb(180, 180, 180)`;
+            if (isFunctionButton || inactiveStates.indexOf(entityState.state) >= 0) {
+              // Apply function button color for functional entities or inactive states
+              if (functionColor) {
+                mainIcon.style.setProperty('color', functionColor, 'important');
+              }
+            }
           }
-          return null;
         }
+      }
 
+      // Apply entity-colored main icon
+      if (config.enable_entity_colored_main_icon === true && this.config.entity) {
+        const entityId = this.config.entity;
+        if (entityId && hass.states[entityId]) {
+          const mainIcon = card.querySelector('.bubble-icon');
+          if (mainIcon) {
+            const color = getEntityColor(entityId);
+            if (color) {
+              mainIcon.style.setProperty('color', color, 'important');
+            }
+          }
+        }
+      } else if (!config.manual_icon_color && !config.custom_icon_color && !config.enable_function_button_color) {
+        // Only reset if no custom colors are set and function button color is not enabled
+        const mainIcon = card.querySelector('.bubble-icon');
+        if (mainIcon) {
+          mainIcon.style.removeProperty('color');
+        }
+      }
+
+      // Apply function button color directly to sub-buttons if enabled
+      if (config.enable_function_button_color === true) {
+        const subButtons = this.config.sub_button || [];
+        const functionColor = card.style.getPropertyValue('--function-button-color');
+
+        subButtons.forEach((buttonConfig, index) => {
+          if (!buttonConfig) return;
+          const buttonNumber = index + 1;
+          try {
+            const subButton = card.querySelector(`.bubble-sub-button-${buttonNumber}`);
+            if (!subButton) return;
+            const iconElement = subButton.querySelector('ha-icon');
+            if (!iconElement) return;
+
+            const entityId = buttonConfig.entity;
+
+            // Check if entity exists and has a state
+            if (!entityId || !hass.states[entityId]) {
+              // No entity defined or entity not found - apply function color
+              if (functionColor) {
+                iconElement.style.setProperty('color', functionColor, 'important');
+              }
+            } else {
+              // Entity exists - check state
+              const entityState = hass.states[entityId];
+              const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'];
+              const isFunctionButton = entityId.startsWith('scene.') || 
+                                     entityId.startsWith('script.') || 
+                                     entityId.startsWith('automation.');
+
+              if (isFunctionButton || inactiveStates.indexOf(entityState.state) >= 0) {
+                // Apply function button color directly for functional entities or inactive states
+                if (functionColor) {
+                  iconElement.style.setProperty('color', functionColor, 'important');
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Error applying function color to sub-button " + buttonNumber, error);
+          }
+        });
+      }
+
+      // Apply entity-colored sub-icons
+      if (config.enable_entity_colored_subicons === true) {
+        const subButtons = this.config.sub_button || [];
         subButtons.forEach((buttonConfig, index) => {
           if (!buttonConfig || !buttonConfig.entity) return;
           const entityId = buttonConfig.entity;
@@ -651,7 +780,8 @@ visual_styling_center:
             console.error("Error applying color to sub-button " + buttonNumber, error);
           }
         });
-      } else {
+      } else if (!config.enable_function_button_color) {
+        // Only reset if function button color is not enabled
         const iconElements = card.querySelectorAll('.bubble-sub-button ha-icon');
         iconElements.forEach(icon => {
           icon.style.removeProperty('color');
@@ -981,7 +1111,7 @@ visual_styling_center:
       color: var(--subicon-color, inherit) !important;
     }
 
-    /* Function/Offline button color styling */
+    /* Function/Offline button color styling - now includes main icon */
     .use-function-button-color .bubble-sub-button ha-icon[style*="rgb(150, 150, 150)"],
     .use-function-button-color .bubble-sub-button ha-icon[style*="rgb(180, 180, 180)"] {
       color: var(--function-button-color, rgba(255, 255, 255, 0.9)) !important;
@@ -990,7 +1120,8 @@ visual_styling_center:
     /* Enhanced styling for entity colored sub-icons */
     .bubble-sub-button ha-icon,
     .bubble-sub-button-icon ha-icon,
-    .bubble-sub-button-icon {
+    .bubble-sub-button-icon,
+    .bubble-icon-container .bubble-icon {
       transition: color 0.3s ease !important;
     }
     /* Large layout support */
@@ -1098,14 +1229,3 @@ visual_styling_center:
 
    return '';
     })()}
-
-
-
-```
-
-</details>
-
----
-
-### Screenshot:
-
