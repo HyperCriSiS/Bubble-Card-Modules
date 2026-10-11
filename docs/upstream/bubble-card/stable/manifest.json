@@ -1,0 +1,279 @@
+{
+  "upstream_repository": "Clooos/Bubble-Card",
+  "channel": "stable",
+  "release_tag": "v3.4.1",
+  "source_commit_sha": "061ed8376134307ba1086446869d0ab736265fcf",
+  "source_tree_sha": "96ab71f0614372ccad9b81d412d1c664d3921aad",
+  "tracked_files": [
+    {
+      "path": "DEVELOPERS.md",
+      "sha": "4c66a4235df5b73f0fe654a277938385b1d85ee9",
+      "bytes": 3374
+    },
+    {
+      "path": "LICENSE",
+      "sha": "123a92f17453628b6d5f701c508460fa8ce8ca42",
+      "bytes": 1062
+    },
+    {
+      "path": "README.md",
+      "sha": "9d36939a7db83ff76c9341df95818514547d47fb",
+      "bytes": 120672
+    },
+    {
+      "path": "hacs.json",
+      "sha": "f8a39a689efbcaea619d588541ad1b08fffc00e8",
+      "bytes": 144
+    },
+    {
+      "path": "package.json",
+      "sha": "204f140bf9a1285f2811f2aa813d0ed2b0cdd701",
+      "bytes": 505
+    },
+    {
+      "path": "src/cards/button/changes.js",
+      "sha": "972e9028b0ede97b73718abfa7a63a728a5a0f24",
+      "bytes": 3318
+    },
+    {
+      "path": "src/cards/button/create.js",
+      "sha": "2dabcb5d54a7c4f9a71c42eb1db6cd204ae79b7d",
+      "bytes": 3329
+    },
+    {
+      "path": "src/cards/button/editor.js",
+      "sha": "a090d84fc9863b6adfb59999a69bf86cdeb06c82",
+      "bytes": 12104
+    },
+    {
+      "path": "src/cards/button/styles.css",
+      "sha": "e6e73d5579e064d8f4de25fc8376201594aab5b0",
+      "bytes": 591
+    },
+    {
+      "path": "src/cards/sub-buttons/changes.js",
+      "sha": "53abb17131adfcaea5b2990b23a586576cd734dc",
+      "bytes": 3697
+    },
+    {
+      "path": "src/cards/sub-buttons/create.js",
+      "sha": "0eff29dfbcade5c7655947c3e760c240163375d3",
+      "bytes": 2977
+    },
+    {
+      "path": "src/cards/sub-buttons/editor.js",
+      "sha": "e3931172890f490a00a797eb7dd6bd3574b5d4ec",
+      "bytes": 6294
+    },
+    {
+      "path": "src/cards/sub-buttons/index.js",
+      "sha": "3945f0843a290f263e97fc6ad08096985da85f8f",
+      "bytes": 966
+    },
+    {
+      "path": "src/cards/sub-buttons/styles.css",
+      "sha": "6af0f8cfd01f9b7e5f41fd16fa52f354705f15f5",
+      "bytes": 2439
+    },
+    {
+      "path": "src/components/base-card/styles.css",
+      "sha": "5d8902adf327b680bc61f07edd7b059d0482bb5e",
+      "bytes": 9200
+    },
+    {
+      "path": "src/components/sub-button/changes.js",
+      "sha": "02fd67c48b5b897ebba8c31e66b02df03422828a",
+      "bytes": 18624
+    },
+    {
+      "path": "src/components/sub-button/create.js",
+      "sha": "1241f6192ab28d0a6c0974ef044f9e7931180b00",
+      "bytes": 22353
+    },
+    {
+      "path": "src/components/sub-button/editor/clipboard.js",
+      "sha": "35dae1c72c761b30fc60a952563d4289495c1921",
+      "bytes": 974
+    },
+    {
+      "path": "src/components/sub-button/editor/index.js",
+      "sha": "6b78eb942df48c78ea762debaf87812873832a08",
+      "bytes": 710
+    },
+    {
+      "path": "src/components/sub-button/editor/sectioned.js",
+      "sha": "f908fe905ab10778e2065373c4f23ae17beb13b6",
+      "bytes": 41851
+    },
+    {
+      "path": "src/components/sub-button/editor/utils.js",
+      "sha": "14f4babdb59665e893ca3df2b0f881123dd73a0b",
+      "bytes": 27622
+    },
+    {
+      "path": "src/components/sub-button/index.js",
+      "sha": "2037f3ec5b642cb1f9f8547c638e608704bc185e",
+      "bytes": 384
+    },
+    {
+      "path": "src/components/sub-button/styles.css",
+      "sha": "21546f8d9380e9f17707af6e02880a62010191e4",
+      "bytes": 24117
+    },
+    {
+      "path": "src/components/sub-button/types/default/index.js",
+      "sha": "d51d66b0b6d0fa363df3e223223a7a5267579ba9",
+      "bytes": 1690
+    },
+    {
+      "path": "src/components/sub-button/types/dropdown/index.js",
+      "sha": "4fb56e7f711a0e93ff730aea67a587a42c593735",
+      "bytes": 6759
+    },
+    {
+      "path": "src/components/sub-button/types/slider/index.js",
+      "sha": "a628d1fbe9a08791ae555545d0ca998c226d1cf4",
+      "bytes": 29216
+    },
+    {
+      "path": "src/components/sub-button/utils.js",
+      "sha": "253d0505b87e4ad10efa77ef85af7ccf59354294",
+      "bytes": 25252
+    },
+    {
+      "path": "src/editor/bubble-card-editor.js",
+      "sha": "dde21587f763f8471dd6068cc895fb47169cbf8e",
+      "bytes": 146324
+    },
+    {
+      "path": "src/editor/styles.css",
+      "sha": "2b4d3f83cca72a2933960be2fff351d11c67bfe3",
+      "bytes": 8957
+    },
+    {
+      "path": "src/modules/bct-migration.js",
+      "sha": "6ecff1d2c470500e9cf3648806c4649af4d96349",
+      "bytes": 5556
+    },
+    {
+      "path": "src/modules/bct-provider.js",
+      "sha": "fa913407623a0c312a23a7bc3e61c6079ac8473d",
+      "bytes": 23948
+    },
+    {
+      "path": "src/modules/cache.js",
+      "sha": "7462d2e838a85010feb9f2371ece3eb2634a108d",
+      "bytes": 2586
+    },
+    {
+      "path": "src/modules/editor.js",
+      "sha": "231c42e699c44d8b60adaf8f04a6994c4af7cea4",
+      "bytes": 56078
+    },
+    {
+      "path": "src/modules/export.js",
+      "sha": "3bb2ef37e07876fbd4dcb21ed57f2d9c0f079996",
+      "bytes": 12192
+    },
+    {
+      "path": "src/modules/install.js",
+      "sha": "0f579d9ca9afe5f897d540d2792919e9f31259a3",
+      "bytes": 12857
+    },
+    {
+      "path": "src/modules/module-documentation.md",
+      "sha": "3dd65adae62ff8943c63ce015fe4a856a799ab86",
+      "bytes": 51616
+    },
+    {
+      "path": "src/modules/module-editor.js",
+      "sha": "da36c3db0bc8f4645aa1fd6d98d3b94f82b35ca6",
+      "bytes": 70725
+    },
+    {
+      "path": "src/modules/parser.js",
+      "sha": "68640fa56c3cc64ea61f0f16b9f92fa92e277ed5",
+      "bytes": 33369
+    },
+    {
+      "path": "src/modules/registry.js",
+      "sha": "25bd34022df0bfffd894e92c9f568bc89b218551",
+      "bytes": 11749
+    },
+    {
+      "path": "src/modules/store.js",
+      "sha": "14f5ceba3c63455263e90a3e81040630be8ab62e",
+      "bytes": 51019
+    },
+    {
+      "path": "src/modules/styles.css",
+      "sha": "2d4d1b248efbeba073121bdb1621c9e969270ae6",
+      "bytes": 26999
+    },
+    {
+      "path": "src/modules/suggestions.js",
+      "sha": "cd9f505265dcb02ee0bbe75e228c07ebbcecb987",
+      "bytes": 18231
+    },
+    {
+      "path": "src/modules/translate.js",
+      "sha": "86dd5c2f740b88f4a6ff455d8775eb73cbeb17af",
+      "bytes": 19652
+    },
+    {
+      "path": "src/modules/translation-note.js",
+      "sha": "f12dd4ba4f5fb94e7731057a7594d46be1e3b840",
+      "bytes": 3912
+    },
+    {
+      "path": "src/modules/utils.js",
+      "sha": "bd070895fcf2702c1b0306987b872a3003573156",
+      "bytes": 11972
+    },
+    {
+      "path": "src/modules/yaml-schema.js",
+      "sha": "f426d358c964dc5d1938def237fd94dd55315d0a",
+      "bytes": 2067
+    },
+    {
+      "path": "src/tools/ha-conditions.js",
+      "sha": "35f2e1283982d9c34b72cff323d337e3b31d9244",
+      "bytes": 38071
+    },
+    {
+      "path": "src/tools/module-gate.js",
+      "sha": "850bd53211f6c60836c86f7f6404be79a7170ad9",
+      "bytes": 2013
+    },
+    {
+      "path": "src/tools/module-teardown.js",
+      "sha": "893c6aac49fe8652e55c9d79baa2a3ebdd3e07bc",
+      "bytes": 2241
+    },
+    {
+      "path": "src/tools/preview-badge.js",
+      "sha": "f667bf41c6bb36076922940416a17e801b5f51f0",
+      "bytes": 5997
+    },
+    {
+      "path": "src/tools/render-template.js",
+      "sha": "bba4e35dd1390016a94bad4a5c72364f846b47be",
+      "bytes": 18615
+    },
+    {
+      "path": "src/tools/style-processor.js",
+      "sha": "94443f76cdaa546e7c4ebbebecb1ef72d0892d8e",
+      "bytes": 35443
+    },
+    {
+      "path": "src/tools/style.js",
+      "sha": "f48d0e70e97232beba36e70ab70b835812be7732",
+      "bytes": 5513
+    },
+    {
+      "path": "src/tools/validate-condition.js",
+      "sha": "fb604ce8c2437e1beeacc3c7bcd485aec3a60ab5",
+      "bytes": 15967
+    }
+  ]
+}

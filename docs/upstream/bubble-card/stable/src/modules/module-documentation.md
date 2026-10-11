@@ -1,0 +1,1518 @@
+# Bubble Card module documentation
+
+This documentation covers everything you need to write a Bubble Card module: the editor schema that builds your configuration UI, how to read those values from your code, the entity suggestions you can contribute to the Home Assistant card picker, and how to keep your module fast and compatible.
+
+<img width="455" alt="image" src="https://github.com/user-attachments/assets/6c04ebef-d8f7-4816-9006-808f80a7e14e" />
+
+## Table of contents
+
+- [Basic structure](#basic-structure)
+- [Accessing configuration values in your module code](#accessing-configuration-values-in-your-module-code)
+  - [Home Assistant templates in your module code](#home-assistant-templates-in-your-module-code)
+  - [Accessing configuration in JavaScript templates](#accessing-configuration-in-javascript-templates)
+  - [Tips for working with configuration values](#tips-for-working-with-configuration-values)
+  - [Example: Complete module with editor and code](#example-complete-module-with-editor-and-code)
+- [Field properties](#field-properties)
+- [Field types](#field-types)
+  - [Selector-based fields](#selector-based-fields)
+    - [Text input selector](#text-input-selectors)
+    - [Number selector](#number-selector)
+    - [Boolean selector](#boolean-selector)
+    - [Select selector](#select-selector)
+    - [Color selector](#color-selector)
+    - [Icon selector](#icon-selector)
+    - [Condition selector](#condition-selector)
+    - [Entity selector](#entity-selector)
+    - [Device selector](#device-selector)
+    - [Area selector](#area-selector)
+    - [Theme selector](#theme-selector)
+    - [Action selector](#action-selector)
+    - [Time selector](#time-selector)
+    - [Date selector](#date-selector)
+    - [Datetime selector](#datetime-selector)
+    - [Media selector](#media-selector)
+    - [Attribute selector](#attribute-selector)
+    - [State selector](#state-selector)
+    - [Target selector](#target-selector)
+    - [Config entry selector](#config-entry-selector)
+    - [Addon selector](#addon-selector)
+    - [Location selector](#location-selector)
+    - [Object selector](#object-selector)
+    - [Backup selector](#backup-selector)
+    - [Assistance selector](#assistance-selector)
+    - [Label selector](#label-selector)
+    - [Language selector](#language-selector)
+    - [Schedule selector](#schedule-selector)
+    - [Template selector](#template-selector)
+    - [File selector](#file-selector)
+    - [QR code selector](#qr-code-selector)
+    - [Conversation agent selector](#conversation-agent-selector)
+    - [Duration selector](#duration-selector)
+    - [Dashboard selector](#dashboard-selector)
+    - [Floor selector](#floor-selector)
+  - [Legacy type-based fields](#legacy-type-based-fields)
+    - [String field](#string-field)
+    - [Integer field](#integer-field)
+    - [Float field](#float-field)
+    - [Boolean field](#boolean-field)
+    - [Select field](#select-field)
+    - [Multi-select field](#multi-select-field)
+- [Advanced structure](#advanced-structure)
+  - [Grid layout](#grid-layout)
+  - [Expandable sections](#expandable-sections)
+- [Entity suggestions](#entity-suggestions)
+  - [Computed suggestions](#computed-suggestions)
+    - [Helpers](#helpers)
+- [How to optimize your modules](#how-to-optimize-your-modules)
+  - [Do the work only when something changed](#do-the-work-only-when-something-changed)
+  - [Release what your module started](#release-what-your-module-started)
+  - [Staying compatible with older versions](#staying-compatible-with-older-versions)
+- [Best practices](#best-practices)
+- [Example: Complete module editor schema](#example-complete-module-editor-schema)
+- [References](#references)
+
+---
+
+## Basic structure
+
+A module editor schema is an array of objects, where each object represents a form field:
+
+```yaml
+editor:
+  - name: color
+    label: "Color"
+    selector:
+      select:
+        options:
+          - label: "Red"
+            value: "red"
+          - label: "Blue"
+            value: "blue"
+  - name: icon_size
+    label: "Icon Size"
+    selector:
+      number:
+        min: 20
+        max: 50
+        unit_of_measurement: "px"
+```
+
+## Accessing configuration values in your module code
+
+When creating a Bubble Card module, you'll need to access the values configured by users through the editor. These values are available in your module's code through the `this.config` object.
+
+### Accessing configuration in JavaScript templates
+
+In your module's `code` section, you can access the configured values using JavaScript template literals. The configuration values follow a specific structure:
+
+```
+this.config.module_id?.field_name
+```
+
+Where:
+- `module_id` is the ID of your module as defined in your module definition
+- `field_name` corresponds directly to the `name` property of the field in your editor schema
+
+<details>
+<summary><b>Example</b></summary>
+
+If you have this editor schema:
+
+```yaml
+editor:
+  - name: color                # This becomes "color" in your code
+    label: "Background Color"
+    selector:
+      ui_color: {}
+  - name: size                 # This becomes "size" in your code
+    label: "Icon Size"
+    selector:
+      number:
+        min: 10
+        max: 50
+        unit_of_measurement: "px"
+  - name: show_icon            # This becomes "show_icon" in your code
+    label: "Show Icon"
+    selector:
+      boolean: {}
+```
+
+Then in your module's `code` section, you would access these values like this:
+
+```yaml
+.bubble-icon-container {
+  /* Access the "color" field */
+  background: var(--${this.config.module_id?.color}-color) !important;
+  
+  /* Access the "size" field with a default value if undefined */
+  --mdc-icon-size: ${this.config.module_id?.size ?? 24}px;
+  
+  /* Access the "show_icon" boolean field */
+  display: ${this.config.module_id?.show_icon ? 'flex' : 'none'};
+}
+```
+
+Remember to replace `module_id` with your actual module ID in your code.
+
+</details>
+
+### Home Assistant templates in your module code
+
+The `code` of a module accepts Home Assistant templates (Jinja) next to the JavaScript ones, rendered by the server and refreshed by themselves when what they read changes:
+
+```yaml
+code: |
+  .bubble-icon {
+    color: {{ 'orange' if is_state(entity, 'on') else 'grey' }};
+  }
+  {% if is_state('input_boolean.night_mode', 'on') %}
+  .bubble-name { opacity: 0.5; }
+  {% endif %}
+```
+
+`entity` is the entity of the card the module is applied to, and `user` the name of the logged in user. A template that reads neither is rendered once for every card that carries the module, so prefer `states('sensor.x')` over anything that iterates `states` when the value is the same everywhere. Keep every `${ }` outside of a `{% if %} ... {% endif %}` block, a block cut in two by a JavaScript template cannot be rendered. Inside a JavaScript template, `renderTemplate("{{ ... }}")` gives you the rendered text of a Home Assistant template.
+
+### Tips for working with configuration values
+
+- **Use optional chaining**: Always use the optional chaining operator (`?.`) when accessing nested configuration properties to prevent errors if the configuration is missing.
+
+- **Provide default values if possible**: Use the nullish coalescing operator (`??`) to supply a default value when the configuration value is undefined. Avoid `||`, which also replaces `0`, `false` and an empty string, so a slider moved to 0 would get its default back. Whatever you fall back to here is what the editor shows for that field, so declare the same value as its `default` in your schema (see [Default values](#default-values)).
+
+### Example: Complete module with editor and code
+
+<details>
+<summary><b>Complete module example</b></summary>
+
+Here's a complete example of a module definition showing both the editor schema and how to use the values in the code:
+
+```yaml
+icon_container_color:
+  name: 'Example: Customize the icon container color'
+  version: v1.1
+  creator: Clooos
+  link: https://github.com/Clooos/Bubble-Card/discussions/1231
+  unsupported:
+    - horizontal-buttons-stack
+    - separator
+  description: |
+    A list of predefined colors to customize the icon container color.
+    Configure this module via the editor or in YAML, for example:
+    <br><br>
+    <code-block><pre>
+    icon_container_color: 
+        color: light-blue
+    </pre></code-block>
+  code: |
+    .bubble-icon-container {
+      opacity: 1 !important;
+      background: var(--${this.config.icon_container_color?.color}-color) !important;
+    }
+  editor:
+    - name: color
+      label: Color
+      selector:
+        ui_color:
+          include_none: true
+```
+</details>
+
+## Field properties
+
+Every field in your editor schema can have these common properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | string | **Required**. The key used to store the value in the module configuration |
+| `label` | string | The displayed name for the field |
+| `required` | boolean | Whether the field is required |
+| `disabled` | boolean | Whether the field is disabled |
+| `default` | any | The value your module applies when the key is absent. Shown in the form, see [Default values](#default-values) |
+| `visible` | condition | Hides the field while the condition does not hold, see [Conditional fields](#conditional-fields) |
+
+### Default values
+
+A `default` is shown in the form on every card that has not set that key
+(except inside a `grid` or `expandable` that has a `name`), so a form reads as
+what the card actually does instead of leaving a control empty.
+It is display only: the value is taken back out on its way to the card
+configuration, and a field left exactly as it was shown stores nothing.
+
+That makes `default` a promise about behaviour. Declare the value your module
+applies when the key is absent, because that is now what the form says out
+loud:
+
+```yaml
+- name: card_layout
+  label: Card layout
+  selector:
+    select:
+      mode: dropdown
+      options:
+        - label: Default
+          value: default
+        - label: Square
+          value: square
+  default: default
+```
+
+```js
+const layout = this.config.module_id?.card_layout ?? 'default';
+```
+
+Two consequences worth knowing:
+
+- Choosing the declared default by hand stores nothing, exactly like leaving
+  the field alone, so a card follows your module if you ever change that
+  default.
+- A key a card **already** carries is never removed, whatever it holds, so a
+  configuration written before any of this keeps every value it had.
+
+### Conditional fields
+
+`visible` hides a field while its condition does not hold, which is how an
+option that cannot do anything where the card stands stays out of the way.
+Home Assistant evaluates it, so it needs nothing from Bubble Card. Home
+Assistant 2026.9 supports it and 2026.3 does not, and a version without it
+ignores the key and shows every field, so your form has to stay usable with
+all of them visible.
+
+```yaml
+- name: progress_position
+  label: Progress bar position
+  selector:
+    select:
+      mode: dropdown
+      options:
+        - label: Above the buttons
+          value: above
+        - label: Below the buttons
+          value: below
+  default: above
+  visible:
+    - field: progress_bar
+      operator: in
+      value: [full, auto]
+```
+
+A list of conditions is an AND. The operators are `eq`, `not_eq`, `in`,
+`not_in`, `exists` and `not_exists`, and `and`, `or` and `not` nest them.
+
+Two traps:
+
+- Conditions read what the form shows, so a field nobody has touched counts as
+  its `default`. A field without a `default`, or inside a `grid` or
+  `expandable` that has a `name`, is **undefined** until it is set, so write
+  those conditions so that undefined lands on the right side by itself.
+- Never put `visible` on a `constant`. A hidden field is remembered by name and
+  a `constant` has none, so hiding one takes every `constant` of that form down
+  with it.
+
+## Field types
+
+You can define fields using either the legacy type syntax or the modern selector syntax.
+
+> [!IMPORTANT]
+> **Not** all selector types have been tested with Bubble Card modules. Some selectors might not work correctly or might not be fully compatible. If you encounter an issue, please report it [here](https://github.com/Clooos/Bubble-Card/issues).
+
+### Selector-based fields
+
+Selector-based fields provide rich UI controls. Simply use the `selector` property with one of the following selector types:
+
+#### Text input selectors
+
+```yaml
+- name: title
+  label: "Title"
+  selector:
+    text: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `multiline` | boolean | Enable multiline text input |
+| `type` | string | HTML input type (e.g., "email", "url", "password") |
+| `autocomplete` | string | Browser autocomplete attribute |
+| `prefix` | string | Text to display before the input |
+| `suffix` | string | Text to display after the input |
+</details>
+
+#### Number selector
+
+```yaml
+- name: opacity
+  label: "Opacity"
+  selector:
+    number:
+      min: 0
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `min` | number | Minimum value |
+| `max` | number | Maximum value |
+| `step` | number | Step value |
+| `mode` | string | Display mode: "box" or "slider" (default: "slider") |
+| `unit_of_measurement` | string | Unit label |
+| `min_step` | number | Minimum step value |
+</details>
+
+#### Boolean selector
+
+```yaml
+- name: show_icon
+  label: "Show Icon"
+  selector:
+    boolean: {}
+```
+
+*No additional option for this selector.*
+
+#### Select selector
+
+```yaml
+- name: theme
+  label: "Theme"
+  selector:
+    select:
+      options:
+        - label: "Light"
+          value: "light"
+        - label: "Dark"
+          value: "dark"
+        - label: "Auto"
+          value: "auto"
+      multiple: false
+      custom_value: false
+      mode: "dropdown"
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `options` | array | List of options with label/value pairs, or simple string arrays |
+| `translation_key` | string | Translation key for the options |
+| `multiple` | boolean | Allow multiple selection |
+| `custom_value` | boolean | Allow custom values |
+| `mode` | string | Display mode: "dropdown" or "list" |
+</details>
+
+#### Color selector
+
+```yaml
+- name: background_color
+  label: "Background Color"
+  selector:
+    ui_color: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `default_color` | string | Default color to use if no color is selected |
+| `include_none` | boolean | Include an option to select no color |
+| `include_state` | boolean | Include a color based on the entity state |
+</details>
+
+#### Icon selector
+
+```yaml
+- name: custom_icon
+  label: "Custom Icon"
+  selector:
+    icon: {}
+```
+
+*No additional option for this selector.*
+
+#### Condition selector
+
+```yaml
+- name: conditions
+  label: "Conditions"
+  selector:
+    condition: {}
+```
+
+The condition selector allows you to define complex conditions based on entity states, numeric values, time, and more. This is especially powerful for creating conditional UI elements or behaviors.
+
+<details>
+<summary><b>Using conditions in your module code</b></summary>
+
+In your JavaScript code, you can use the `checkConditionsMet` function to evaluate conditions at runtime:
+
+```yaml
+// Example of checking if conditions are met
+if (!badgeConfig?.condition || (badgeConfig?.condition && checkConditionsMet([].concat(badgeConfig.condition), hass))) {
+  // The condition is met or there is no condition defined
+  // Show or activate your component here
+}
+```
+
+Here's a simple example:
+
+```yaml
+# Module configuration example
+my_module:
+  element_to_show:
+    condition:
+      - condition: state
+        entity_id: light.living_room
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.temperature
+        above: 20
+```
+
+```yaml
+// In your module code
+const elementConfig = this.config.my_module?.element_to_show;
+if (!elementConfig?.condition || checkConditionsMet([].concat(elementConfig.condition), hass)) {
+  // Show element when living room light is ON and temperature is above 20
+}
+```
+
+</details>
+
+<details>
+<summary><b>Supported condition types</b></summary>
+
+`checkConditionsMet` evaluates conditions in the browser, where Home Assistant
+normally evaluates them on the server. Every condition type the native condition
+builder offers is supported: the Lovelace ones (`state`, `numeric_state`,
+`screen`, `user`, `time`, `location`, `view_columns`, `and`, `or`, `not`, plus
+the Bubble Card `template` one) and the ones the integrations provide
+(`sun.is_up`, `light.is_on`, `select.is_option_selected`, `climate.is_heating`,
+`moon.is_phase`, ...) with their `target`, `behavior` and `for` options. The
+legacy `sun` and `zone` conditions, which the builder no longer offers but which
+remain valid in hand written YAML, are supported too.
+
+Two of them are approximated, since the browser has neither the recorder nor the
+astral library Home Assistant uses:
+
+- `for:` is measured from the last state change, without replaying the history,
+  so a condition that was already true beforehand can read as shorter.
+- the legacy `sun` condition derives today's sunrise and sunset from the next
+  ones published by `sun.sun`. It is exact until the event has passed, then off
+  by the few minutes the event drifts in a day.
+
+A condition type Home Assistant adds after a Bubble Card release reads as false
+and logs a warning in the browser console naming the type, so a condition that
+never matches is never silent.
+
+</details>
+
+*No additional selector options.*
+
+#### Entity selector
+
+```yaml
+- name: target_entity
+  label: "Target Entity"
+  selector:
+    entity:
+      filter:
+        domain: light
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `filter.domain` | string \| string[] | Filter by entity domain(s) |
+| `filter.device_class` | string \| string[] | Filter by device class(es) |
+| `filter.integration` | string | Filter by integration |
+| `filter.supported_features` | number \| number[] | Filter by supported features flags |
+| `include_entities` | string[] | List of entities to include |
+| `exclude_entities` | string[] | List of entities to exclude |
+| `multiple` | boolean | Allow multiple selection |
+</details>
+
+#### Device selector
+
+```yaml
+- name: device
+  label: "Device"
+  selector:
+    device:
+      filter:
+        integration: zwave
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `filter.integration` | string \| string[] | Filter by integration(s) |
+| `filter.manufacturer` | string \| string[] | Filter by manufacturer(s) |
+| `filter.model` | string \| string[] | Filter by model(s) |
+| `entity.domain` | string \| string[] | Filter by entity domain(s) |
+| `entity.device_class` | string \| string[] | Filter by entity device class(es) |
+| `multiple` | boolean | Allow multiple selection |
+</details>
+
+#### Area selector
+
+```yaml
+- name: area
+  label: "Area"
+  selector:
+    area: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `entity.domain` | string \| string[] | Filter by entities in area with domain(s) |
+| `entity.device_class` | string \| string[] | Filter by entities in area with device class(es) |
+| `device.integration` | string \| string[] | Filter by devices in area with integration(s) |
+| `device.manufacturer` | string \| string[] | Filter by devices in area with manufacturer(s) |
+| `device.model` | string \| string[] | Filter by devices in area with model(s) |
+| `multiple` | boolean | Allow multiple selection |
+</details>
+
+#### Theme selector
+
+```yaml
+- name: card_theme
+  label: "Card Theme"
+  selector:
+    theme: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `include_default` | boolean | Include the default theme |
+</details>
+
+#### Action selector
+
+```yaml
+- name: tap_action
+  label: "Tap Action"
+  selector:
+    action: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `actions` | string[] | List of allowed actions (e.g., ["more-info", "toggle", "call-service", "navigate", "url", "none"]) |
+</details>
+
+#### Time selector
+
+```yaml
+- name: start_time
+  label: "Start Time"
+  selector:
+    time: {}
+```
+
+*No additional option for this selector.*
+
+#### Date selector
+
+```yaml
+- name: event_date
+  label: "Event Date"
+  selector:
+    date: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `min` | string | Minimum date in ISO format (YYYY-MM-DD) |
+| `max` | string | Maximum date in ISO format (YYYY-MM-DD) |
+</details>
+
+#### Datetime selector
+
+```yaml
+- name: event_datetime
+  label: "Event Date and Time"
+  selector:
+    datetime: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `min` | string | Minimum datetime in ISO format |
+| `max` | string | Maximum datetime in ISO format |
+</details>
+
+#### Media selector
+
+```yaml
+- name: media
+  label: "Media"
+  selector:
+    media: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `filter_media_source` | boolean | Filter media sources |
+| `filter_local_media` | boolean | Filter local media |
+</details>
+
+#### Attribute selector
+
+This selector works only if combined to an entity selector at the same level. Inside an [object selector](#object-selector) item, if the entity field next to it is empty the attribute list falls back to the card's configured `entity`, matching the common runtime pattern where items inherit the card entity.
+
+```yaml
+- name: attribute
+  label: "Attribute"
+  selector:
+    attribute: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `entity_id` | string | Required: Entity ID to select attribute from |
+| `hide_attributes` | string[] | List of attributes to exclude |
+</details>
+
+#### State selector
+
+This selector works only if combined to an entity selector at the same level.
+
+```yaml
+- name: target_state
+  label: "Target State"
+  selector:
+    state: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `entity_id` | string | Required: Entity ID to select state from |
+| `attribute` | string | Select from entity attribute rather than state |
+</details>
+
+#### Target selector
+
+```yaml
+- name: target
+  label: "Target"
+  selector:
+    target:
+      entity:
+        domain: light
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `entity` | object | Entity filters (same as entity selector) |
+| `device` | object | Device filters (same as device selector) |
+| `area` | object | Area filters (same as area selector) |
+</details>
+
+#### Config entry selector
+
+```yaml
+- name: config_entry
+  label: "Integration"
+  selector:
+    config_entry:
+      domain: zwave_js
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `domain` | string | Filter by domain |
+</details>
+
+#### Addon selector
+
+```yaml
+- name: addon
+  label: "Add-on"
+  selector:
+    addon: {}
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `name` | string | Filter by add-on name |
+</details>
+
+#### Location selector
+
+```yaml
+- name: location
+  label: "Location"
+  selector:
+    location:
+      radius: true
+      icon: "mdi:home"
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `radius` | boolean | Allow setting a radius around the location |
+| `icon` | string | Icon to show on the map |
+</details>
+
+#### Object selector
+
+The object selector lets users enter structured objects defined by a set of sub-fields. Each sub-field uses its own selector (e.g., text, number, icon). It can capture a single object or a list when `multiple` is `true`. Use `label_field` and `description_field` to control the label and secondary text displayed for each item. The output is an object or a list of objects.
+
+When `multiple` is `true`, each item row has a drag handle to reorder the list and a duplicate button that inserts a deep copy of the item right below it.
+
+```yaml
+- name: main_item
+  label: "Main item"
+  selector:
+    object:
+      fields:
+        name:
+          label: "Name"
+          selector:
+            text: {}
+        icon:
+          label: "Icon"
+          selector:
+            icon: {}
+      label_field: name
+      description_field: icon
+      multiple: true
+```
+
+Fields that share a `group` are rendered together inside a collapsible section
+(the group name becomes the section title, `group_icon` its optional icon).
+The stored configuration stays flat, grouping only affects the editor UI, so
+adding groups to an existing module is fully backward compatible. Fields
+without a `group` render at the top level as usual:
+
+```yaml
+- name: items
+  label: "Items"
+  selector:
+    object:
+      fields:
+        name:
+          label: "Name"
+          selector:
+            text: {}
+        background_color:
+          label: "Background color"
+          group: "Appearance"
+          group_icon: "mdi:palette"
+          selector:
+            ui_color: {}
+        text_color:
+          label: "Text color"
+          group: "Appearance"
+          selector:
+            ui_color: {}
+      multiple: true
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `fields` | object | Map of field keys to field schemas. Each field supports a `label`, a `description`, a nested `selector` (any selector type), and an optional `group`. Keys starting with `__` or `bc_group_` are reserved for the editor's internal UI state. |
+| `fields.*.group` | string | Renders the field inside a collapsible section with this title. Fields sharing the same `group` end up in the same section. UI-only: the stored value stays flat. |
+| `fields.*.group_icon` | string | Optional icon (Material Design Icons) for the field's group section. |
+| `fields.*.visible_if` | string | JS expression evaluated against the item's current data as `item`, the live `hass` object and the card's config as `card` (e.g. `item.target === 'card'`). `hass` and `card` may be `undefined` (early renders, dialogs the card config can't be found from), so guard them (`card && card.entity`). The field only renders while the expression is truthy; sections whose fields are all hidden disappear. Re-evaluated live on every change. Broken expressions fail open (field stays visible). |
+| `fields.*.warn_if` | string | JS expression with the same `item` / `hass` / `card` arguments as `visible_if`, including the same need to guard `hass` and `card`. While truthy, the field shows `warn_text`, for example to warn about a missing entity (`item.entity && hass && !hass.states[item.entity]`) or an option that has no effect without another one. Broken expressions fail silent (no warning). |
+| `fields.*.warn_text` | string | The warning message displayed while `warn_if` is truthy, rendered as an amber warning alert above the field. |
+| `fields.*.default` | any | For text-based sub-fields, the declared default is shown as the input's placeholder so users can see what applies when the field is left empty. Single-select dropdowns render the default as the selected value while the key is unset (display only, picking the default or clearing the dropdown stores nothing, so unset and default stay the same config). |
+| `fields.*.variant_of` | string | Marks this field as an alternative representation ("variant") of the named base field, for example a state→color map or a JS expression next to a static color. The form collapses the family into one mode dropdown (the base mode, labelled `Static` unless the base field sets its own `variant`, plus each variant's `variant` label) and only the active variant's input. The dropdown is UI-only: stored values keep their original keys, and opening an existing config selects whichever variant already has data. If an inactive variant also has data, a helper line warns that the module's priority rules decide which wins. The family renders inside a light visual cluster (thin left rail), so the mode dropdown and its value field read as one unit. |
+| `fields.*.variant` | string | Display label of this variant in the family's mode dropdown (e.g. `"State map"`, `"JS"`). Defaults to the field key. On the *base* field it instead renames the base mode's dropdown label (default `"Static"`), for example `variant: Single` next to a `"Multiple"` variant. |
+| `fields.*.cluster_of` | string | Renders this field inside the named base field's visual cluster (the same thin-left-rail box variant families use) instead of as a standalone row, purely visual grouping for fields that form one logical unit, e.g. a mode select plus its parameters. Rule of thumb: variants swap which key is stored, clusters only group real fields visually. Nothing is synthetic or swapped: every member is a real stored field and keeps its own `visible_if`. A hidden base hides the whole cluster; while no member is visible the base renders flat (no rail). Composes with variants, members append after the variant rows. |
+| `label_field` | string | Property key used as the item label in the UI (useful when `multiple` is `true`). |
+| `description_field` | string \| list | Property key used as an optional item description in the UI. A list of keys falls back to the first one with a value; list values render comma-separated. |
+| `multiple` | boolean | Allow entering a list of objects. If `true`, the resulting value is a list. |
+</details>
+
+#### Backup selector
+
+```yaml
+- name: backup
+  label: "Backup"
+  selector:
+    backup:
+      integration: google_assistant
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `integration` | string | Filter backups by integration |
+</details>
+
+#### Assistance selector
+
+```yaml
+- name: assistance_pipeline
+  label: "Assistance Pipeline"
+  selector:
+    assistance: {}
+```
+
+*No additional option for this selector.*
+
+#### Label selector
+
+```yaml
+- name: labels
+  label: "Labels"
+  selector:
+    label:
+      multiple: true
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `multiple` | boolean | Allow multiple selection |
+</details>
+
+#### Language selector
+
+```yaml
+- name: language
+  label: "Language"
+  selector:
+    language: {}
+```
+
+*No additional option for this selector.*
+
+#### Schedule selector
+
+```yaml
+- name: schedule
+  label: "Schedule"
+  selector:
+    schedule: {}
+```
+
+*No additional option for this selector.*
+
+#### Template selector
+
+```yaml
+- name: template
+  label: "Template"
+  selector:
+    template: {}
+```
+
+*No additional option for this selector.*
+
+#### File selector
+
+```yaml
+- name: config_file
+  label: "Configuration File"
+  selector:
+    file:
+      accept: ".yaml,.json"
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `accept` | string | Comma-separated list of acceptable file extensions |
+</details>
+
+#### QR code selector
+
+```yaml
+- name: qr_data
+  label: "QR Code Data"
+  selector:
+    qr_code: {}
+```
+
+*No additional option for this selector.*
+
+#### Conversation agent selector
+
+```yaml
+- name: agent
+  label: "Conversation Agent"
+  selector:
+    conversation_agent: {}
+```
+
+*No additional option for this selector.*
+
+#### Duration selector
+
+```yaml
+- name: timeout
+  label: "Timeout"
+  selector:
+    duration:
+      enable_day: false
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `enable_day` | boolean | Include days in the duration selector |
+</details>
+
+#### Dashboard selector
+
+```yaml
+- name: dashboard
+  label: "Dashboard"
+  selector:
+    dashboard:
+      include_dashboards: ["lovelace"]
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `include_dashboards` | string[] | List of dashboards to include |
+</details>
+
+#### Floor selector
+
+```yaml
+- name: floor
+  label: "Floor"
+  selector:
+    floor: {}
+```
+
+*No additional option for this selector.*
+
+### Legacy type-based fields
+
+While selector-based fields are recommended, you can also use the legacy type syntax:
+
+#### String field
+
+```yaml
+- name: title
+  label: "Title"
+  type: string
+```
+
+#### Integer field
+
+```yaml
+- name: count
+  label: "Count"
+  type: integer
+  valueMin: 0
+  valueMax: 100
+```
+
+#### Float field
+
+```yaml
+- name: opacity
+  label: "Opacity"
+  type: float
+```
+
+#### Boolean field
+
+```yaml
+- name: enabled
+  label: "Enabled"
+  type: boolean
+```
+
+#### Select field
+
+```yaml
+- name: mode
+  label: "Mode"
+  type: select
+  options:
+    - ["auto", "Automatic"]
+    - ["manual", "Manual"]
+```
+
+#### Multi-select field
+
+```yaml
+- name: features
+  label: "Features"
+  type: multi_select
+  options:
+    - ["animations", "Animations"]
+    - ["colors", "Custom Colors"]
+    - ["icons", "Custom Icons"]
+```
+
+## Advanced structure
+
+### Grid layout
+
+You can organize fields in a grid layout:
+
+```yaml
+- type: grid
+  name: appearance
+  schema:
+    - name: color
+      label: "Color"
+      selector:
+        select:
+          options:
+            - label: "Red"
+              value: "red"
+            - label: "Blue"
+              value: "blue"
+    - name: size
+      label: "Size"
+      selector:
+        number:
+          min: 10
+          max: 100
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `column_min_width` | string | Minimum column width (CSS value) |
+| `schema` | array | Fields in the grid |
+</details>
+
+### Expandable sections
+
+You can create collapsible sections:
+
+```yaml
+- type: expandable
+  name: advanced_settings
+  title: "Advanced Settings"
+  icon: "mdi:tune"
+  expanded: false
+  schema:
+    - name: animation_speed
+      label: "Animation Speed"
+      selector:
+        number:
+          min: 1
+          max: 10
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `title` | string | Section title |
+| `icon` | string | Section icon (Material Design Icons) |
+| `expanded` | boolean | Initially expanded |
+| `schema` | array | Fields in the section |
+</details>
+
+## Entity suggestions
+
+Home Assistant (2026.6+) suggests cards when a user picks an entity in the card picker, and
+Bubble Card answers with a set of built-in tile recipes. Your module can join that list by
+declaring a `suggestions:` key next to `name`, `code` and `editor`. Suggested cards appear
+in the **Community** section of the picker, rendered as live previews.
+
+```yaml
+my_module:
+  name: My Module
+  version: "1.0"
+  supported:
+    - button
+  suggestions:
+    # Variant 1: twin every built-in suggestion, with your module applied.
+    - extends: native
+
+    # Variant 2: standalone suggestion, fully authored by the module.
+    - label: Weather + forecast
+      domains: [weather]
+      config:
+        card_type: button
+        button_type: state
+        entity: ${entity}
+        weather_forecast:
+          card_layout: background_only
+```
+
+Each entry of `suggestions:` accepts:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `extends` | string | `native` clones every built-in tile suggestion offered for the picked entity (the classic dedicated card, Button and Slider shortcuts are not cloned), adds your module to its `modules` list, and applies the optional `config` patch on top (shallow merge, key by key). `base` does the same but clones only the first tile: the right pick when a module offers one entry per layout |
+| `config` | object | Standalone card configuration, or the patch applied over each clone when `extends` is set. `${entity}` anywhere in a string is replaced by the picked entity id, in both forms, which is how a patch points your module's own options at the entity being suggested. Standalone configurations must include `card_type`, and their `entity`/`modules` are filled in automatically when missing |
+| `domains` | list | Only offer the suggestion for these entity domains (`light`, `switch`, ...). Without it the rule applies to every entity that has suggestions |
+| `condition` | string | JavaScript expression evaluated with `hass`, `entity` (the id), `state`, `attributes`, `stateObj` and `domain` in scope. The suggestion is skipped when it is falsy or throws |
+| `label` | string | Variant text shown after the module `name` in the picker (e.g. `Square card` gives "My Module · Square card"). Without it the entry is labeled with the module name alone |
+
+Good to know:
+
+- The picker asks synchronously, so suggestions are read from the module registry once a
+  dashboard has rendered (or from the Bubble Card Tools cache). On a brand new browser
+  profile only the built-in suggestions show up until then.
+- `supported:` is honored: a clone or a standalone configuration whose `card_type` your
+  module does not support is dropped automatically.
+- The whole list (built-in + modules) is deduplicated, and each module is limited to
+  **24 suggestions per entity**, its declarative rules and its code hook counted together.
+  There is no global cap: every installed module keeps its own share of the picker,
+  instead of the last ones being silently truncated. Keep your rules focused with
+  `domains` and `condition` anyway, nobody scrolls through 24 previews.
+- A rule that throws is ignored and logged once, it never breaks the picker.
+
+### Computed suggestions
+
+A `suggestions:` rule is declarative, so it can only describe a configuration known in
+advance. When the configuration has to be **computed** (a room pop-up built from every
+entity of the area the picked entity belongs to, for instance), declare a
+`suggestions_code:` string instead. Both keys can live on the same module, the
+declarative rules are evaluated first.
+
+```yaml
+bubble_popup_suggestions:
+  name: Bubble Pop-up Suggestions
+  version: "1.0"
+  supported:
+    - pop-up
+  suggestions_code: |-
+    const area = helpers.areaOf(entity);
+    if (!area) return null;
+
+    const ids = helpers.areaEntities(area, { domains: ['light', 'switch', 'cover'] });
+    if (ids.length < 2) return null;
+
+    return {
+      label: helpers.areaName(area),
+      config: {
+        card_type: 'pop-up',
+        hash: '#' + area,
+        name: helpers.areaName(area),
+        icon: 'mdi:sofa-outline',
+        cards: ids.map((id) => ({
+          type: 'custom:bubble-card',
+          card_type: 'button',
+          entity: id,
+          name: helpers.friendlyName(id),
+        })),
+      },
+    };
+```
+
+The string is a **function body**, compiled once with `Function(...)` and cached. It runs
+in the same sandbox as a `condition:` expression: plain function scope, no access to the
+card, no `this`. It must be synchronous, the picker asks synchronously.
+
+| Argument | Description |
+|----------|-------------|
+| `hass` | The live Home Assistant object |
+| `entity` | The picked entity id, a string (`light.salon`) |
+| `stateObj` | `hass.states[entity]`, guaranteed to exist |
+| `helpers` | The helper API described below |
+| `module` | Your own module object, as parsed from its YAML (`name`, `version`, your own keys), plus `module.id`, the id your module is registered under |
+
+Return an **array of `{ label, config }` entries**, a **single entry**, or `null` /
+`undefined` when the module has nothing to offer for that entity. Every entry is then
+normalized:
+
+- The entry is dropped unless `config` is an object carrying a truthy `card_type`.
+- `config.type` is forced to `custom:bubble-card`.
+- `supported:` and `unsupported:` are honored, exactly like a declarative rule.
+- `label` is composed as `<module name> · <label>`, so your entries read as one family in
+  the picker. Without a label, the entry is named after your module alone.
+- **Nothing else is touched.** No `entity` is filled in, no `${entity}` substitution
+  happens, and your module is **not** added to `modules:`. A code hook returns a fully
+  authored configuration: a generated card is standalone and has to keep working after
+  your module is uninstalled, so making its output silently depend on the generator would
+  be wrong. A styling module that does want itself applied simply returns
+  `modules: [module.id]` in the configuration it builds.
+- Only the **top level** of `config` is normalized. Nested `cards:` are authored content
+  and are left byte for byte as you returned them.
+
+#### Helpers
+
+Everything is synchronous, and every helper answers with an empty result instead of
+throwing when `hass.entities`, `hass.devices` or `hass.areas` are not loaded yet, which
+happens for a moment after a hard reload.
+
+| Helper | Returns |
+|--------|---------|
+| `t(key, params)` | Translated string for a Bubble Card translation key, in the user's language. `params` fills the `{placeholders}` of the value, e.g. `t('editor.card_picker.suggestions.controls', { area: 'Kitchen' })`. Unknown keys come back as the key itself |
+| `domainOf(entityId)` | `'light'` for `'light.salon'`, an empty string when there is no domain |
+| `friendlyName(entityId)` | `attributes.friendly_name`, falling back to a readable object id (`light.living_room_lamp` gives `living room lamp`), like Home Assistant does |
+| `hasModule(moduleId)` | Whether another module is installed. Use it to offer a variant built on someone else's module and stay silent otherwise: listing a module that is not installed is harmless at render time, but offering the variant is not, since the user would pick it and get a card identical to the plain one |
+| `areaOf(entityId)` | The area id of an entity, resolved from its registry entry first, then from its device. `null` when it has no area, and also `null` for an area that no longer exists, so a deleted or stale id never leaks into a generated title |
+| `areaName(areaId)` | The display name of an area, falling back to the id |
+| `areas()` | `[{ area_id, name, icon }]` for every area, sorted by name. `icon` is `null` when the area has none |
+| `areaEntities(areaId, options)` | The entity ids assigned to that area, directly or through their device, sorted by friendly name. Entities missing from `hass.states` are skipped. `options.domains` filters by domain (`{ domains: ['light'] }`), `options.includeHidden` (default `false`) keeps registry-hidden entities, `options.includeDiagnostic` (default `false`) keeps the `diagnostic` and `config` entity categories |
+| `nativeSuggestions(entityId)` | The built-in Bubble Card recipes for any entity, as a fresh copy you can freely reshape. Entries are `{ label, config }`, plus an internal `classic: true` marker on the legacy shortcuts (the dedicated card, plain Button and Slider entries) so you can filter them out with `.filter((s) => !s.classic)` |
+
+Good to know:
+
+- Write the value as a YAML **block scalar** (`suggestions_code: |-`). A plain scalar
+  loses everything after an unquoted `#`, and `suggestions_code: {a:1}` parses as a
+  mapping instead of a string.
+- `suggestions_code:` goes next to `name:` in your module, like `suggestions:`.
+- An error at run time **or** at compile time is caught and logged once, then your module
+  is skipped. The picker and the other modules are never affected.
+- Keep it cheap. The hook runs every time a user picks an entity in the card picker, for
+  every installed module.
+
+## How to optimize your modules
+
+Your `code:` runs again on **every style pass** of **every card** that carries your
+module, and a pop-up rebuilds all of its cards each time it opens. A module that
+is cheap on one card can therefore be expensive on a dashboard, and the two
+sections below are what makes the difference. On one real module they took a
+pop-up from 7.2 s to 3.7 s cold on a low end iPad.
+
+### Do the work only when something changed
+
+
+A module that touches the DOM is re-executed on **every** style pass, because
+re-running it is the only way its side effects happen. A card gets roughly seven
+passes per pop-up open, so a module that writes a few custom properties writes
+them seven times per card for an identical result, and every read it makes to
+compute them is paid seven times too.
+
+`hasChanged(label, ...values)` answers `true` the first time and whenever one of
+the values has moved since, and `false` in between:
+
+```yaml
+code: |
+  ${(() => {
+    const rgb = hass.states[entity]?.attributes?.rgb_color;
+
+    // Falls back to the same answer on versions without the helper, see the
+    // section above.
+    const changed = (label, ...values) => {
+      if (typeof hasChanged === 'function') return hasChanged(label, ...values);
+      const signature = values.map(v => Array.isArray(v) ? v.join(',') : String(v)).join('|');
+      if (this['_gate_' + label] === signature) return false;
+      this['_gate_' + label] = signature;
+      return true;
+    };
+
+    if (!changed('tint', state, rgb)) return;
+
+    // Only reached when the state or the colour actually moved.
+    card.style.setProperty('--my-tint', computeTint(state, rgb));
+  })()}
+```
+
+What you can rely on:
+
+- **One memory per label per card**, so a module can gate several independent
+  pieces of work, and two modules using the same label never collide.
+- **Arrays are compared by value**, so an rgb triplet works directly, and two
+  colours differing by one unit are two different answers.
+- It **never throws**, whatever you pass it, and it answers `true` rather than
+  skipping your work if it cannot remember anything.
+- A rebuilt card starts with an empty memory, so your work runs again.
+
+Two things to keep in mind. Pass everything your work depends on, including
+values you read from the DOM or the theme, because what is not in the list cannot be
+noticed. And gate only your own writes. If something outside your module can
+remove what you wrote without any of your values changing, the gate will not
+know to write it again.
+
+Measured on one real module, gating the work this way took a pop-up from 7.2 s
+to 3.7 s cold on a low end iPad, and the per-execution cost of its template from
+30.7 ms to 6.8 ms.
+
+### Release what your module started
+
+
+Your `code:` runs again on every style pass of every card that carries your module, and a
+pop-up rebuilds all of its cards every time it opens. Anything you start once per card, a
+timer, an observer, a listener on a shared target, therefore outlives the card that owns
+it, and a guard like `if (!this._timer)` does not help, because the state lives on the card
+element, so each rebuilt card starts from a fresh one.
+
+`onTeardown(fn)` is called with the function to run when the card goes away:
+
+```yaml
+my_module:
+  name: My Module
+  code: |
+    ${(() => {
+      if (!this._myTimer) {
+        this._myTimer = setInterval(() => {
+          // Fallback for versions without the hook, see the section above.
+          if (!this.isConnected) { clearInterval(this._myTimer); this._myTimer = null; return; }
+          /* ... */
+        }, 5000);
+        if (typeof onTeardown === 'function') {
+          onTeardown(() => {
+            clearInterval(this._myTimer);
+            this._myTimer = null;
+          });
+        }
+      }
+    })()}
+```
+
+What you can rely on:
+
+- **One registration per module per card.** Registering on every pass replaces your own
+  entry rather than stacking one per pass, so you never need to check whether you already
+  registered.
+- **The last function you registered wins**, and it runs exactly once.
+- **Your teardown cannot break anything else.** It runs after the card is disconnected,
+  one module's throw is logged and the other modules still get their turn.
+- A card that Home Assistant merely **moved** in the DOM is torn down too. That is
+  intentional, since your next style pass registers again, so you always end with exactly one
+  live registration.
+
+Registering from a card's own `styles:` works the same way, with its own slot.
+
+### Staying compatible with older versions
+
+
+Your `code:` is compiled with a fixed list of names in scope (`hass`, `entity`,
+`state`, `card`, and the helpers below). **Referencing a name that the installed
+version does not provide throws, and Bubble Card then skips your whole module**,
+so a card loses all of your styling rather than just that one feature. If you
+share your module, its users are on many different versions.
+
+`typeof` is the only way to test an undeclared name without throwing:
+
+```yaml
+code: |
+  ${(() => {
+    if (typeof onTeardown === 'function') {
+      onTeardown(() => clearInterval(this._myTimer));
+    }
+  })()}
+```
+
+| Helper | Available since |
+|--------|-----------------|
+| `onTeardown` | 3.3.0 |
+| `hasChanged` | 3.3.0 |
+
+Two things worth knowing. **YAML keys are safe**, an older version simply ignores
+a key it does not know, such as `suggestions:`, so only names used inside `code:`
+need this treatment. And when you write a fallback for older versions, make it do
+**the same thing** rather than something different, otherwise you are maintaining
+two behaviours and only testing one.
+
+## Best practices
+
+1. **Keep it simple**: Only include fields that users actually need to configure
+2. **Use clear labels**: Make field labels descriptive but concise
+3. **Provide defaults**: Declare a `default` on every field, and declare the value your code applies when the key is absent, because the form shows it
+4. **Group related fields**: Use grid or expandable sections to organize complex options
+5. **Add descriptions**: Use the description property to explain complex options, and `visible` to hide the ones that cannot apply
+6. **Test your UI**: Ensure your form is user-friendly before sharing
+
+## Example: Complete module editor schema
+
+```yaml
+editor:
+  - name: color_mode
+    label: "Color Mode"
+    selector:
+      select:
+        options:
+          - label: "Custom Color"
+            value: "custom"
+          - label: "Theme Color"
+            value: "theme"
+  - name: custom_color
+    label: "Custom Color"
+    selector:
+      ui_color: {}
+  - type: expandable
+    title: "Advanced Settings"
+    expanded: false
+    schema:
+      - name: animation
+        label: "Animation"
+        selector:
+          boolean: {}
+      - name: animation_speed
+        label: "Animation Speed"
+        selector:
+          number:
+            min: 1
+            max: 10
+            step: 0.1
+      - name: opacity
+        label: "Opacity"
+        selector:
+          number:
+            min: 0
+            max: 100
+            unit_of_measurement: "%"
+```
+
+This schema creates a form with a select dropdown for color mode, a color picker, and an expandable section with animation controls. This is the example shown in the screenshot at the top of this documentation.
+
+## References
+
+This documentation is based on Home Assistant's form schemas:
+- [Home Assistant Form Types](https://github.com/home-assistant/frontend/blob/03a415beff6e6f9c87a95287804f6c03c8fef3d5/src/components/ha-form/types.ts)
+- [Home Assistant Selectors](https://github.com/home-assistant/frontend/blob/03a415beff6e6f9c87a95287804f6c03c8fef3d5/src/data/selector.ts) 
