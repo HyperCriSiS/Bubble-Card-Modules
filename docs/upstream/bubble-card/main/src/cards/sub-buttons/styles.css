@@ -1,0 +1,83 @@
+.bubble-container.no-background,
+.bubble-container.no-background::after,
+.bubble-container.no-background::before {
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.no-background .bubble-sub-button-container {
+  inset-inline-end: 0;
+}
+
+.bubble-sub-button-container.space-between-justify {
+  justify-content: space-between !important;
+}
+
+.bubble-sub-button-container {
+  height: auto;
+  min-height: auto;
+  max-height: none;
+}
+
+ha-card.footer-mode {
+  /* Where the dashboard content starts, measured from HA's own rendered panel
+     (tools/content-inset.js). --mdc-drawer-width is deliberately gone from
+     this chain: HA drops --ha-sidebar-width when the sidebar is hidden, and
+     the legacy token then re-adds a sidebar that is not on screen, pushing
+     this fixed footer off to the side (same defect as #2537). */
+  --bubble-sub-buttons-content-inline-start: var(--bubble-content-inline-start, var(--ha-sidebar-width, 0px));
+  bottom: var(--bubble-footer-bottom, 16px);
+  height: auto;
+  margin-top: 0;
+  position: fixed;
+  width: calc(100% - var(--bubble-sub-buttons-content-inline-start) - 8px);
+  inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + 4px);
+  z-index: 5;
+}
+
+ha-card.footer-mode:not(.footer-full-width) {
+  width: var(--bubble-footer-width, 500px);
+  inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + (100% - var(--bubble-sub-buttons-content-inline-start) - var(--bubble-footer-width, 500px)) / 2);
+}
+
+@media only screen and (max-width: 600px) {
+  ha-card.footer-mode {
+    width: calc(100% - 16px);
+    inset-inline-start: 8px;
+  }
+
+  ha-card.footer-mode:not(.footer-full-width) {
+    width: calc(100% - 16px);
+    inset-inline-start: 8px;
+  }
+}
+
+ha-card.footer-mode .bubble-container {
+  margin: 0;
+  box-shadow: var(--bubble-footer-box-shadow, 2px 2px 40px rgba(0, 0, 0, 0.4));
+}
+
+ha-card.footer-mode .bubble-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.2;
+  background: var(--bubble-pop-up-main-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));
+}
+
+ha-card.footer-mode.editor {
+  position: relative;
+  width: 100%;
+  inset-inline-start: 0;
+  bottom: 0;
+}
+
+.editor {
+  transition: none !important;
+}

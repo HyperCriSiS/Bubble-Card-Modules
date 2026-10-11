@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "name": "bubble-card",
+  "version": "0.0.0",
+  "scripts": {
+    "dist": "webpack",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
+  },
+  "dependencies": {
+    "js-yaml": "^4.3.2",
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "jest": "^29.7.0",
+    "webpack": "^5.105.4",
+    "webpack-cli": "^6.0.1"
+  },
+  "type": "module"
+}
