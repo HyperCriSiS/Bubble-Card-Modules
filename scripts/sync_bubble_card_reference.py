@@ -16,7 +16,7 @@ ROOT = Path("docs/upstream/bubble-card")
 CHANNELS = ("stable", "main")
 FOLDERS = ("src/modules/", "src/components/sub-button/", "src/cards/sub-buttons/")
 EXTRAS = {
-    "README.md", "DEVELOPERS.md", "package.json", "hacs.json",
+    "README.md", "DEVELOPERS.md", "LICENSE", "package.json", "hacs.json",
     "src/cards/button/editor.js", "src/cards/button/create.js",
     "src/cards/button/changes.js", "src/cards/button/styles.css",
     "src/components/base-card/styles.css", "src/editor/bubble-card-editor.js",
@@ -27,7 +27,7 @@ EXTRAS = {
     "src/tools/render-template.js",
 }
 REQUIRED = {
-    "README.md", "src/modules/module-documentation.md",
+    "README.md", "LICENSE", "src/modules/module-documentation.md",
     "src/modules/parser.js", "src/modules/module-editor.js",
     "src/modules/yaml-schema.js", "src/components/sub-button/create.js",
     "src/components/sub-button/styles.css", "src/cards/sub-buttons/editor.js",

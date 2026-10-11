@@ -9,6 +9,7 @@ from scripts import sync_bubble_card_reference as sync
 class SelectionTests(unittest.TestCase):
     def test_tracks_contracts(self):
         for path in (
+            "LICENSE",
             "src/modules/module-documentation.md",
             "src/components/sub-button/styles.css",
             "src/cards/sub-buttons/create.js",
