@@ -10,7 +10,7 @@ Original source: https://github.com/Clooos/Bubble-Card
 
 ## Source selection
 
-- Official README, DEVELOPERS guide, package/hacs metadata
+- Original LICENSE, official README, DEVELOPERS guide, package/hacs metadata
 - src/modules: module schema, parser, registration, editor, lifecycle
 - src/components/sub-button: component implementation, sub-button selectors and styles
 - src/cards/sub-buttons: sub-button card integration
