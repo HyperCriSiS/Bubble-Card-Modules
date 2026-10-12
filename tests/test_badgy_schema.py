@@ -42,7 +42,7 @@ def main():
     md = (ROOT / PATH).read_text(encoding="utf-8")
     new = read_module(md)
     old_md = subprocess.check_output(
-        ["git", "show", "origin/main:" + PATH], cwd=ROOT, text=True
+        ["git", "show", "origin/main:" + PATH], cwd=ROOT, text=True, errors="replace"
     )
     old = read_module(old_md)
     existing = paths(old["editor"])
