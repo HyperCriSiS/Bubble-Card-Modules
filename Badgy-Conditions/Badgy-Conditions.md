@@ -550,35 +550,41 @@ badgy-condition-helper:
         }
 
         function processSubButtonBackgrounds() {
-          const sbBg = config.sub_buttons_background || {};
+          const perButton = config.sub_buttons_background || {};
           for (let i = 1; i <= 10; i++) {
-            const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
+            const sb = cardEl.querySelector(".bubble-sub-button-" + i);
             if (!sb) continue;
-            sb.classList.remove('sub-button-direct-bg');
-            sb.style.removeProperty('background');
-            sb.style.removeProperty('opacity');
-          }
-          for (const [k, bgC] of Object.entries(sbBg)) {
-            if (!bgC) continue;
-            const sbN = parseInt(k) + 1;
-            if (!checkAllConditions(bgC.condition, hass)) continue;
-            const type = bgC.type ?? 'solid';
-            const op = (bgC.opacity !== undefined) ? bgC.opacity : 1.0;
-            let colorStr = '';
-            if (type === 'solid') {
-              const c = processColor(bgC.color);
-              if (!c) continue;
-              colorStr = c;
-            } else if (type === 'two-color') {
-              colorStr = `linear-gradient(135deg, ${processColor(bgC.color1 || '#ff0000')} 0%, ${processColor(bgC.color2 || '#0000ff')} 100%)`;
-            } else if (type === 'three-color') {
-              colorStr = `linear-gradient(135deg, ${processColor(bgC.color1 || '#ff0000')} 0%, ${processColor(bgC.color2 || '#00ff00')} 50%, ${processColor(bgC.color3 || '#0000ff')} 100%)`;
+            const entry = perButton[String(i - 1)] || config.global_defaults?.sub_button_background;
+            const bg = chooseRule(entry);
+            let background = null;
+            if (bg) {
+              const type = bg.type ?? "solid";
+              if (type === "solid") {
+                background = resolvedColor(bg, "color");
+              } else if (type === "two-color") {
+                const a = resolvedColor(bg, "color1") || "#ff0000";
+                const b = resolvedColor(bg, "color2") || "#0000ff";
+                background = "linear-gradient(135deg, " + a + " 0%, " + b + " 100%)";
+              } else if (type === "three-color") {
+                const a = resolvedColor(bg, "color1") || "#ff0000";
+                const b = resolvedColor(bg, "color2") || "#00ff00";
+                const c = resolvedColor(bg, "color3") || "#0000ff";
+                background = "linear-gradient(135deg, " + a + " 0%, " + b + " 50%, " + c + " 100%)";
+              }
             }
-            const sb = cardEl.querySelector(`.bubble-sub-button-${sbN}`);
-            if (!sb) continue;
-            sb.classList.add('sub-button-direct-bg');
-            sb.style.setProperty('background', colorStr, 'important');
-            sb.style.setProperty('opacity', op, 'important');
+            // Only touch properties that Badgy owns. Other modules must keep theirs.
+            if (background) {
+              if (sb.style.getPropertyValue("background") !== background)
+                sb.style.setProperty("background", background, "important");
+              const opacity = String(bg.opacity ?? 1);
+              if (sb.style.getPropertyValue("opacity") !== opacity)
+                sb.style.setProperty("opacity", opacity, "important");
+              sb.classList.add("sub-button-direct-bg");
+            } else if (sb.classList.contains("sub-button-direct-bg")) {
+              sb.classList.remove("sub-button-direct-bg");
+              sb.style.removeProperty("background");
+              sb.style.removeProperty("opacity");
+            }
           }
         }
 
@@ -604,7 +610,7 @@ badgy-condition-helper:
           for (let i = 0; i < 10; i++) {
             const sb = cardEl.querySelector(`.bubble-sub-button-${i+1}`);
             if (!sb) continue;
-            const eff = sBE && sBE[i.toString()];
+            const eff = sBE[i.toString()] || (config.global_defaults?.sub_button_effect ? { effect: config.global_defaults.sub_button_effect, color: config.global_defaults.sub_button_effect_color } : null);
             const met = eff && eff.effect && checkAllConditions(eff.condition, hass);
             setEffect(sb, met ? eff.effect : null, eff && eff.color);
           }
@@ -647,18 +653,133 @@ badgy-condition-helper:
         }
 
         function processMainIconBackground() {
-          const mBg = config.main_icon_background || {};
-          const mainCont = cardEl.querySelector('.bubble-icon-container');
+          const mBg = chooseRule(config.main_icon_background);
+          const mainCont = cardEl.querySelector(".bubble-icon-container");
           if (!mainCont) return;
-          mainCont.style.removeProperty('background');
-          mainCont.style.removeProperty('opacity');
-          if (checkAllConditions(mBg.condition, hass) && mBg.color) {
-            const op = (mBg.opacity !== undefined) ? mBg.opacity : 1.0;
-            const cProc = processColor(mBg.color);
-            if (cProc) {
-              mainCont.style.setProperty('background', cProc, 'important');
-              mainCont.style.setProperty('opacity', op, 'important');
+          const color = mBg ? resolvedColor(mBg) : null;
+          if (color) {
+            if (mainCont.style.getPropertyValue("background") !== color)
+              mainCont.style.setProperty("background", color, "important");
+            const opacity = String(mBg.opacity ?? 1);
+            if (mainCont.style.getPropertyValue("opacity") !== opacity)
+              mainCont.style.setProperty("opacity", opacity, "important");
+            mainCont.dataset.badgyBackgroundManaged = "1";
+          } else if (mainCont.dataset.badgyBackgroundManaged) {
+            mainCont.style.removeProperty("background");
+            mainCont.style.removeProperty("opacity");
+            delete mainCont.dataset.badgyBackgroundManaged;
+          }
+        }
+
+        function processMainBadges() {
+          const parent = cardEl.querySelector(".bubble-icon-container");
+          if (!parent) return;
+          for (const type of ["entity", "icon"]) {
+            const isEntity = type === "entity";
+            const category = isEntity ? "entity_badges" : "icon_badges";
+            const cfg = config[category]?.main;
+            const cls = type + "-badge";
+            const state = isEntity && cfg?.entity ? hass.states?.[cfg.entity] : null;
+            const visible = Boolean(cfg && (isEntity ? state : cfg.icon) &&
+              checkAllConditions(cfg.condition, hass) &&
+              (!isEntity || cfg.show_if_off !== false || state.state !== "off"));
+            if (!visible) {
+              const old = parent.querySelector("." + cls);
+              if (old) old.remove();
+              continue;
             }
+            let content;
+            if (isEntity) {
+              if (cfg.attribute && state.attributes?.[cfg.attribute] !== undefined)
+                content = state.attributes[cfg.attribute];
+              else content = formatBadgeState(state, cfg);
+              if (cfg.decimals !== undefined && content !== "" && !isNaN(Number(content)))
+                content = Number(content).toFixed(Number(cfg.decimals));
+              if (cfg.show_unit !== false && state.attributes?.unit_of_measurement)
+                content = String(content) + state.attributes.unit_of_measurement;
+            }
+            createBadge({
+              subButtonNumber: 0, badgeType: cls, content,
+              icon: !isEntity ? cfg.icon : undefined,
+              badgeColor: cfg.color, textColor: cfg.text_color,
+              scale: cfg.scale ?? config.global_defaults?.badge_scale ?? 1,
+              hPos: cfg.h_pos ?? config.global_defaults?.badge_h_pos ?? -8,
+              vPos: cfg.v_pos ?? config.global_defaults?.badge_v_pos ?? -8,
+              showBackground: cfg.show_background !== false,
+            });
+            const effect = config[isEntity ? "entity_badge_effects" : "icon_badge_effects"]?.main;
+            const matched = effect?.effect && checkAllConditions(effect.condition, hass);
+            setEffect(parent.querySelector("." + cls), matched ? effect.effect : null, effect?.color);
+          }
+        }
+
+        function updateManagedIcon(el, requested) {
+          if (!el) return;
+          if (requested) {
+            if (!Object.prototype.hasOwnProperty.call(el.dataset, "badgyOriginalIcon")) {
+              el.dataset.badgyOriginalIcon = el.getAttribute("icon") || "";
+            }
+            if (el.getAttribute("icon") !== requested) el.setAttribute("icon", requested);
+          } else if (Object.prototype.hasOwnProperty.call(el.dataset, "badgyOriginalIcon")) {
+            const original = el.dataset.badgyOriginalIcon;
+            if (original) el.setAttribute("icon", original);
+            else el.removeAttribute("icon");
+            delete el.dataset.badgyOriginalIcon;
+          }
+        }
+
+        function updateManagedColor(el, chosen) {
+          if (!el) return;
+          const value = chosen ? resolvedColor(chosen) : null;
+          if (value) {
+            if (!Object.prototype.hasOwnProperty.call(el.dataset, "badgyOriginalColor")) {
+              el.dataset.badgyOriginalColor = el.style.getPropertyValue("color");
+              el.dataset.badgyOriginalColorPriority = el.style.getPropertyPriority("color");
+            }
+            if (el.style.getPropertyValue("color") !== value)
+              el.style.setProperty("color", value, "important");
+          } else if (Object.prototype.hasOwnProperty.call(el.dataset, "badgyOriginalColor")) {
+            const original = el.dataset.badgyOriginalColor;
+            if (original) el.style.setProperty("color", original, el.dataset.badgyOriginalColorPriority || "");
+            else el.style.removeProperty("color");
+            delete el.dataset.badgyOriginalColor;
+            delete el.dataset.badgyOriginalColorPriority;
+          }
+        }
+
+        function processIconsAndColors() {
+          const colorCfg = config.icon_colors || {};
+          const iconCfg = config.icons || {};
+          const apply = (el, colorOptions, iconOptions, useDefault) => {
+            const chosenColor = chooseRule(colorOptions);
+            updateManagedColor(el, chosenColor ||
+              (useDefault && config.global_defaults?.icon_color ? {color: config.global_defaults.icon_color} : null));
+            const chosenIcon = chooseRule(iconOptions);
+            updateManagedIcon(el, chosenIcon?.icon || null);
+          };
+          apply(cardEl.querySelector(".bubble-icon"),
+            colorCfg.main_icon, iconCfg.main_icon, false);
+          for (let i = 1; i <= 10; i++) {
+            const el = cardEl.querySelector(".bubble-sub-button-" + i + " .bubble-sub-button-icon");
+            apply(el, colorCfg.sub_button_icon?.[String(i - 1)],
+              iconCfg.sub_button_icon?.[String(i - 1)], true);
+          }
+        }
+
+        function processCardGlow() {
+          const effect = chooseRule(config.card_effects);
+          const target = cardEl.querySelector(".bubble-button-card-container") ||
+            cardEl.querySelector("ha-card") || cardEl;
+          const active = effect?.effect === "glow";
+          target.classList.toggle("badgy-card-glow", active);
+          target.classList.toggle("badgy-card-glow-pulse", active && effect.animate === true);
+          if (active) {
+            const color = resolvedColor(effect) || "var(--primary-color)";
+            target.style.setProperty("--badgy-glow-color", color);
+            target.style.setProperty("--badgy-glow-size", String(effect.intensity ?? 14) + "px");
+          } else {
+            target.style.removeProperty("--badgy-glow-color");
+            target.style.removeProperty("--badgy-glow-size");
           }
         }
 
@@ -674,6 +795,9 @@ badgy-condition-helper:
         processEntityBadgeEffects();
         processIconBadgeEffects();
         processMainIconBackground();
+        processIconsAndColors();
+        processMainBadges();
+        processCardGlow();
 
       } catch (err) {
         console.error("Error in badgy-condition-helper module:", err);
