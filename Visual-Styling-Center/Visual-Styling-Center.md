@@ -147,13 +147,13 @@ visual_styling_center:
 
 ```yaml
 visual_styling_center:
-  name: "Visual Styling Center"```
+  name: "Visual Styling Center"
   version: "v2025.03.30"
-  creator: "HyperCriSiS"</details>
+  creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
-  description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.---
+  description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
   unsupported:
-    - cover### Screenshot:
+    - cover
     - climate
     - horizontal-buttons-stack
     - media-player
@@ -494,19 +494,15 @@ visual_styling_center:
    ${(() => {
       const config = this.config.visual_styling_center || {};
 
-      // Default gradient configuration
-      if (config.gradient_target === undefined) {
-        config.gradient_target = "slider";
-      }
-      if (config.gradient_target === 'background' && config.enable_gradient) {
+      // Derive defaults without mutating the saved Bubble Card configuration.
+      const gradientTarget = config.gradient_target ?? 'slider';
+      const gradientEntity = config.gradient_entity ||
+        (this.config.entity?.startsWith('light.') ? this.config.entity : null);
+      if (gradientTarget === 'background' && config.enable_gradient) {
         card.classList.add('slider-background-mode');
       } else {
         card.classList.remove('slider-background-mode');
       }
-      if (!config.gradient_entity && this.config.entity && this.config.entity.startsWith('light.')) {
-        config.gradient_entity = this.config.entity;
-      }
-
       // Apply all size and spacing configurations
       if (config.height_multiplier !== undefined) {
         card.style.setProperty('--height-multiplier', config.height_multiplier);
@@ -544,70 +540,32 @@ visual_styling_center:
         card.style.setProperty('--slider-bg-opacity', 0.6);
       }
 
-      // Apply custom colors
-      if (config.manual_icon_color) {
-        card.style.setProperty('--icon-color', config.manual_icon_color);
-      } else if (config.custom_icon_color) {
-        const iconColor = config.custom_icon_color;
-        const colorValue = Array.isArray(iconColor)
-          ? `rgb(${iconColor[0]}, ${iconColor[1]}, ${iconColor[2]})`
-          : iconColor;
-        card.style.setProperty('--icon-color', colorValue);
-      }
-      if (config.manual_subicon_color) {
-        card.style.setProperty('--subicon-color', config.manual_subicon_color);
-      } else if (config.custom_subicon_color) {
-        const subiconColor = config.custom_subicon_color;
-        const colorValue = Array.isArray(subiconColor)
-          ? `rgb(${subiconColor[0]}, ${subiconColor[1]}, ${subiconColor[2]})`
-          : subiconColor;
-        card.style.setProperty('--subicon-color', colorValue);
-      }
-      if (config.manual_icon_background_color) {
-        card.style.setProperty('--icon-background-color', config.manual_icon_background_color);
-      } else if (config.custom_icon_background_color) {
-        const bgColor = config.custom_icon_background_color;
-        const colorValue = Array.isArray(bgColor)
-          ? `rgb(${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]})`
-          : bgColor;
-        card.style.setProperty('--icon-background-color', colorValue);
-      }
-      if (config.manual_subbutton_background_color) {
-        card.style.setProperty('--subbutton-background-color', config.manual_subbutton_background_color);
-      } else if (config.custom_subbutton_background_color) {
-        const subbgColor = config.custom_subbutton_background_color;
-        const colorValue = Array.isArray(subbgColor)
-          ? `rgb(${subbgColor[0]}, ${subbgColor[1]}, ${subbgColor[2]})`
-          : subbgColor;
-        card.style.setProperty('--subbutton-background-color', colorValue);
-      }
-
-      // Apply function button color for non-active/function buttons
-      if (config.enable_function_button_color === true) {
-        let functionColor;
-        if (config.manual_function_button_color) {
-          functionColor = config.manual_function_button_color;
-        } else if (config.function_button_color) {
-          const fbColor = config.function_button_color;
-          functionColor = Array.isArray(fbColor)
-            ? `rgb(${fbColor[0]}, ${fbColor[1]}, ${fbColor[2]})`
-            : fbColor;
-        } else {
-          functionColor = 'rgba(255, 255, 255, 0.9)'; // Default color
+      // Only keep module-owned variables while an option has a value.
+      const resolveColor = (manual, selected) => {
+        if (typeof manual === 'string' && manual.trim()) return manual;
+        if (Array.isArray(selected) && selected.length === 3) {
+          return `rgb(${selected[0]}, ${selected[1]}, ${selected[2]})`;
         }
-        card.style.setProperty('--function-button-color', functionColor);
-        card.classList.add('use-function-button-color');
-      } else {
-        card.classList.remove('use-function-button-color');
-      }
+        return typeof selected === 'string' && selected.trim() ? selected : null;
+      };
+      const setCardVariable = (name, value) => {
+        if (value != null) card.style.setProperty(name, value);
+        else card.style.removeProperty(name);
+      };
+      setCardVariable('--icon-color', resolveColor(config.manual_icon_color, config.custom_icon_color));
+      setCardVariable('--subicon-color', resolveColor(config.manual_subicon_color, config.custom_subicon_color));
+      setCardVariable('--subbutton-background-color', resolveColor(config.manual_subbutton_background_color, config.custom_subbutton_background_color));
+      const iconBackgroundColor = resolveColor(config.manual_icon_background_color, config.custom_icon_background_color);
+      setCardVariable('--icon-background-color', config.hide_icon_background === true ? 'transparent' : iconBackgroundColor);
+
+      const functionButtonColor = config.enable_function_button_color === true
+        ? (resolveColor(config.manual_function_button_color, config.function_button_color) ?? 'rgba(255, 255, 255, 0.9)')
+        : null;
+      setCardVariable('--function-button-color', functionButtonColor);
+      card.classList.toggle('use-function-button-color', functionButtonColor != null);
 
       // Apply background visibility toggling
-      if (config.hide_icon_background === true) {
-        card.style.setProperty('--icon-background-color', 'transparent');
-        card.classList.add('hide-icon-background');
-      } else {
-        card.classList.remove('hide-icon-background');
-      }
+      card.classList.toggle('hide-icon-background', config.hide_icon_background === true);
 
       // Apply sub-button background visibility - automatically hide if helper is enabled
       if (config.hide_subbutton_background === true || config.enable_icon_helper === true) {
@@ -616,177 +574,91 @@ visual_styling_center:
         card.classList.remove('hide-subbutton-background');
       }
 
-      // Apply sub-button background visibility to individual elements
-      const subButtonElements = card.querySelectorAll('.bubble-sub-button');
-      subButtonElements.forEach(button => {
-        if (config.hide_subbutton_background === true || config.enable_icon_helper === true) {
-          button.style.backgroundColor = 'transparent';
-          button.style.boxShadow = 'none';
-          button.style.border = 'none';
-        } else {
-          button.style.backgroundColor = '';
-          button.style.boxShadow = '';
-          button.style.border = '';
-        }
-      });
+      // The CSS .hide-subbutton-background class handles this; avoid inline
+      // writes that could overwrite Bubble Card or another module's own styling.
 
-      // Helper function to get entity color based on state
+      // Restore only inline styles owned by this module. Native Bubble Card
+      // can update other inline styles independently during state changes.
+      function applyOwnedIconColor(icon, color) {
+        if (!icon) return;
+        if (color != null) {
+          if (!Object.prototype.hasOwnProperty.call(icon.dataset, 'vscAppliedColor')) {
+            icon.dataset.vscPreviousColor = icon.style.getPropertyValue('color');
+            icon.dataset.vscPreviousPriority = icon.style.getPropertyPriority('color');
+          }
+          icon.style.setProperty('color', color, 'important');
+          icon.dataset.vscAppliedColor = color;
+        } else if (Object.prototype.hasOwnProperty.call(icon.dataset, 'vscAppliedColor')) {
+          if (icon.style.getPropertyValue('color') === icon.dataset.vscAppliedColor) {
+            if (icon.dataset.vscPreviousColor) {
+              icon.style.setProperty('color', icon.dataset.vscPreviousColor, icon.dataset.vscPreviousPriority);
+            } else {
+              icon.style.removeProperty('color');
+            }
+          }
+          delete icon.dataset.vscAppliedColor;
+          delete icon.dataset.vscPreviousColor;
+          delete icon.dataset.vscPreviousPriority;
+        }
+      }
+
       function getEntityColor(entityId) {
-        if (!entityId || !hass.states[entityId]) return null;
-        const entity = hass.states[entityId];
-        if (entity.state === 'on' && entity.attributes.rgb_color) {
-          const rgb = entity.attributes.rgb_color;
+        const entityState = hass?.states?.[entityId];
+        if (!entityId || !entityState) return null;
+        if (entityState.state === 'on' && Array.isArray(entityState.attributes?.rgb_color)) {
+          const rgb = entityState.attributes.rgb_color;
           return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
         }
         const activeStates = ['on', 'home', 'active', 'open', 'unlocked', 'detected'];
         const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear'];
         const errorStates = ['unavailable', 'unknown'];
-
-        // Check if this is a scene or functional button (these don't have typical states)
-        const isFunctionButton = entityId.startsWith('scene.') || 
-                              entityId.startsWith('script.') || 
-                              entityId.startsWith('automation.');
-
-        if (isFunctionButton && config.enable_function_button_color) {
-          return card.style.getPropertyValue('--function-button-color');
-        } else if (activeStates.indexOf(entity.state) >= 0) {
-          return `rgb(140, 200, 105)`;
-        } else if (inactiveStates.indexOf(entity.state) >= 0 && config.enable_function_button_color) {
-          // Apply the function button color to inactive states too when enabled
-          return card.style.getPropertyValue('--function-button-color');
-        } else if (inactiveStates.indexOf(entity.state) >= 0) {
-          return `rgb(150, 150, 150)`;
-        } else if (errorStates.indexOf(entity.state) >= 0 && config.enable_function_button_color) {
-          // Apply the function button color to error states too when enabled
-          return card.style.getPropertyValue('--function-button-color');
-        } else if (errorStates.indexOf(entity.state) >= 0) {
-          return `rgb(180, 180, 180)`;
+        const isFunction = /^(scene|script|automation)\\./.test(entityId);
+        if (isFunction && functionButtonColor != null) return functionButtonColor;
+        if (activeStates.includes(entityState.state)) return 'rgb(140, 200, 105)';
+        if (inactiveStates.includes(entityState.state) || errorStates.includes(entityState.state)) {
+          if (functionButtonColor != null) return functionButtonColor;
+          return inactiveStates.includes(entityState.state) ? 'rgb(150, 150, 150)' : 'rgb(180, 180, 180)';
         }
         return null;
       }
 
-      // Apply function button color directly to main icon if enabled
-      if (config.enable_function_button_color === true) {
-        const mainIcon = card.querySelector('.bubble-icon');
-        if (mainIcon) {
-          const entityId = this.config.entity;
-          const functionColor = card.style.getPropertyValue('--function-button-color');
-
-          // Check if entity exists and has a state
-          if (!entityId || !hass.states[entityId]) {
-            // No entity defined or entity not found - apply function color
-            if (functionColor) {
-              mainIcon.style.setProperty('color', functionColor, 'important');
-            }
-          } else {
-            // Entity exists - check state
-            const entityState = hass.states[entityId];
-            const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'];
-            const isFunctionButton = entityId.startsWith('scene.') || 
-                                  entityId.startsWith('script.') || 
-                                  entityId.startsWith('automation.');
-
-            if (isFunctionButton || inactiveStates.indexOf(entityState.state) >= 0) {
-              // Apply function button color for functional entities or inactive states
-              if (functionColor) {
-                mainIcon.style.setProperty('color', functionColor, 'important');
-              }
-            }
-          }
-        }
+      function getFunctionOnlyColor(entityId) {
+        if (functionButtonColor == null) return null;
+        const st = hass?.states?.[entityId];
+        if (!entityId || !st || /^(scene|script|automation)\\./.test(entityId)) return functionButtonColor;
+        return ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'].includes(st.state)
+          ? functionButtonColor : null;
       }
 
-      // Apply entity-colored main icon
-      if (config.enable_entity_colored_main_icon === true && this.config.entity) {
-        const entityId = this.config.entity;
-        if (entityId && hass.states[entityId]) {
-          const mainIcon = card.querySelector('.bubble-icon');
-          if (mainIcon) {
-            const color = getEntityColor(entityId);
-            if (color) {
-              mainIcon.style.setProperty('color', color, 'important');
-            }
-          }
-        }
-      } else if (!config.manual_icon_color && !config.custom_icon_color && !config.enable_function_button_color) {
-        // Only reset if no custom colors are set and function button color is not enabled
-        const mainIcon = card.querySelector('.bubble-icon');
-        if (mainIcon) {
-          mainIcon.style.removeProperty('color');
-        }
-      }
+      const mainEntityId = this.config.entity;
+      const mainColor = (config.enable_entity_colored_main_icon === true && getEntityColor(mainEntityId)) ||
+        getFunctionOnlyColor(mainEntityId);
+      applyOwnedIconColor(card.querySelector('.bubble-icon'), mainColor);
 
-      // Apply function button color directly to sub-buttons if enabled
-      if (config.enable_function_button_color === true) {
-        const subButtons = this.config.sub_button || [];
-        const functionColor = card.style.getPropertyValue('--function-button-color');
-
-        subButtons.forEach((buttonConfig, index) => {
-          if (!buttonConfig) return;
-          const buttonNumber = index + 1;
-          try {
-            const subButton = card.querySelector(`.bubble-sub-button-${buttonNumber}`);
-            if (!subButton) return;
-            const iconElement = subButton.querySelector('ha-icon');
-            if (!iconElement) return;
-
-            const entityId = buttonConfig.entity;
-
-            // Check if entity exists and has a state
-            if (!entityId || !hass.states[entityId]) {
-              // No entity defined or entity not found - apply function color
-              if (functionColor) {
-                iconElement.style.setProperty('color', functionColor, 'important');
-              }
-            } else {
-              // Entity exists - check state
-              const entityState = hass.states[entityId];
-              const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'];
-              const isFunctionButton = entityId.startsWith('scene.') || 
-                                     entityId.startsWith('script.') || 
-                                     entityId.startsWith('automation.');
-
-              if (isFunctionButton || inactiveStates.indexOf(entityState.state) >= 0) {
-                // Apply function button color directly for functional entities or inactive states
-                if (functionColor) {
-                  iconElement.style.setProperty('color', functionColor, 'important');
-                }
-              }
-            }
-          } catch (error) {
-            console.error("Error applying function color to sub-button " + buttonNumber, error);
-          }
+      // Bubble Card v3.4+ supports legacy arrays and sectioned main/bottom
+      // structures with nested groups. Preserve the visible 1-based index order.
+      const subButtonConfigs = [];
+      const collectSubButtons = (items) => {
+        if (!Array.isArray(items)) return;
+        items.forEach(item => {
+          if (!item) return;
+          if (Array.isArray(item.group)) collectSubButtons(item.group);
+          else subButtonConfigs.push(item);
         });
+      };
+      const configuredSubButtons = this.config.sub_button;
+      if (Array.isArray(configuredSubButtons)) collectSubButtons(configuredSubButtons);
+      else if (configuredSubButtons && typeof configuredSubButtons === 'object') {
+        collectSubButtons(configuredSubButtons.main);
+        collectSubButtons(configuredSubButtons.bottom);
       }
-
-      // Apply entity-colored sub-icons
-      if (config.enable_entity_colored_subicons === true) {
-        const subButtons = this.config.sub_button || [];
-        subButtons.forEach((buttonConfig, index) => {
-          if (!buttonConfig || !buttonConfig.entity) return;
-          const entityId = buttonConfig.entity;
-          if (!entityId || !hass.states[entityId]) return;
-          const buttonNumber = index + 1;
-          try {
-            const subButton = card.querySelector(`.bubble-sub-button-${buttonNumber}`);
-            if (!subButton) return;
-            const iconElement = subButton.querySelector('ha-icon');
-            if (!iconElement) return;
-            const color = getEntityColor(entityId);
-            if (color) {
-              iconElement.style.setProperty('color', color, 'important');
-            }
-          } catch (error) {
-            console.error("Error applying color to sub-button " + buttonNumber, error);
-          }
-        });
-      } else if (!config.enable_function_button_color) {
-        // Only reset if function button color is not enabled
-        const iconElements = card.querySelectorAll('.bubble-sub-button ha-icon');
-        iconElements.forEach(icon => {
-          icon.style.removeProperty('color');
-        });
-      }
+      subButtonConfigs.forEach((buttonConfig, index) => {
+        const icon = card.querySelector(`.bubble-sub-button-${index + 1} .bubble-sub-button-icon`);
+        const entityId = buttonConfig.entity;
+        const color = (config.enable_entity_colored_subicons === true && getEntityColor(entityId)) ||
+          getFunctionOnlyColor(entityId);
+        applyOwnedIconColor(icon, color);
+      });
 
       // Icon Contrast Helper Implementation
       if (config.enable_icon_helper === true) {
@@ -799,16 +671,16 @@ visual_styling_center:
         } else if (config.helper_color) {
           const colorArray = config.helper_color;
           helperColor = Array.isArray(colorArray)
-            ? `rgba(${colorArray[0]}, ${colorArray[1]}, ${colorArray[2]}, ${config.helper_opacity || 0.7})`
+            ? `rgba(${colorArray[0]}, ${colorArray[1]}, ${colorArray[2]}, ${config.helper_opacity ?? 0.7})`
             : colorArray;
         } else {
           // Default to a light grey if no color specified
-          helperColor = `rgba(255, 255, 255, ${config.helper_opacity || 0.7})`;
+          helperColor = `rgba(255, 255, 255, ${config.helper_opacity ?? 0.7})`;
         }
 
         card.style.setProperty('--helper-color', helperColor);
-        card.style.setProperty('--helper-size', config.helper_size_ratio || 0.7);
-        card.style.setProperty('--fade-strength', config.fade_strength || 1.0);
+        card.style.setProperty('--helper-size', config.helper_size_ratio ?? 0.7);
+        card.style.setProperty('--fade-strength', config.fade_strength ?? 1.0);
 
         if (config.enable_helper_fade === true) {
           card.classList.add('helper-fade-enabled');
@@ -832,7 +704,7 @@ visual_styling_center:
       }
 
       // Slider Contrast Helper Implementation - Only apply when Card Background gradient is active
-      if (config.enable_slider_helper === true && config.gradient_target === 'background' && config.enable_gradient === true) {
+      if (config.enable_slider_helper === true && gradientTarget === 'background' && config.enable_gradient === true) {
         card.classList.add('slider-helper-enabled');
 
         // Set slider helper colors and properties
@@ -842,16 +714,16 @@ visual_styling_center:
         } else if (config.slider_helper_color) {
           const colorArray = config.slider_helper_color;
           sliderHelperColor = Array.isArray(colorArray)
-            ? `rgba(${colorArray[0]}, ${colorArray[1]}, ${colorArray[2]}, ${config.slider_helper_opacity || 0.7})`
+            ? `rgba(${colorArray[0]}, ${colorArray[1]}, ${colorArray[2]}, ${config.slider_helper_opacity ?? 0.7})`
             : colorArray;
         } else {
           // Default to black if no color specified
-          sliderHelperColor = `rgba(0, 0, 0, ${config.slider_helper_opacity || 0.7})`;
+          sliderHelperColor = `rgba(0, 0, 0, ${config.slider_helper_opacity ?? 0.7})`;
         }
 
         card.style.setProperty('--slider-helper-color', sliderHelperColor);
-        card.style.setProperty('--slider-helper-size', config.slider_helper_size_ratio || 0.7);
-        card.style.setProperty('--slider-fade-strength', config.slider_fade_strength || 1.0);
+        card.style.setProperty('--slider-helper-size', config.slider_helper_size_ratio ?? 0.7);
+        card.style.setProperty('--slider-fade-strength', config.slider_fade_strength ?? 1.0);
 
         if (config.enable_slider_helper_fade === true) {
           card.classList.add('slider-helper-fade-enabled');
@@ -868,8 +740,8 @@ visual_styling_center:
       card.style.removeProperty('--slider-gradient');
       card.style.removeProperty('--card-gradient');
 
-      if (config.enable_gradient === true && config.gradient_entity) {
-        const entityId = config.gradient_entity;
+      if (config.enable_gradient === true && gradientEntity) {
+        const entityId = gradientEntity;
         const entityState = hass.states[entityId];
         let coloredLights = [];
 
@@ -949,7 +821,7 @@ visual_styling_center:
 
           // Apply the gradient to the target element
           const gradient = `linear-gradient(to right, ${gradientColors})`;
-          if (config.gradient_target === 'background') {
+          if (gradientTarget === 'background') {
             card.style.setProperty('--card-gradient', gradient);
             card.classList.add('use-gradient-background');
           } else {
@@ -959,7 +831,7 @@ visual_styling_center:
         } else if (config.disable_default_gradient !== true) {
           // Fallback rainbow gradient if no colored lights are found and option is not disabled
           const defaultGradient = 'linear-gradient(to right, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3)';
-          if (config.gradient_target === 'background') {
+          if (gradientTarget === 'background') {
             card.style.setProperty('--card-gradient', defaultGradient);
             card.classList.add('use-gradient-background');
           } else {
@@ -1210,6 +1082,11 @@ visual_styling_center:
     .bubble-icon-container:focus .bubble-icon {
       filter: brightness(1.2) !important;
     }
+```
+</details>
 
-   return '';
-    })()}
+### Screenshots
+
+![Options](./Options.png)
+![Gradient slider](./Gradient_Slider.png)
+![Gradient background helper](./Gradient_Background_Helper.png)
