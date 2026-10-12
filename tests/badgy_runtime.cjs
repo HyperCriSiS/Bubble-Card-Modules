@@ -81,7 +81,7 @@ let created = 0;
 global.document = { createElement(tag) { created++; return new El(tag); } };
 global.getComputedStyle = () => ({ position: "relative" });
 global.CSS = {
-  supports(property, value) { return property === "color" && /^(#[0-9a-f]{3,8}|rgb\(|hsl\(|var\(--)/i.test(value); }
+  supports(property, value) { return property === "color" && /^(#[0-9a-f]{3,8}|rgb\(|hsl\(|var\(--|black$|red$|blue$)/i.test(value); }
 };
 
 const root = new El("card");
@@ -113,7 +113,7 @@ const cfg = {
   sub_buttons_background: {
     "0": {rules: [
       {condition: check, type: "solid", color: "#ff0000"},
-      {condition: {condition:"state",entity_id:"sensor.flag",state:"off"}, type:"solid",color:"#0000ff"}
+      {condition: {condition:"state",entity_id:"sensor.flag",state:"off"}, type:"solid",color:"black"}
     ]}
   },
   icon_colors: {main_icon: {color: "#ffbb00", condition: check}},
@@ -165,7 +165,7 @@ assert.ok(!subIcon.classList.contains("effect-spin-360"), "icon effect stops on 
 assert.ok(!sub.classList.contains("effect-pulse"), "container effect stops on false");
 assert.ok(!cardContainer.classList.contains("badgy-card-glow"), "card glow stops on false");
 assert.equal(mainIcon.getAttribute("icon"), "mdi:home", "original icon restored on false");
-assert.equal(sub.style.getPropertyValue("background"), "#0000ff", "second color rule matches");
+assert.equal(sub.style.getPropertyValue("background"), "var(--black-color, black)", "named color uses theme with CSS fallback");
 cfg.sub_buttons_background["0"] = {type:"solid", color_template:"{{ state_attr('sensor.palette','hex') }}"};
 run();
 assert.equal(sub.style.getPropertyValue("background"), "#c02200", "template-based color resolves");
