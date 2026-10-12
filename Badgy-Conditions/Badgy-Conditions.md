@@ -372,9 +372,17 @@ badgy-condition-helper:
         }
 
         function processColor(color) {
-          if (!color || color === 'none') return null;
-          if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) return color;
-          return `var(--${color}-color)`;
+          if (typeof color !== "string") return null;
+          const value = color.trim();
+          if (!value || value === "none") return null;
+          if (value.startsWith("#") || value.startsWith("rgb") ||
+              value.startsWith("hsl") || value.startsWith("var(")) return value;
+          if (!/^[a-z][a-z0-9-]*$/i.test(value)) return null;
+          // Bubble theme colors retain precedence; fall back to standard CSS
+          // named colors (including black) if no matching --*-color exists.
+          if (typeof CSS !== "undefined" && CSS.supports?.("color", value))
+            return "var(--" + value + "-color, " + value + ")";
+          return "var(--" + value + "-color)";
         }
 
         const ALL_EFFECT_CLASSES = [
