@@ -110,6 +110,8 @@ class VSCBrowser(unittest.TestCase):
         self.change(cfg={'height_multiplier':2,'icon_size_multiplier':1.5,'subbutton_background_ratio':1.25})
         self.assertEqual(self.cssval('.bubble-button-card-container','height'),'100px')
         self.assertEqual(self.cssval('.bubble-icon-container','width'),'57px')
+        # Native Bubble Card animates sub-button geometry for 0.5 s.
+        self.page.wait_for_timeout(650)
         self.assertEqual(self.cssval('.bubble-sub-button-1','height'),'80px')
         self.change(classes={'large':True})
         self.assertEqual(self.cssval('.bubble-icon-container','width'),'63px')
