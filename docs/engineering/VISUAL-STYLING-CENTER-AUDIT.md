@@ -1,18 +1,25 @@
-# Visual Styling Center — audit (2026-10-12)
+# Visual Styling Center — compatibility audit (2026-10-12)
 
-Reference: Bubble Card stable v3.4.1, mirrored under `docs/upstream/bubble-card/stable/`. Stable and main currently have no tracked source differences.
+Upstream reference: Bubble Card **v3.4.1** (mirrored as read-only under docs/upstream/bubble-card/stable/). At review time main and stable tracked sources were identical.
 
-## Applied cleanup
-- Removed the dormant `_hasInitialSliderUpdate` guard and `updateInitialSliderState` callback. The callback previously only read `hass.states` and did not change the slider, schedule updates, or subscribe to events. Native slider synchronization belongs to Bubble Card.
-- Preserved the module ID `visual_styling_center` and all user-facing editor configuration keys.
+## Implemented in PR #7
+- Removed the obsolete _hasInitialSliderUpdate / updateInitialSliderState stub. Native Bubble Card updates button and sub-button sliders.
+- Repaired corrupted Markdown code fences and module YAML metadata, removed stray JS-template closure, and restored invalid multiplication-unit characters. The entire module now parses as YAML.
+- Preserved module ID visual_styling_center and **all 46 existing editor field names**. Version metadata is synchronized and advanced to v2026.10.12.
+- Color changes for main icons and sub-button icons now restore only module-owned inline overrides when settings or entity states change. Supports legacy sub-button arrays and sectioned main/bottom + nested groups.
+- Resolved nullish defaults, removed saved-config mutations, repaired function/scene detection, and removed redundant inline sub-button background writes.
+- Explicitly reset module-owned color custom properties when settings are cleared. Re-enabled icon background picks up configured custom color.
+- Corrected outdated introductory module name and repaired module download presentation.
+- Added YAML/JavaScript regression tests and a GitHub Actions PR check for this module.
 
-## Follow-up review findings (not changed in this focused cleanup)
-1. **State-derived colors can remain stale:** Directly applied `style.color` values in the icon and sub-button paths do not reliably clear when the previous entity-derived color is no longer applicable, or when the optional function-color feature is switched off. Audit ownership of inline style properties and remove only module-owned overrides.
-2. **Zero values are lost:** `config.helper_opacity || 0.7`, `config.slider_helper_opacity || 0.7`, `config.helper_size_ratio || 0.7`, and related patterns override legitimate numeric zero values. Prefer `??` where zero is allowed.
-3. **Configuration mutation:** `config.gradient_target = "slider"` and `config.gradient_entity = ...` mutate the object from `this.config`. Derive local effective values instead to avoid side effects.
-4. **Gradient child entities:** A gradient built from group child light states must be retested when only one child light changes externally. Native slider value syncing does not by itself guarantee this custom visual dependency is invalidated.
-5. **Styling specificity and compatibility:** The module uses a number of broad `!important` CSS rules and directly writes sub-button inline styles. Verify interaction with Bubble Card v3.4.1 defaults, other modules and section/grid layouts; avoid removing intended visuals solely based on class-name matches.
-6. **Documentation drift:** The overview still calls the module 'Slider Control Center' though its name is 'Visual Styling Center'. Check supported-card claims and sample screenshots against v3.4.1.
-7. **Verification gap:** Add automated checks covering parsing of the Markdown module, stable editor keys, zero-value behavior, stale-state cleanup and a browser-based slider/external-change regression scenario.
+## Reactivity and reference
+Current Bubble Card style-processor uses trackedHass during module execution. State reads inside this module, including group-member light states for gradients, are tracked as dependencies. No explicit state_changed subscription is needed. A regression test verifies gradient recalculation when a child light RGB value changes **on a style pass**, but does not simulate the entire Home Assistant frontend lifecycle.
 
-No Home Assistant runtime test was performed by this audit. These findings are code-review observations, not verified user-visible regressions.
+## Still requiring Home Assistant UI verification
+1. Manual slider interactions plus updates from outside HA, including sub-button sliders and long interactions.
+2. All layout variants (normal, large, sections, grid, group/bottom sub-buttons) and interaction with other styling modules.
+3. Theme changes and CSS specificity where broad !important rules override Bubble Card defaults.
+4. Icon state colors for entities with unusual state values and missing attributes.
+5. Screenshots and supported-card declarations against rendered Bubble Card v3.4.1.
+
+Test coverage is intentionally focused on module serialization, naming compatibility and JavaScript side effects. A real HA/browser E2E test has not been performed.

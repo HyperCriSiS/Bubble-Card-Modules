@@ -80,6 +80,29 @@ test("function-color reset and native ownership",()=>{
   cfg.enable_entity_colored_main_icon=false;run();
   assert.equal(card.main.style.getPropertyValue("color"),"magenta");
 });
+test("scene state uses configured function color",()=>{
+  hass.states["scene.demo"]=st("on");
+  ctx.config.entity="scene.demo";
+  cfg.enable_entity_colored_main_icon=false;
+  cfg.enable_function_button_color=true;
+  run();
+  assert.equal(card.main.style.getPropertyValue("color"),"rgba(255, 255, 255, 0.9)");
+  ctx.config.entity="light.a";
+  cfg.enable_function_button_color=false;
+  run();
+});
+test("gradient follows child light RGB changes",()=>{
+  cfg.enable_gradient=true;
+  cfg.gradient_target="background";
+  cfg.gradient_entity="light.group";
+  hass.states["light.group"]={state:"on",attributes:{entity_id:["light.a","light.b"]}};
+  hass.states["light.b"]=st("on",[200,20,20]);
+  run();
+  const initial=card.style.getPropertyValue("--card-gradient");
+  hass.states["light.b"]=st("on",[15,220,210]);
+  run();
+  assert.notEqual(card.style.getPropertyValue("--card-gradient"),initial);
+});
 test("hide background resets custom styling correctly",()=>{
   cfg.manual_icon_background_color="#123456";cfg.hide_icon_background=true;run();
   assert.equal(card.style.getPropertyValue("--icon-background-color"),"transparent");

@@ -1,6 +1,6 @@
 # Visual Styling Center
 
-**Version:** v2025.04.16
+**Version:** v2026.10.12
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
@@ -16,7 +16,7 @@
 
 ## Overview
 
-The Slider Control Center module offers advanced customization options for Bubble Card elements with a focus on visual enhancements.
+The Visual Styling Center module offers advanced customization options for Bubble Card elements with a focus on visual enhancements.
 It provides precise control over Icon and card sizes, spacing, colors, and visual effects like gradients.
 
 ## IMPORTANT
@@ -139,7 +139,7 @@ visual_styling_center:
 
 <details>
 
-<summary><b>Ã°Å¸Â§Â© Get this Module</b></summary>
+<summary><b>Get this Module</b></summary>
 
 <br>
 
@@ -148,7 +148,7 @@ visual_styling_center:
 ```yaml
 visual_styling_center:
   name: "Visual Styling Center"
-  version: "v2025.03.30"
+  version: "v2026.10.12"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
   description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
@@ -612,7 +612,7 @@ visual_styling_center:
         const activeStates = ['on', 'home', 'active', 'open', 'unlocked', 'detected'];
         const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear'];
         const errorStates = ['unavailable', 'unknown'];
-        const isFunction = /^(scene|script|automation)\\./.test(entityId);
+        const isFunction = /^(scene|script|automation)\./.test(entityId);
         if (isFunction && functionButtonColor != null) return functionButtonColor;
         if (activeStates.includes(entityState.state)) return 'rgb(140, 200, 105)';
         if (inactiveStates.includes(entityState.state) || errorStates.includes(entityState.state)) {
@@ -625,7 +625,7 @@ visual_styling_center:
       function getFunctionOnlyColor(entityId) {
         if (functionButtonColor == null) return null;
         const st = hass?.states?.[entityId];
-        if (!entityId || !st || /^(scene|script|automation)\\./.test(entityId)) return functionButtonColor;
+        if (!entityId || !st || /^(scene|script|automation)\./.test(entityId)) return functionButtonColor;
         return ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'].includes(st.state)
           ? functionButtonColor : null;
       }
