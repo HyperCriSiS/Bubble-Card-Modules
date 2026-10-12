@@ -1,5 +1,19 @@
 # Badgy Condition Helper — 2026 upgrade (beta)
 
+## Test the beta alongside the stable version
+
+The working branch contains a [separate importable beta](./Badgy-Conditions-beta.yaml).
+
+- Open the raw YAML: https://raw.githubusercontent.com/HyperCriSiS/Bubble-Card-Modules/feature/badgy-v2026-upgrade/Badgy-Conditions/Badgy-Conditions-beta.yaml
+- In a Bubble Card editor, open Modules -> My Modules -> Import from YAML.
+- Paste the entire YAML, then select Import Module. The module ID is `badgy-condition-helper-beta`.
+- Duplicate an existing card and activate the beta *only on the duplicate*. If necessary, change the card's `modules` entry and per-card configuration namespace from `badgy-condition-helper` to `badgy-condition-helper-beta`.
+- Disable the old Badgy module on the duplicate. All other cards continue using the stable installation.
+
+This special beta ID is for testing only. The eventual release retains the
+original ID `badgy-condition-helper`, so stored configuration paths remain unchanged.
+
+
 This document describes the update proposed in the 2026 Badgy PR.
 The existing YAML module ID and **all 240 pre-existing editor configuration
 paths are preserved**. Existing cards should not require migration.

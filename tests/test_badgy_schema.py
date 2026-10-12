@@ -41,6 +41,19 @@ def paths(fields, prefix=()):
 def main():
     md = (ROOT / PATH).read_text(encoding="utf-8")
     new = read_module(md)
+    # Parallel install must have a distinct ID but exactly the same runtime/editor.
+    beta_id = "badgy-condition-helper-beta"
+    beta = yaml.safe_load(
+        (ROOT / "Badgy-Conditions/Badgy-Conditions-beta.yaml").read_text(encoding="utf-8")
+    )
+    assert list(beta) == [beta_id]
+    isolated = beta[beta_id]
+    assert isolated["name"] == "Badgy Condition Helper (Beta)"
+    assert isolated["version"] == new["version"]
+    assert isolated["editor"] == new["editor"]
+    assert isolated["code"] == new["code"].replace(MODULE, beta_id)
+    assert MODULE not in isolated["code"]
+    print("Verified isolated test module matches source without sharing its module ID")
     old_md = subprocess.check_output(
         ["git", "show", "origin/main:" + PATH], cwd=ROOT, text=True, errors="replace"
     )
