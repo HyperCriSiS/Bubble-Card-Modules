@@ -151,14 +151,26 @@ modules:
 > To use this module, simply copy and paste the following configuration into your `/www/bubble/bubble-modules.yaml` file.
 
 ```yaml
-
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2025.03.16-mod"
+  version: "v2026.06.19-mod"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   description: |
     Advanced badge and effect helper module with conditional logic.
+
+    Patched fork (v2026.06.19-mod) â€” tested against Home Assistant 2026.6.x:
+    - Fixed: sub-button & icon effects now stop when their condition turns false
+      (previously the animation kept running until a full page reload).
+    - Improved: effects are applied idempotently, so animations are no longer
+      restarted on every unrelated Home Assistant state change.
+    - Improved: badges are updated in place instead of being recreated, which
+      avoids restarting badge animations and reduces DOM churn.
+    - Improved: conditions now use Bubble Card's native checkConditionsMet when
+      available (adds support for time/template/sun/zone/...), with a safe
+      fallback to the built-in evaluator.
+    - Cleanup: removed the non-functional state_changed subscription and the
+      custom disconnectedCallback override.
 
     Features:
     - Entity badges: Display entity states or attributes on sub-buttons
@@ -187,7 +199,7 @@ badgy-condition-helper:
       align-items: center;
       justify-content: center;
       padding: 0 4px;
-      z-index: 1; /* reduziert, damit Badges nicht Popups überlagern */
+      z-index: 1;
       box-sizing: border-box;
       box-shadow: 0 1px 2px rgba(0,0,0,0.2);
       transform: scale(var(--badge-scale, 1));
@@ -208,12 +220,7 @@ badgy-condition-helper:
       height: 13px;
     }
 
-    /* =============================
-       Direct styling for sub-button backgrounds
-       ============================= */
-    .sub-button-direct-bg {
-      /* Used to track that we are controlling the background color with JS */
-    }
+    .sub-button-direct-bg { /* tracking class for JS-controlled background */ }
 
     /* =============================
        Animations for effects
@@ -253,8 +260,6 @@ badgy-condition-helper:
       60%  { transform: scale(1.07); }
       100% { transform: scale(1); }
     }
-
-    /* New custom animations: spin-360, flip, vibrate */
     @keyframes spin360 {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -280,18 +285,15 @@ badgy-condition-helper:
     .effect-float       { animation: float-up-down 3s infinite ease-in-out; }
     .effect-zoom        { animation: zoom 1.5s infinite ease-in-out; }
     .effect-heartbeat   { animation: heartbeat 2s infinite ease-in-out; }
-
     .effect-spin-360    { animation: spin360 2s linear infinite; }
     .effect-flip        { animation: flip 2s linear infinite; }
     .effect-vibrate     { animation: vibrate 0.6s linear infinite; }
 
-    /* For sub-button icon only */
     .bubble-sub-button-icon.has-effect {
       position: relative;
       transform-origin: center;
       display: inline-flex;
     }
-    /* For main icon only */
     .bubble-icon.has-effect {
       position: relative;
       transform-origin: center;
@@ -300,11 +302,10 @@ badgy-condition-helper:
 
     ${(() => {
       try {
-        // ===== Global variables for tracking =====
         const DEBUG = false;
-        let trackedEntities = new Set();
 
-        // ===== Helper functions for conditions =====
+        // ---- Fallback condition evaluator (used only if the native
+        //      checkConditionsMet helper is not available) ----
         function evaluateSingleCondition(condObj, hass) {
           if (!condObj || typeof condObj !== 'object') return false;
           if (!condObj.condition) return false;
@@ -320,30 +321,20 @@ badgy-condition-helper:
               } else {
                 val = hass.states[eid].state;
               }
-              if (Array.isArray(condObj.state)) {
-                return condObj.state.includes(val);
-              } else {
-                return val === condObj.state;
-              }
+              if (Array.isArray(condObj.state)) return condObj.state.includes(val);
+              return val === condObj.state;
             }
             case 'numeric_state': {
               const eid = condObj.entity_id || condObj.entity;
               if (!eid || !hass.states[eid]) return false;
               let val;
-              if (condObj.attribute) {
-                val = hass.states[eid].attributes[condObj.attribute];
-              } else {
-                val = hass.states[eid].state;
-              }
+              if (condObj.attribute) val = hass.states[eid].attributes[condObj.attribute];
+              else val = hass.states[eid].state;
               const numVal = parseFloat(val);
               if (isNaN(numVal)) return false;
               let ok = true;
-              if (condObj.above !== undefined) {
-                ok = ok && (numVal > parseFloat(condObj.above));
-              }
-              if (condObj.below !== undefined) {
-                ok = ok && (numVal < parseFloat(condObj.below));
-              }
+              if (condObj.above !== undefined) ok = ok && (numVal > parseFloat(condObj.above));
+              if (condObj.below !== undefined) ok = ok && (numVal < parseFloat(condObj.below));
               return ok;
             }
             case 'and':
@@ -356,180 +347,111 @@ badgy-condition-helper:
               if (Array.isArray(condObj.conditions) && condObj.conditions.length > 0) {
                 return !evaluateSingleCondition(condObj.conditions[0], hass);
               }
-              if (condObj.condition_obj) {
-                return !evaluateSingleCondition(condObj.condition_obj, hass);
-              }
+              if (condObj.condition_obj) return !evaluateSingleCondition(condObj.condition_obj, hass);
               return false;
             default:
               return false;
           }
         }
 
+        // Prefer Bubble Card's native checkConditionsMet (supports time,
+        // template, sun, zone, etc.). Fall back to the local evaluator on
+        // older Bubble Card versions or if the native call throws.
         function checkAllConditions(cProp, hass) {
           if (!cProp) return true;
-          if (Array.isArray(cProp)) {
-            return cProp.every(x => evaluateSingleCondition(x, hass));
+          const arr = [].concat(cProp);
+          if (typeof checkConditionsMet === 'function') {
+            try { return checkConditionsMet(arr, hass); } catch (e) { /* fallback below */ }
           }
-          return evaluateSingleCondition(cProp, hass);
+          return arr.every(x => evaluateSingleCondition(x, hass));
         }
 
         function processColor(color) {
-          if (!color) return null;
-          if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) {
-            return color;
-          }
+          if (!color || color === 'none') return null;
+          if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) return color;
           return `var(--${color}-color)`;
         }
 
-        // ===== Find entities in conditions =====
-        function collectEntitiesFromCondition(condObj) {
-          if (!condObj || typeof condObj !== 'object') return [];
-          const entities = [];
-          const t = condObj.condition;
-          if (!t) return entities;
-          switch (t) {
-            case 'state':
-            case 'numeric_state': {
-              const eid = condObj.entity_id || condObj.entity;
-              if (eid && typeof eid === 'string') entities.push(eid);
-              break;
-            }
-            case 'and':
-            case 'or':
-              if (Array.isArray(condObj.conditions)) {
-                condObj.conditions.forEach(sc => {
-                  entities.push(...collectEntitiesFromCondition(sc));
-                });
-              }
-              break;
-            case 'not':
-              if (Array.isArray(condObj.conditions) && condObj.conditions.length > 0) {
-                entities.push(...collectEntitiesFromCondition(condObj.conditions[0]));
-              }
-              if (condObj.condition_obj) {
-                entities.push(...collectEntitiesFromCondition(condObj.condition_obj));
-              }
-              break;
+        const ALL_EFFECT_CLASSES = [
+          'effect-pulse','effect-rotate','effect-glow','effect-shake',
+          'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
+          'effect-flip','effect-vibrate'
+        ];
+
+        // Idempotent effect application: only mutates classes when the desired
+        // state actually changes, so the CSS animation is NOT restarted on every
+        // (global) Home Assistant state update.
+        function setEffect(el, effect, color) {
+          if (!el) return;
+          const desired = effect ? `effect-${effect}` : null;
+          for (const c of ALL_EFFECT_CLASSES) {
+            if (c !== desired && el.classList.contains(c)) el.classList.remove(c);
           }
-          return entities;
+          if (desired) {
+            if (!el.classList.contains(desired)) el.classList.add(desired);
+            if (!el.classList.contains('has-effect')) el.classList.add('has-effect');
+            const cProc = color ? processColor(color) : null;
+            if (cProc) el.style.setProperty('--effect-color', cProc);
+            else el.style.removeProperty('--effect-color');
+          } else {
+            if (el.classList.contains('has-effect')) el.classList.remove('has-effect');
+            el.style.removeProperty('--effect-color');
+          }
         }
 
-        // ===== Collect all relevant entities =====
-        function collectAllTrackedEntities() {
-          const cfg = this.config["badgy-condition-helper"] || {};
-          const allEntities = new Set();
-
-          // 1) Entity-Badges
-          const eBadges = cfg.entity_badges || {};
-          for (const bc of Object.values(eBadges)) {
-            if (bc?.entity) allEntities.add(bc.entity);
-            if (bc?.condition) {
-              collectEntitiesFromCondition(bc.condition).forEach(e => allEntities.add(e));
-            }
-          }
-          // 2) Icon-Badges
-          const iBadges = cfg.icon_badges || {};
-          for (const bc of Object.values(iBadges)) {
-            if (bc?.condition) {
-              collectEntitiesFromCondition(bc.condition).forEach(e => allEntities.add(e));
-            }
-          }
-          // 3) Sub-Button Backgrounds
-          const sbBg = cfg.sub_buttons_background || {};
-          for (const bgC of Object.values(sbBg)) {
-            if (bgC?.condition) {
-              collectEntitiesFromCondition(bgC.condition).forEach(e => allEntities.add(e));
-            }
-          }
-          // 4) Icon Effects
-          const iE = cfg.icon_effects || {};
-          if (iE.main_icon?.condition) {
-            collectEntitiesFromCondition(iE.main_icon.condition).forEach(e => allEntities.add(e));
-          }
-          const sbIcons = iE.sub_button_icon || {};
-          for (const eC of Object.values(sbIcons)) {
-            if (eC?.condition) {
-              collectEntitiesFromCondition(eC.condition).forEach(e => allEntities.add(e));
-            }
-          }
-          // 5) Entity Badge Effects
-          const eBE = cfg.entity_badge_effects || {};
-          for (const ef of Object.values(eBE)) {
-            if (ef?.condition) {
-              collectEntitiesFromCondition(ef.condition).forEach(e => allEntities.add(e));
-            }
-          }
-          // 6) Icon Badge Effects
-          const iBE = cfg.icon_badge_effects || {};
-          for (const ef of Object.values(iBE)) {
-            if (ef?.condition) {
-              collectEntitiesFromCondition(ef.condition).forEach(e => allEntities.add(e));
-            }
-          }
-          // 7) Main Icon Background
-          const mBg = cfg.main_icon_background || {};
-          if (mBg?.condition) {
-            collectEntitiesFromCondition(mBg.condition).forEach(e => allEntities.add(e));
-          }
-          // 8) Sub-Button Effects
-          const sBE = cfg.sub_button_effects || {};
-          for (const eff of Object.values(sBE)) {
-            if (eff?.condition) {
-              collectEntitiesFromCondition(eff.condition).forEach(e => allEntities.add(e));
-            }
-          }
-          return allEntities;
-        }
-
-        // ===== Set up state change listener =====
-        function setupStateChangeListener() {
-          const cardEl = card;
-          const connection = hass.connection;
-          if (cardEl._badgyStateChangeHandler) {
-            connection.removeEventListener('state_changed', cardEl._badgyStateChangeHandler);
-          }
-          cardEl._badgyStateChangeHandler = (event) => {
-            const entityId = event.data.entity_id;
-            if (trackedEntities.has(entityId)) {
-              if (DEBUG) console.log(`[badgy-helper] State changed for tracked entity: ${entityId}`);
-              processEntityBadges();
-              processIconBadges();
-              processSubButtonBackgrounds();
-              processIconEffects();
-              processSubButtonEffects();
-              processEntityBadgeEffects();
-              processIconBadgeEffects();
-              processMainIconBackground();
-            }
-          };
-          connection.addEventListener('state_changed', cardEl._badgyStateChangeHandler);
-          if (DEBUG) console.log('[badgy-helper] Registered state_changed listener');
-        }
-
-        // ===== Clean up event listeners when card is disconnected =====
-        if (!card._badgyCleanupHandlerAdded) {
-          card._badgyCleanupHandlerAdded = true;
-          const originalDisconnectedCallback = card.disconnectedCallback;
-          card.disconnectedCallback = function() {
-            if (DEBUG) console.log('[badgy-helper] Card removed, cleaning up...');
-            if (this._badgyStateChangeHandler && hass.connection) {
-              hass.connection.removeEventListener('state_changed', this._badgyStateChangeHandler);
-              this._badgyStateChangeHandler = null;
-            }
-            if (originalDisconnectedCallback) {
-              originalDisconnectedCallback.call(this);
-            }
-          };
-        }
-
-        // ===== Read configuration =====
         const config = this.config["badgy-condition-helper"] || {};
         const cardEl = card;
 
-        // ========== PROCESS: Entity Badges ==========
-        function processEntityBadges(){
+        // ---- createBadge: reuses an existing badge element instead of
+        //      destroying/recreating it, so badge effect animations don't
+        //      restart on every state update. ----
+        function createBadge({subButtonNumber, content, icon, badgeColor, textColor, hPos, vPos, scale, showBackground, badgeType}) {
+          const sb = cardEl.querySelector(`.bubble-sub-button-${subButtonNumber}`);
+          if (!sb) return;
+          if (getComputedStyle(sb).position === 'static') sb.style.position = 'relative';
+
+          let badge = sb.querySelector(`.${badgeType}`);
+          if (!badge) {
+            badge = document.createElement('div');
+            badge.className = `bubble-sub-button-badge ${badgeType}`;
+            sb.appendChild(badge);
+          }
+          badge.classList.toggle('without-background', !showBackground);
+
+          if (scale !== undefined && scale !== 1) badge.style.setProperty('--badge-scale', scale);
+          else badge.style.removeProperty('--badge-scale');
+
+          badge.style.top = `${vPos}px`;
+          if (badgeType === 'entity-badge') { badge.style.right = `${hPos}px`; badge.style.left = ''; }
+          else { badge.style.left = `${hPos}px`; badge.style.right = ''; }
+          badge.dataset.hPos = hPos;
+          badge.dataset.vPos = vPos;
+
+          if (badgeColor) badge.style.setProperty('--badge-color', processColor(badgeColor));
+          else badge.style.removeProperty('--badge-color');
+          if (textColor) badge.style.color = processColor(textColor);
+          else badge.style.removeProperty('color');
+
+          if (icon) {
+            let ic = badge.querySelector('ha-icon.badge-icon');
+            if (!ic) {
+              badge.textContent = '';
+              ic = document.createElement('ha-icon');
+              ic.className = 'badge-icon';
+              badge.appendChild(ic);
+            }
+            if (ic.getAttribute('icon') !== icon) ic.setAttribute('icon', icon);
+          } else if (content !== undefined && content !== null) {
+            const ic = badge.querySelector('ha-icon.badge-icon');
+            if (ic) ic.remove();
+            const str = String(content);
+            if (badge.textContent !== str) badge.textContent = str;
+          }
+        }
+
+        function processEntityBadges() {
           const eBadges = config.entity_badges || {};
-          const currentEntityBadges = new Set();
+          const current = new Set();
           for (const [k, bc] of Object.entries(eBadges)) {
             if (!bc?.entity) continue;
             const sbNum = parseInt(k) + 1;
@@ -537,116 +459,52 @@ badgy-condition-helper:
             const conditionMet = checkAllConditions(bc.condition, hass);
             const showBadge = conditionMet && !(bc.show_if_off === false && hass.states[bc.entity].state === 'off');
             if (showBadge) {
-              currentEntityBadges.add(sbNum);
+              current.add(sbNum);
               let dispVal;
               const stObj = hass.states[bc.entity];
-              if (bc.attribute && stObj.attributes[bc.attribute] !== undefined) {
-                dispVal = stObj.attributes[bc.attribute];
-              } else {
-                dispVal = stObj.state;
-              }
-              if (bc.decimals !== undefined && !isNaN(parseFloat(dispVal))) {
-                dispVal = parseFloat(dispVal).toFixed(parseInt(bc.decimals));
-              }
-              if (bc.show_unit !== false && stObj.attributes.unit_of_measurement) {
-                dispVal += stObj.attributes.unit_of_measurement;
-              }
+              if (bc.attribute && stObj.attributes[bc.attribute] !== undefined) dispVal = stObj.attributes[bc.attribute];
+              else dispVal = stObj.state;
+              if (bc.decimals !== undefined && !isNaN(parseFloat(dispVal))) dispVal = parseFloat(dispVal).toFixed(parseInt(bc.decimals));
+              if (bc.show_unit !== false && stObj.attributes.unit_of_measurement) dispVal += stObj.attributes.unit_of_measurement;
               createBadge({
-                subButtonNumber: sbNum,
-                content: dispVal,
-                badgeColor: bc.color,
-                textColor: bc.text_color,
-                hPos: bc.h_pos ?? -8,
-                vPos: bc.v_pos ?? -8,
-                scale: bc.scale ?? 1,
-                showBackground: bc.show_background !== false,
-                badgeType: 'entity-badge'
+                subButtonNumber: sbNum, content: dispVal, badgeColor: bc.color, textColor: bc.text_color,
+                hPos: bc.h_pos ?? -8, vPos: bc.v_pos ?? -8, scale: bc.scale ?? 1,
+                showBackground: bc.show_background !== false, badgeType: 'entity-badge'
               });
             }
           }
           for (let i = 1; i <= 10; i++) {
-            if (!currentEntityBadges.has(i)) {
+            if (!current.has(i)) {
               const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
-              if (sb) {
-                const badge = sb.querySelector('.entity-badge');
-                if (badge) sb.removeChild(badge);
-              }
+              if (sb) { const b = sb.querySelector('.entity-badge'); if (b) sb.removeChild(b); }
             }
           }
         }
 
-        // ========== PROCESS: Icon Badges ==========
-        function processIconBadges(){
+        function processIconBadges() {
           const iBadges = config.icon_badges || {};
-          const currentIconBadges = new Set();
+          const current = new Set();
           for (const [k, bc] of Object.entries(iBadges)) {
             if (!bc?.icon) continue;
             const sbNum = parseInt(k) + 1;
-            const conditionMet = checkAllConditions(bc.condition, hass);
-            if (conditionMet) {
-              currentIconBadges.add(sbNum);
+            if (checkAllConditions(bc.condition, hass)) {
+              current.add(sbNum);
               createBadge({
-                subButtonNumber: sbNum,
-                icon: bc.icon,
-                badgeColor: bc.color,
-                textColor: bc.text_color,
-                hPos: bc.h_pos ?? -8,
-                vPos: bc.v_pos ?? -8,
-                scale: bc.scale ?? 1,
-                showBackground: bc.show_background !== false,
-                badgeType: 'icon-badge'
+                subButtonNumber: sbNum, icon: bc.icon, badgeColor: bc.color, textColor: bc.text_color,
+                hPos: bc.h_pos ?? -8, vPos: bc.v_pos ?? -8, scale: bc.scale ?? 1,
+                showBackground: bc.show_background !== false, badgeType: 'icon-badge'
               });
             }
           }
           for (let i = 1; i <= 10; i++) {
-            if (!currentIconBadges.has(i)) {
+            if (!current.has(i)) {
               const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
-              if (sb) {
-                const badge = sb.querySelector('.icon-badge');
-                if (badge) sb.removeChild(badge);
-              }
+              if (sb) { const b = sb.querySelector('.icon-badge'); if (b) sb.removeChild(b); }
             }
           }
         }
 
-        // ========== HELPER: createBadge ==========
-        function createBadge({subButtonNumber, content, icon, badgeColor, textColor, hPos, vPos, scale, showBackground, badgeType}) {
-          const sb = cardEl.querySelector(`.bubble-sub-button-${subButtonNumber}`);
-          if (!sb) return;
-          if (getComputedStyle(sb).position === 'static') {
-            sb.style.position = 'relative';
-          }
-          const old = sb.querySelector(`.${badgeType}`);
-          if (old) sb.removeChild(old);
-          const badge = document.createElement('div');
-          badge.className = `bubble-sub-button-badge ${badgeType} ` + (showBackground ? '' : 'without-background');
-          if (scale !== 1) {
-            badge.style.setProperty('--badge-scale', scale);
-          }
-          if (badgeType === 'entity-badge') {
-            badge.style.top = `${vPos}px`;
-            badge.style.right = `${hPos}px`;
-          } else {
-            badge.style.top = `${vPos}px`;
-            badge.style.left = `${hPos}px`;
-          }
-          badge.dataset.hPos = hPos;
-          badge.dataset.vPos = vPos;
-          if (badgeColor) badge.style.setProperty('--badge-color', processColor(badgeColor));
-          if (textColor) badge.style.color = processColor(textColor);
-          if (icon) {
-            const ic = document.createElement('ha-icon');
-            ic.setAttribute('icon', icon);
-            ic.className = 'badge-icon';
-            badge.appendChild(ic);
-          } else if (content) {
-            badge.textContent = content;
-          }
-          sb.appendChild(badge);
-        }
-
-        // ========== PROCESS: Sub-Button Backgrounds ==========
-        function processSubButtonBackgrounds(){
+        function processSubButtonBackgrounds() {
           const sbBg = config.sub_buttons_background || {};
           for (let i = 1; i <= 10; i++) {
             const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
@@ -658,176 +516,109 @@ badgy-condition-helper:
           for (const [k, bgC] of Object.entries(sbBg)) {
             if (!bgC) continue;
             const sbN = parseInt(k) + 1;
-            const conditionMet = checkAllConditions(bgC.condition, hass);
-            if (conditionMet) {
-              const type = bgC.type ?? 'solid';
-              const op = (bgC.opacity !== undefined) ? bgC.opacity : 1.0;
-              let colorStr = '';
-              if (type === 'solid') {
-                if (bgC.color) {
-                  colorStr = processColor(bgC.color);
-                } else {
-                  continue;
-                }
-              }
-              else if (type === 'two-color') {
-                const c1 = processColor(bgC.color1 || '#ff0000');
-                const c2 = processColor(bgC.color2 || '#0000ff');
-                colorStr = `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`;
-              }
-              else if (type === 'three-color') {
-                const c1 = processColor(bgC.color1 || '#ff0000');
-                const c2 = processColor(bgC.color2 || '#00ff00');
-                const c3 = processColor(bgC.color3 || '#0000ff');
-                colorStr = `linear-gradient(135deg, ${c1} 0%, ${c2} 50%, ${c3} 100%)`;
-              }
-              applySubButtonBg(sbN, colorStr, op);
+            if (!checkAllConditions(bgC.condition, hass)) continue;
+            const type = bgC.type ?? 'solid';
+            const op = (bgC.opacity !== undefined) ? bgC.opacity : 1.0;
+            let colorStr = '';
+            if (type === 'solid') {
+              const c = processColor(bgC.color);
+              if (!c) continue;
+              colorStr = c;
+            } else if (type === 'two-color') {
+              colorStr = `linear-gradient(135deg, ${processColor(bgC.color1 || '#ff0000')} 0%, ${processColor(bgC.color2 || '#0000ff')} 100%)`;
+            } else if (type === 'three-color') {
+              colorStr = `linear-gradient(135deg, ${processColor(bgC.color1 || '#ff0000')} 0%, ${processColor(bgC.color2 || '#00ff00')} 50%, ${processColor(bgC.color3 || '#0000ff')} 100%)`;
             }
+            const sb = cardEl.querySelector(`.bubble-sub-button-${sbN}`);
+            if (!sb) continue;
+            sb.classList.add('sub-button-direct-bg');
+            sb.style.setProperty('background', colorStr, 'important');
+            sb.style.setProperty('opacity', op, 'important');
           }
         }
 
-        function applySubButtonBg(subButtonNum, bgValue, opacity) {
-          const sb = cardEl.querySelector(`.bubble-sub-button-${subButtonNum}`);
-          if (!sb) return;
-          sb.classList.add('sub-button-direct-bg');
-          sb.style.setProperty('background', bgValue, 'important');
-          sb.style.setProperty('opacity', opacity, 'important');
-        }
-
-        // ========== PROCESS: Icon Effects (for Main Icon and Sub-Button Icons) ==========
-        function processIconEffects(){
+        function processIconEffects() {
           const iE = config.icon_effects || {};
           const mCfg = iE.main_icon || {};
           const mainIconEl = cardEl.querySelector('.bubble-icon');
           if (mainIconEl) {
-            mainIconEl.classList.remove(
-              'effect-pulse','effect-rotate','effect-glow','effect-shake',
-              'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
-              'effect-flip','effect-vibrate','has-effect'
-            );
-            mainIconEl.style.removeProperty('--effect-color');
-            const conditionMet = checkAllConditions(mCfg.condition, hass);
-            if (conditionMet && mCfg.effect) {
-              mainIconEl.classList.add(`effect-${mCfg.effect}`, 'has-effect');
-              if (mCfg.color) {
-                mainIconEl.style.setProperty('--effect-color', processColor(mCfg.color));
-              }
-            }
+            const met = checkAllConditions(mCfg.condition, hass);
+            setEffect(mainIconEl, (met && mCfg.effect) ? mCfg.effect : null, mCfg.color);
           }
-          // Neu: Sub-Button ICON Effekte – über Schleife von 0 bis 9
           for (let i = 0; i < 10; i++) {
+            const el = cardEl.querySelector(`.bubble-sub-button-${i+1} .bubble-sub-button-icon`);
+            if (!el) continue;
             const eC = iE.sub_button_icon && iE.sub_button_icon[i.toString()];
-            if (eC && eC.effect) {
-              const conditionMet = checkAllConditions(eC.condition, hass);
-              if (conditionMet) {
-                const el = cardEl.querySelector(`.bubble-sub-button-${i+1} .bubble-sub-button-icon`);
-                if (el) {
-                  el.classList.add(`effect-${eC.effect}`, 'has-effect');
-                  if (eC.color) {
-                    el.style.setProperty('--effect-color', processColor(eC.color));
-                  }
-                }
-              }
-            }
+            const met = eC && eC.effect && checkAllConditions(eC.condition, hass);
+            setEffect(el, met ? eC.effect : null, eC && eC.color);
           }
         }
 
-        // ========== PROCESS: Sub-Button Effects (on the container) ==========
-        function processSubButtonEffects(){
+        function processSubButtonEffects() {
           const sBE = config.sub_button_effects || {};
-          for (let i = 0; i < 10; i++){
+          for (let i = 0; i < 10; i++) {
+            const sb = cardEl.querySelector(`.bubble-sub-button-${i+1}`);
+            if (!sb) continue;
             const eff = sBE && sBE[i.toString()];
-            if (eff && eff.effect) {
-              const conditionMet = checkAllConditions(eff.condition, hass);
-              if (conditionMet) {
-                const sb = cardEl.querySelector(`.bubble-sub-button-${i+1}`);
-                if (sb) {
-                  sb.classList.add(`effect-${eff.effect}`, 'has-effect');
-                  if (eff.color) {
-                    sb.style.setProperty('--effect-color', processColor(eff.color));
-                  }
-                }
-              }
-            }
+            const met = eff && eff.effect && checkAllConditions(eff.condition, hass);
+            setEffect(sb, met ? eff.effect : null, eff && eff.color);
           }
         }
 
-        // ========== PROCESS: Entity-Badge Effects ==========
-        function processEntityBadgeEffects(){
+        function processEntityBadgeEffects() {
           const eBE = config.entity_badge_effects || {};
-          const allEntBadges = cardEl.querySelectorAll('.bubble-sub-button-badge.entity-badge');
-          allEntBadges.forEach(b => {
-            b.classList.remove(
-              'effect-pulse','effect-rotate','effect-glow','effect-shake',
-              'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
-              'effect-flip','effect-vibrate','has-effect'
-            );
-            b.style.removeProperty('--effect-color');
-          });
-          for (const [k, ef] of Object.entries(eBE)){
+          const matched = new Set();
+          for (const [k, ef] of Object.entries(eBE)) {
             if (!ef?.effect) continue;
             const sbN = parseInt(k) + 1;
-            const conditionMet = checkAllConditions(ef.condition, hass);
-            if (conditionMet) {
-              const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .entity-badge`);
-              if (!badge) continue;
-              badge.classList.add(`effect-${ef.effect}`, 'has-effect');
-              if (ef.color) {
-                badge.style.setProperty('--effect-color', processColor(ef.color));
-              }
-            }
+            const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .entity-badge`);
+            if (!badge) continue;
+            const met = checkAllConditions(ef.condition, hass);
+            setEffect(badge, met ? ef.effect : null, ef.color);
+            if (met) matched.add(badge);
           }
+          cardEl.querySelectorAll('.bubble-sub-button-badge.entity-badge').forEach(b => {
+            if (!matched.has(b)) setEffect(b, null, null);
+          });
         }
 
-        // ========== PROCESS: Icon-Badge Effects ==========
-        function processIconBadgeEffects(){
+        function processIconBadgeEffects() {
           const iBE = config.icon_badge_effects || {};
-          const allIconBadges = cardEl.querySelectorAll('.bubble-sub-button-badge.icon-badge');
-          allIconBadges.forEach(b => {
-            b.classList.remove(
-              'effect-pulse','effect-rotate','effect-glow','effect-shake',
-              'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
-              'effect-flip','effect-vibrate','has-effect'
-            );
-            b.style.removeProperty('--effect-color');
-          });
-          for (const [k, ef] of Object.entries(iBE)){
+          const matched = new Set();
+          for (const [k, ef] of Object.entries(iBE)) {
             if (!ef?.effect) continue;
             const sbN = parseInt(k) + 1;
-            const conditionMet = checkAllConditions(ef.condition, hass);
-            if (conditionMet) {
-              const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .icon-badge`);
-              if (!badge) continue;
-              badge.classList.add(`effect-${ef.effect}`, 'has-effect');
-              if (ef.color) {
-                badge.style.setProperty('--effect-color', processColor(ef.color));
-              }
-            }
+            const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .icon-badge`);
+            if (!badge) continue;
+            const met = checkAllConditions(ef.condition, hass);
+            setEffect(badge, met ? ef.effect : null, ef.color);
+            if (met) matched.add(badge);
           }
+          cardEl.querySelectorAll('.bubble-sub-button-badge.icon-badge').forEach(b => {
+            if (!matched.has(b)) setEffect(b, null, null);
+          });
         }
 
-        // ========== PROCESS: Main Icon Background ==========
-        function processMainIconBackground(){
+        function processMainIconBackground() {
           const mBg = config.main_icon_background || {};
           const mainCont = cardEl.querySelector('.bubble-icon-container');
           if (!mainCont) return;
           mainCont.style.removeProperty('background');
           mainCont.style.removeProperty('opacity');
-          const conditionMet = checkAllConditions(mBg.condition, hass);
-          if (conditionMet && mBg.color) {
+          if (checkAllConditions(mBg.condition, hass) && mBg.color) {
             const op = (mBg.opacity !== undefined) ? mBg.opacity : 1.0;
             const cProc = processColor(mBg.color);
-            mainCont.style.setProperty('background', cProc, 'important');
-            mainCont.style.setProperty('opacity', op, 'important');
+            if (cProc) {
+              mainCont.style.setProperty('background', cProc, 'important');
+              mainCont.style.setProperty('opacity', op, 'important');
+            }
           }
         }
 
-        // ===== Start: State tracking, Listener, and Initial Pass =====
-        trackedEntities.clear();
-        collectAllTrackedEntities.call(this).forEach(e => trackedEntities.add(e));
-        if (DEBUG) console.log('[badgy-helper] Entities tracked:', [...trackedEntities]);
-        setupStateChangeListener.call(this);
-
+        // The module code is re-evaluated by Bubble Card on every hass update,
+        // so a single pass here is enough to keep everything in sync. No manual
+        // state_changed subscription is needed (and the previous one relied on a
+        // non-functional hass.connection.addEventListener('state_changed')).
         processEntityBadges();
         processIconBadges();
         processSubButtonBackgrounds();
@@ -923,7 +714,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 2"
           name: "1"
@@ -998,7 +788,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 3"
           name: "2"
@@ -1073,7 +862,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 4"
           name: "3"
@@ -1148,7 +936,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 5"
           name: "4"
@@ -1223,7 +1010,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 6"
           name: "5"
@@ -1357,7 +1143,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 2"
           name: "1"
@@ -1410,7 +1195,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 3"
           name: "2"
@@ -1463,7 +1247,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 4"
           name: "3"
@@ -1516,7 +1299,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 5"
           name: "4"
@@ -1569,7 +1351,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 6"
           name: "5"
@@ -1698,7 +1479,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 2"
           name: "1"
@@ -1744,7 +1524,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 3"
           name: "2"
@@ -1790,7 +1569,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 4"
           name: "3"
@@ -1836,7 +1614,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 5"
           name: "4"
@@ -1882,7 +1659,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 6"
           name: "5"
@@ -1972,7 +1748,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 2"
           name: "1"
@@ -2010,7 +1785,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 3"
           name: "2"
@@ -2048,7 +1822,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 4"
           name: "3"
@@ -2086,7 +1859,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 5"
           name: "4"
@@ -2124,7 +1896,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 6"
           name: "5"
@@ -2206,7 +1977,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 2"
           name: "1"
@@ -2244,7 +2014,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 3"
           name: "2"
@@ -2282,7 +2051,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 4"
           name: "3"
@@ -2320,7 +2088,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 5"
           name: "4"
@@ -2358,7 +2125,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 6"
           name: "5"
@@ -2440,7 +2206,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button Icon Effects"
           name: sub_button_icon
@@ -2482,7 +2247,6 @@ badgy-condition-helper:
                   label: "Condition (optional)"
                   selector:
                     condition: {}
-
             - type: expandable
               title: "Sub-Button Icon 2"
               name: "1"
@@ -2520,7 +2284,6 @@ badgy-condition-helper:
                   label: "Condition (optional)"
                   selector:
                     condition: {}
-
             - type: expandable
               title: "Sub-Button Icon 3"
               name: "2"
@@ -2558,7 +2321,6 @@ badgy-condition-helper:
                   label: "Condition (optional)"
                   selector:
                     condition: {}
-
             - type: expandable
               title: "Sub-Button Icon 4"
               name: "3"
@@ -2596,7 +2358,6 @@ badgy-condition-helper:
                   label: "Condition (optional)"
                   selector:
                     condition: {}
-
             - type: expandable
               title: "Sub-Button Icon 5"
               name: "4"
@@ -2634,7 +2395,6 @@ badgy-condition-helper:
                   label: "Condition (optional)"
                   selector:
                     condition: {}
-
             - type: expandable
               title: "Sub-Button Icon 6"
               name: "5"
@@ -2716,7 +2476,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 2"
           name: "1"
@@ -2754,7 +2513,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 3"
           name: "2"
@@ -2792,7 +2550,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 4"
           name: "3"
@@ -2830,7 +2587,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 5"
           name: "4"
@@ -2868,7 +2624,6 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
-
         - type: expandable
           title: "Sub-Button 6"
           name: "5"
@@ -2906,6 +2661,7 @@ badgy-condition-helper:
               label: "Condition (optional)"
               selector:
                 condition: {}
+
 ```
 
 </details>
