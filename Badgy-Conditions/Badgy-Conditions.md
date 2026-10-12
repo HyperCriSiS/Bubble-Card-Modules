@@ -388,7 +388,7 @@ badgy-condition-helper:
         // (global) Home Assistant state update.
         function setEffect(el, effect, color) {
           if (!el) return;
-          const desired = effect ? `effect-${effect}` : null;
+          const desired = effect && effect !== "none" ? `effect-${effect}` : null;
           for (const c of ALL_EFFECT_CLASSES) {
             if (c !== desired && el.classList.contains(c)) el.classList.remove(c);
           }
@@ -481,6 +481,17 @@ badgy-condition-helper:
 
         function resolvedColor(cfg, name = "color") {
           const raw = cfg?.[name];
+          const template = cfg?.[name + "_template"];
+          if (typeof template === "string" && template.trim() &&
+              typeof renderTemplate === "function") {
+            try {
+              const evaluated = renderTemplate(template);
+              if (typeof evaluated === "string") {
+                const color = evaluated.trim();
+                if (typeof CSS !== "undefined" && CSS.supports?.("color", color)) return color;
+              }
+            } catch (err) { /* optional template fallback */ }
+          }
           const entity = cfg?.[name + "_entity"];
           const attribute = cfg?.[name + "_attribute"];
           const st = entity && hass.states?.[entity];
@@ -1047,6 +1058,10 @@ badgy-condition-helper:
           icon: "mdi:format-color-fill"
           name: main_icon_background
           schema:
+            - name: color_template
+              label: "Color template (e.g. Jinja {{ state_attr(...) }})"
+              selector:
+                text: {}
             - name: color_entity
               label: "Color entity (dynamic)"
               selector:
@@ -1143,6 +1158,10 @@ badgy-condition-helper:
                           value: "two-color"
                         - label: "Three-Color Gradient"
                           value: "three-color"
+                - name: color_template
+                  label: "Color template (e.g. Jinja {{ state_attr(...) }})"
+                  selector:
+                    text: {}
                 - name: color_entity
                   label: "Color entity (dynamic)"
                   selector:
@@ -1245,6 +1264,10 @@ badgy-condition-helper:
                           value: "two-color"
                         - label: "Three-Color Gradient"
                           value: "three-color"
+                - name: color_template
+                  label: "Color template (e.g. Jinja {{ state_attr(...) }})"
+                  selector:
+                    text: {}
                 - name: color_entity
                   label: "Color entity (dynamic)"
                   selector:
@@ -1347,6 +1370,10 @@ badgy-condition-helper:
                           value: "two-color"
                         - label: "Three-Color Gradient"
                           value: "three-color"
+                - name: color_template
+                  label: "Color template (e.g. Jinja {{ state_attr(...) }})"
+                  selector:
+                    text: {}
                 - name: color_entity
                   label: "Color entity (dynamic)"
                   selector:
@@ -1449,6 +1476,10 @@ badgy-condition-helper:
                           value: "two-color"
                         - label: "Three-Color Gradient"
                           value: "three-color"
+                - name: color_template
+                  label: "Color template (e.g. Jinja {{ state_attr(...) }})"
+                  selector:
+                    text: {}
                 - name: color_entity
                   label: "Color entity (dynamic)"
                   selector:
@@ -1551,6 +1582,10 @@ badgy-condition-helper:
                           value: "two-color"
                         - label: "Three-Color Gradient"
                           value: "three-color"
+                - name: color_template
+                  label: "Color template (e.g. Jinja {{ state_attr(...) }})"
+                  selector:
+                    text: {}
                 - name: color_entity
                   label: "Color entity (dynamic)"
                   selector:
@@ -1653,6 +1688,10 @@ badgy-condition-helper:
                           value: "two-color"
                         - label: "Three-Color Gradient"
                           value: "three-color"
+                - name: color_template
+                  label: "Color template (e.g. Jinja {{ state_attr(...) }})"
+                  selector:
+                    text: {}
                 - name: color_entity
                   label: "Color entity (dynamic)"
                   selector:
@@ -2028,7 +2067,6 @@ badgy-condition-helper:
                 text: {}
             - name: translated_state
               label: "Translate the entity state (e.g. Open/Closed)"
-              default: true
               selector:
                 boolean: {}
             - name: color
@@ -2112,7 +2150,6 @@ badgy-condition-helper:
                 text: {}
             - name: translated_state
               label: "Translate state (default for binary sensors)"
-              default: true
               selector:
                 boolean: {}
             - name: color
@@ -2195,7 +2232,6 @@ badgy-condition-helper:
                 text: {}
             - name: translated_state
               label: "Translate state (default for binary sensors)"
-              default: true
               selector:
                 boolean: {}
             - name: color
@@ -2278,7 +2314,6 @@ badgy-condition-helper:
                 text: {}
             - name: translated_state
               label: "Translate state (default for binary sensors)"
-              default: true
               selector:
                 boolean: {}
             - name: color
@@ -2361,7 +2396,6 @@ badgy-condition-helper:
                 text: {}
             - name: translated_state
               label: "Translate state (default for binary sensors)"
-              default: true
               selector:
                 boolean: {}
             - name: color
@@ -2444,7 +2478,6 @@ badgy-condition-helper:
                 text: {}
             - name: translated_state
               label: "Translate state (default for binary sensors)"
-              default: true
               selector:
                 boolean: {}
             - name: color
@@ -2527,7 +2560,6 @@ badgy-condition-helper:
                 text: {}
             - name: translated_state
               label: "Translate state (default for binary sensors)"
-              default: true
               selector:
                 boolean: {}
             - name: color
