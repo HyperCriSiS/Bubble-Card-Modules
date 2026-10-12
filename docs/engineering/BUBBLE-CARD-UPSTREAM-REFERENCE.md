@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This repository maintains a searchable, read-only mirror of the technical Bubble Card
-sources relevant to our Home Assistant modules. It does not modify any module code
-or inject upstream JavaScript into a build or test pipeline.
+This repository automatically maintains a searchable, read-only mirror of the technical
+Bubble Card sources relevant to our Home Assistant modules. It does not modify any
+module code or inject upstream JavaScript into a build or test pipeline.
 
 Original source: https://github.com/Clooos/Bubble-Card
 
@@ -28,10 +28,10 @@ Each mirrored byte is compared with the Git blob SHA from the upstream tree.
 
 Each channel has its own manifest.json with source_commit_sha and SHA for every file.
 The main snapshot changes only when relevant selected sources change. Unrelated upstream
-commits do not cause PR churn. CHANNEL-DIFF.md lists differences between these channels.
-UPDATES.md records reference refreshes.
+commits do not cause extra commits. CHANNEL-DIFF.md lists differences between these
+channels. UPDATES.md records reference refreshes.
 
-## Local commands
+## Local commands (optional)
 
     python3 -m unittest discover -s tests -p 'test_bubble_card_reference.py' -v
     python3 scripts/sync_bubble_card_reference.py --dry-run
@@ -45,27 +45,35 @@ If upstream changes are incompatible, a source is missing, the tree is truncated
 a download fails or a hash is wrong, synchronization fails without replacing
 the existing reference directory.
 
-## Automation
+## Fully automatic synchronization
 
 GitHub Action: .github/workflows/sync-bubble-card-reference.yml
 
-- Every day at 03:17 UTC, plus manual workflow_dispatch
-- Test synchronizer, fetch stable and main, verify all files
-- Create/update a reviewable pull request on automation/bubble-card-upstream
-- Only docs/upstream/bubble-card changes get committed
-- No automatic merge and no automatic changes to Badgy-Conditions
-- A read-only pull request CI workflow validates the tooling
+- Runs daily at **03:17 UTC**, and supports an optional manual workflow_dispatch.
+- Fetches both upstream channels, tests the synchronizer and verifies every file.
+- Automatically commits **only** changed files beneath docs/upstream/bubble-card/
+  directly to the main branch. No pull request, approval or manual merge required.
+- If no relevant source changed, produces no commit.
+- Uses a GitHub-provided token with contents:write; no custom PAT required.
+- Never edits Badgy-Conditions or other executable module files.
+- Push is fast-forward only; if main changes concurrently, the job fails safely
+  rather than overwriting changes (the next scheduled run can retry).
+- Failures are visible in GitHub Actions. They do not replace a good reference
+  with an incomplete or unverified download.
 
-Required GitHub repository setting: Settings / Actions / General /
-Workflow permissions / Allow GitHub Actions to create and approve pull requests.
-The sync job has explicit contents:write and pull-requests:write permissions.
+Only changes to the synchronization **implementation** are proposed and reviewed
+via pull requests using the separate read-only CI workflow.
+GitHub Actions commits made with GITHUB_TOKEN do not normally trigger other
+workflows, so this sync job runs its checks and verifies all snapshot hashes
+before committing.
 
-## Review procedure
+## Where to find the sources
 
-1. Read the new channel manifests, official module specification and channel diff.
-2. Check changes in module parser/editor and sub-button DOM/CSS.
-3. Assess compatibility risks to existing module configuration values.
-4. Merge the upstream-reference PR only after review.
+- docs/upstream/bubble-card/README.md: reference index
+- docs/upstream/bubble-card/stable/: newest stable Bubble Card release
+- docs/upstream/bubble-card/main/: newest relevant upstream main files
+- docs/upstream/bubble-card/CHANNEL-DIFF.md: stable/main comparison
+- docs/upstream/bubble-card/UPDATES.md: update history
 
-The mirrored upstream code is untrusted reference material and must not be run
-by the workflow.
+All mirrored source files are untrusted reference material and must not be
+executed by the workflow.
