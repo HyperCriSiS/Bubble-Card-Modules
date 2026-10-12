@@ -850,194 +850,194 @@ badgy-condition-helper:
               title: "Sub-Button 1"
               name: "0"
               schema:
-            - name: color
-              label: "Icon color"
-              selector:
-                ui_color:
-                  include_none: true
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional colors (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: "Icon color"
-                      selector:
-                        ui_color: {}
+                - name: color
+                  label: "Icon color"
+                  selector:
+                    ui_color:
+                      include_none: true
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional colors (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        color:
+                          label: "Icon color"
+                          selector:
+                            ui_color: {}
             - type: expandable
               title: "Sub-Button 2"
               name: "1"
               schema:
-            - name: color
-              label: "Icon color"
-              selector:
-                ui_color:
-                  include_none: true
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional colors (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: "Icon color"
-                      selector:
-                        ui_color: {}
+                - name: color
+                  label: "Icon color"
+                  selector:
+                    ui_color:
+                      include_none: true
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional colors (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        color:
+                          label: "Icon color"
+                          selector:
+                            ui_color: {}
             - type: expandable
               title: "Sub-Button 3"
               name: "2"
               schema:
-            - name: color
-              label: "Icon color"
-              selector:
-                ui_color:
-                  include_none: true
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional colors (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: "Icon color"
-                      selector:
-                        ui_color: {}
+                - name: color
+                  label: "Icon color"
+                  selector:
+                    ui_color:
+                      include_none: true
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional colors (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        color:
+                          label: "Icon color"
+                          selector:
+                            ui_color: {}
             - type: expandable
               title: "Sub-Button 4"
               name: "3"
               schema:
-            - name: color
-              label: "Icon color"
-              selector:
-                ui_color:
-                  include_none: true
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional colors (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: "Icon color"
-                      selector:
-                        ui_color: {}
+                - name: color
+                  label: "Icon color"
+                  selector:
+                    ui_color:
+                      include_none: true
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional colors (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        color:
+                          label: "Icon color"
+                          selector:
+                            ui_color: {}
             - type: expandable
               title: "Sub-Button 5"
               name: "4"
               schema:
-            - name: color
-              label: "Icon color"
-              selector:
-                ui_color:
-                  include_none: true
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional colors (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: "Icon color"
-                      selector:
-                        ui_color: {}
+                - name: color
+                  label: "Icon color"
+                  selector:
+                    ui_color:
+                      include_none: true
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional colors (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        color:
+                          label: "Icon color"
+                          selector:
+                            ui_color: {}
             - type: expandable
               title: "Sub-Button 6"
               name: "5"
               schema:
-            - name: color
-              label: "Icon color"
-              selector:
-                ui_color:
-                  include_none: true
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional colors (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: "Icon color"
-                      selector:
-                        ui_color: {}
+                - name: color
+                  label: "Icon color"
+                  selector:
+                    ui_color:
+                      include_none: true
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional colors (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        color:
+                          label: "Icon color"
+                          selector:
+                            ui_color: {}
     - type: expandable
       title: "Backgrounds"
       icon: "mdi:format-color-fill"
@@ -1823,188 +1823,188 @@ badgy-condition-helper:
               title: "Sub-Button 1"
               name: "0"
               schema:
-            - name: icon
-              label: "Replacement icon"
-              selector:
-                icon: {}
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional icons (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: "Icon"
-                      selector:
-                        icon: {}
+                - name: icon
+                  label: "Replacement icon"
+                  selector:
+                    icon: {}
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional icons (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        icon:
+                          label: "Icon"
+                          selector:
+                            icon: {}
             - type: expandable
               title: "Sub-Button 2"
               name: "1"
               schema:
-            - name: icon
-              label: "Replacement icon"
-              selector:
-                icon: {}
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional icons (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: "Icon"
-                      selector:
-                        icon: {}
+                - name: icon
+                  label: "Replacement icon"
+                  selector:
+                    icon: {}
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional icons (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        icon:
+                          label: "Icon"
+                          selector:
+                            icon: {}
             - type: expandable
               title: "Sub-Button 3"
               name: "2"
               schema:
-            - name: icon
-              label: "Replacement icon"
-              selector:
-                icon: {}
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional icons (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: "Icon"
-                      selector:
-                        icon: {}
+                - name: icon
+                  label: "Replacement icon"
+                  selector:
+                    icon: {}
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional icons (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        icon:
+                          label: "Icon"
+                          selector:
+                            icon: {}
             - type: expandable
               title: "Sub-Button 4"
               name: "3"
               schema:
-            - name: icon
-              label: "Replacement icon"
-              selector:
-                icon: {}
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional icons (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: "Icon"
-                      selector:
-                        icon: {}
+                - name: icon
+                  label: "Replacement icon"
+                  selector:
+                    icon: {}
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional icons (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        icon:
+                          label: "Icon"
+                          selector:
+                            icon: {}
             - type: expandable
               title: "Sub-Button 5"
               name: "4"
               schema:
-            - name: icon
-              label: "Replacement icon"
-              selector:
-                icon: {}
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional icons (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: "Icon"
-                      selector:
-                        icon: {}
+                - name: icon
+                  label: "Replacement icon"
+                  selector:
+                    icon: {}
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional icons (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        icon:
+                          label: "Icon"
+                          selector:
+                            icon: {}
             - type: expandable
               title: "Sub-Button 6"
               name: "5"
               schema:
-            - name: icon
-              label: "Replacement icon"
-              selector:
-                icon: {}
-            - name: condition
-              label: "Condition"
-              selector:
-                condition: {}
-            - name: rules
-              label: "Conditional icons (first match wins)"
-              selector:
-                object:
-                  multiple: true
-                  label_field: label
-                  fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: "Icon"
-                      selector:
-                        icon: {}
+                - name: icon
+                  label: "Replacement icon"
+                  selector:
+                    icon: {}
+                - name: condition
+                  label: "Condition"
+                  selector:
+                    condition: {}
+                - name: rules
+                  label: "Conditional icons (first match wins)"
+                  selector:
+                    object:
+                      multiple: true
+                      label_field: label
+                      fields:
+                        label:
+                          label: Rule name
+                          selector:
+                            text: {}
+                        condition:
+                          label: Condition
+                          selector:
+                            condition: {}
+                        icon:
+                          label: "Icon"
+                          selector:
+                            icon: {}
     - type: expandable
       title: "Entity Badges"
       icon: "mdi:tag-text"
