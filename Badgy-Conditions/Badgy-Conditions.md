@@ -779,8 +779,8 @@ badgy-condition-helper:
 
         function processCardGlow() {
           const effect = chooseRule(config.card_effects);
-          const target = cardEl.querySelector(".bubble-button-card-container") ||
-            cardEl.querySelector("ha-card") || cardEl;
+          const target = cardEl.querySelector("ha-card") ||
+            cardEl.querySelector(".bubble-button-card-container") || cardEl;
           const active = effect?.effect === "glow";
           target.classList.toggle("badgy-card-glow", active);
           target.classList.toggle("badgy-card-glow-pulse", active && effect.animate === true);
@@ -4145,6 +4145,7 @@ badgy-condition-helper:
                     condition: {}
 ```
 
+</details>
 
 ---
 
