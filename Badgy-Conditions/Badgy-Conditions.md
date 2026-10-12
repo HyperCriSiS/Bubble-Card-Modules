@@ -1742,43 +1742,43 @@ badgy-condition-helper:
                     condition: {}
     
         # Entity Badge Effects
-            - type: expandable
-              title: "Card Glow"
-              icon: "mdi:brightness-6"
-              name: card_effects
-              schema:
-                - name: effect
-                  label: "Card effect"
-                  default: "none"
-                  selector:
-                    select:
-                      options:
-                        - label: None
-                          value: none
-                        - label: Glow
-                          value: glow
-                - name: color
-                  label: "Glow color"
-                  selector:
-                    ui_color:
-                      include_none: true
-                - name: intensity
-                  label: "Glow radius in pixels"
-                  default: 14
-                  selector:
-                    number:
-                      min: 2
-                      max: 40
-                      step: 1
-                - name: animate
-                  label: "Pulse glow"
-                  default: false
-                  selector:
-                    boolean: {}
-                - name: condition
-                  label: "Condition"
-                  selector:
-                    condition: {}
+        - type: expandable
+          title: "Card Glow"
+          icon: "mdi:brightness-6"
+          name: card_effects
+          schema:
+            - name: effect
+              label: "Card effect"
+              default: "none"
+              selector:
+                select:
+                  options:
+                    - label: None
+                      value: none
+                    - label: Glow
+                      value: glow
+            - name: color
+              label: "Glow color"
+              selector:
+                ui_color:
+                  include_none: true
+            - name: intensity
+              label: "Glow radius in pixels"
+              default: 14
+              selector:
+                number:
+                  min: 2
+                  max: 40
+                  step: 1
+            - name: animate
+              label: "Pulse glow"
+              default: false
+              selector:
+                boolean: {}
+            - name: condition
+              label: "Condition"
+              selector:
+                condition: {}
     - type: expandable
       title: "Icons"
       icon: "mdi:shape"
