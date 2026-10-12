@@ -174,7 +174,7 @@ visual_styling_center:
               max: 5.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "Ã"
+              unit_of_measurement: "×"
     - type: expandable
       title: "Margin & Spacing Adjustments"
       icon: "mdi:arrow-expand"
@@ -242,7 +242,7 @@ visual_styling_center:
               max: 3.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "Ã"
+              unit_of_measurement: "×"
         - name: icon_background_ratio
           label: "Icon Background Ratio"
           default: 1
@@ -252,7 +252,7 @@ visual_styling_center:
               max: 1.4
               step: 0.05
               mode: slider
-              unit_of_measurement: "Ã"
+              unit_of_measurement: "×"
         - name: subicon_size_multiplier
           label: "Sub-icon Size Multiplier"
           default: 1
@@ -262,7 +262,7 @@ visual_styling_center:
               max: 3.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "Ã"
+              unit_of_measurement: "×"
         - name: subbutton_background_ratio
           label: "Sub-button Background Ratio"
           default: 1
@@ -272,7 +272,7 @@ visual_styling_center:
               max: 1.4
               step: 0.05
               mode: slider
-              unit_of_measurement: "Ã"
+              unit_of_measurement: "×"
     - type: expandable
       title: "Icon Contrast Helper"
       icon: "mdi:contrast-circle"
@@ -318,7 +318,7 @@ visual_styling_center:
               max: 1.5
               step: 0.05
               mode: slider
-              unit_of_measurement: "Ã"
+              unit_of_measurement: "×"
         - name: enable_helper_fade
           label: "Enable Radial Fade Effect"
           default: true
@@ -368,7 +368,7 @@ visual_styling_center:
               max: 4.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "Ã"
+              unit_of_measurement: "×"
         - name: enable_slider_helper_fade
           label: "Enable Radial Fade Effect"
           default: true

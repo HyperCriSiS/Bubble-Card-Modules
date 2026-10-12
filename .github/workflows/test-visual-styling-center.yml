@@ -1,0 +1,24 @@
+name: Test Visual Styling Center
+on:
+  pull_request:
+    paths:
+      - 'Visual-Styling-Center/**'
+      - 'tests/test_visual_styling_center.py'
+      - 'tests/vsc_runtime_test.cjs'
+      - '.github/workflows/test-visual-styling-center.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install PyYAML
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install PyYAML==6.0.3
+      - name: Run YAML and JavaScript regression tests
+        run: .venv/bin/python -m unittest discover -s tests -p 'test_visual_styling_center.py' -v

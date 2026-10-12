@@ -1,0 +1,90 @@
+"use strict";
+const fs = require("node:fs");
+const vm = require("node:vm");
+const assert = require("node:assert/strict");
+const runner = vm.runInNewContext(fs.readFileSync(process.argv[2], "utf8") + "\nrunner;", {});
+function style() {
+  const values = new Map(), priorities = new Map();
+  return {
+    setProperty(k,v,p=""){values.set(k,String(v));priorities.set(k,p)},
+    removeProperty(k){values.delete(k);priorities.delete(k)},
+    getPropertyValue(k){return values.get(k)||""},
+    getPropertyPriority(k){return priorities.get(k)||""}
+  };
+}
+function classes() {
+  const s = new Set();
+  return {
+    add(...k){k.forEach(x=>s.add(x))},remove(...k){k.forEach(x=>s.delete(x))},
+    contains(x){return s.has(x)},toggle(x,on){if(on)s.add(x);else s.delete(x)}
+  };
+}
+function icon(){return {style:style(),dataset:{}}}
+function makeCard(){
+  const main=icon(),sub=[icon(),icon(),icon()];
+  return {main,sub,style:style(),classList:classes(),
+    querySelector(q){
+      if(q===".bubble-icon")return main;
+      const m=q.match(/^\.bubble-sub-button-(\d+) \.bubble-sub-button-icon$/);
+      return m?sub[+m[1]-1]??null:null;
+    },
+    querySelectorAll(){return []}
+  };
+}
+function st(state,rgb){return {state,attributes:rgb?{rgb_color:rgb}:{}}}
+function test(n,fn){try{fn();console.log("PASS",n)}catch(e){console.error("FAIL",n,e);process.exitCode=1}}
+const hass={states:{"light.a":st("on",[100,20,40]),"light.b":st("off")}};
+const ctx={config:{entity:"light.a",sub_button:[{entity:"light.b"}],visual_styling_center:{
+  enable_entity_colored_main_icon:true,enable_entity_colored_subicons:true
+}}};
+const cfg=ctx.config.visual_styling_center,card=makeCard();
+const run=()=>runner.call(ctx,card,hass);
+test("entity state colors update",()=>{
+  run();assert.equal(card.main.style.getPropertyValue("color"),"rgb(100, 20, 40)");
+  assert.equal(card.sub[0].style.getPropertyValue("color"),"rgb(150, 150, 150)");
+  hass.states["light.a"]=st("off");run();
+  assert.equal(card.main.style.getPropertyValue("color"),"rgb(150, 150, 150)");
+});
+test("old inline colors are restored",()=>{
+  cfg.enable_entity_colored_main_icon=false;run();
+  assert.equal(card.main.style.getPropertyValue("color"),"");
+});
+test("zero values are honored",()=>{
+  cfg.enable_icon_helper=true;cfg.helper_color=[1,2,3];cfg.helper_opacity=0;cfg.helper_size_ratio=0;run();
+  assert.equal(card.style.getPropertyValue("--helper-color"),"rgba(1, 2, 3, 0)");
+  assert.equal(card.style.getPropertyValue("--helper-size"),"0");
+});
+test("gradient recalculates without mutating config",()=>{
+  cfg.enable_gradient=true;cfg.gradient_target="background";
+  const before=JSON.stringify(cfg);
+  hass.states["light.a"]=st("on",[10,20,30]);run();
+  assert.equal(JSON.stringify(cfg),before);
+  assert.equal(card.classList.contains("use-gradient-background"),true);
+  hass.states["light.a"]=st("on",[80,90,10]);run();
+  assert.match(card.style.getPropertyValue("--card-gradient"),/80/);
+});
+test("sectioned sub-buttons work",()=>{
+  ctx.config.sub_button={main:[{group:[{entity:"light.a"},{entity:"light.b"}]}],bottom:[{entity:"light.a"}]};
+  run();
+  assert.equal(card.sub[0].style.getPropertyValue("color"),"rgb(80, 90, 10)");
+  assert.equal(card.sub[1].style.getPropertyValue("color"),"rgb(150, 150, 150)");
+  assert.equal(card.sub[2].style.getPropertyValue("color"),"rgb(80, 90, 10)");
+});
+test("function-color reset and native ownership",()=>{
+  cfg.enable_function_button_color=true;cfg.enable_entity_colored_subicons=false;run();
+  assert.equal(card.sub[1].style.getPropertyValue("color"),"rgba(255, 255, 255, 0.9)");
+  cfg.enable_function_button_color=false;run();
+  assert.equal(card.sub[1].style.getPropertyValue("color"),"");
+  cfg.enable_entity_colored_main_icon=true;run();
+  card.main.style.setProperty("color","magenta","important");
+  cfg.enable_entity_colored_main_icon=false;run();
+  assert.equal(card.main.style.getPropertyValue("color"),"magenta");
+});
+test("hide background resets custom styling correctly",()=>{
+  cfg.manual_icon_background_color="#123456";cfg.hide_icon_background=true;run();
+  assert.equal(card.style.getPropertyValue("--icon-background-color"),"transparent");
+  cfg.hide_icon_background=false;run();
+  assert.equal(card.style.getPropertyValue("--icon-background-color"),"#123456");
+  delete cfg.manual_icon_background_color;run();
+  assert.equal(card.style.getPropertyValue("--icon-background-color"),"");
+});
