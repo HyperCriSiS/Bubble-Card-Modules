@@ -1,0 +1,25 @@
+name: Validate Badgy module
+
+on:
+  pull_request:
+    paths:
+      - 'Badgy-Conditions/**'
+      - 'tests/test_badgy_schema.py'
+      - '.github/workflows/test-badgy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  badgy-schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout with main history
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Install schema parser
+        run: python3 -m pip install 'PyYAML==6.0.3'
+      - name: Check YAML, JavaScript and configuration compatibility
+        run: python3 tests/test_badgy_schema.py
