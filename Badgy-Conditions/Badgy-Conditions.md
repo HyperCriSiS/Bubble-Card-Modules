@@ -3469,15 +3469,6 @@ badgy-condition-helper:
                   selector:
                     condition: {}
     
-    ```
-    
-    </details>
-    
-    ---
-    
-    ### Screenshots:
-    ![Options](https://github.com/user-attachments/assets/05af8dac-5a6b-4c0d-8edc-5572ff2836e2)
-    ![Badgy_sample](https://github.com/user-attachments/assets/8983ea13-0adb-4e94-ac95-d465ef2c94f4)
         - type: expandable
           title: "Entity Badge Effects"
           icon: "mdi:tag-text"
@@ -4121,3 +4112,10 @@ badgy-condition-helper:
                   selector:
                     condition: {}
 ```
+
+
+---
+
+### Screenshots:
+![Options](https://github.com/user-attachments/assets/05af8dac-5a6b-4c0d-8edc-5572ff2836e2)
+![Badgy_sample](https://github.com/user-attachments/assets/8983ea13-0adb-4e94-ac95-d465ef2c94f4)
