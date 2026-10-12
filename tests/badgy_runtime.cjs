@@ -92,6 +92,10 @@ mainIcon.setAttribute("icon", "mdi:home");
 const sub = cardContainer.appendChild(new El("div", "bubble-sub-button-1"));
 const subIcon = sub.appendChild(new El("ha-icon", "bubble-sub-button-icon"));
 subIcon.setAttribute("icon", "mdi:fan");
+const groupedContainer = cardContainer.appendChild(new El("div", "bubble-sub-button-group"));
+const groupedSub = groupedContainer.appendChild(new El("div", "bubble-sub-button-2"));
+const groupedIcon = groupedSub.appendChild(new El("ha-icon", "bubble-sub-button-icon"));
+groupedIcon.setAttribute("icon", "mdi:fan");
 
 const state = (id, value, attributes = {}) => ({entity_id: id, state: value, attributes});
 const hass = {
@@ -105,9 +109,9 @@ const hass = {
 };
 const check = {condition: "state", entity_id: "sensor.flag", state: "on"};
 const cfg = {
-  entity_badges: { "0": {entity: "sensor.power", scale: 1.7}, main: {entity: "binary_sensor.window", scale: 1.3} },
+  entity_badges: { "0": {entity: "sensor.power", scale: 1.7}, "1": {entity: "sensor.power"}, main: {entity: "binary_sensor.window", scale: 1.3} },
   icon_badges: { main: {icon: "mdi:alert"} },
-  icon_effects: {sub_button_icon: {"0": {effect: "spin-360", condition: check}}},
+  icon_effects: {sub_button_icon: {"0": {effect: "spin-360", condition: check}, "1": {effect: "rotate", condition: check}}},
   sub_button_effects: {"0": {effect: "pulse", condition: check}},
   entity_badge_effects: {"0": {effect: "spin-360"}},
   sub_buttons_background: {
@@ -144,6 +148,8 @@ assert.equal(subBadge.textContent, "25W");
 assert.equal(subBadge.style.getPropertyValue("--badge-scale"), "1.7");
 assert.equal(mainBadge.style.getPropertyValue("--badge-scale"), "1.3");
 assert.ok(main.querySelector(".icon-badge"), "main icon icon-badge rendered");
+assert.ok(groupedSub.querySelector(".entity-badge"), "badge works on grouped sub-button");
+assert.ok(groupedIcon.classList.contains("effect-rotate"), "grouped sub-button icon effect works");
 assert.ok(subIcon.classList.contains("effect-spin-360"));
 assert.ok(sub.classList.contains("effect-pulse"));
 assert.ok(cardContainer.classList.contains("badgy-card-glow"));
@@ -162,6 +168,7 @@ hass.states["binary_sensor.window"].state = "off";
 run();
 assert.equal(mainBadge.textContent, "Closed", "binary sensor state updates in place");
 assert.ok(!subIcon.classList.contains("effect-spin-360"), "icon effect stops on false");
+assert.ok(!groupedIcon.classList.contains("effect-rotate"), "grouped icon effect stops on false");
 assert.ok(!sub.classList.contains("effect-pulse"), "container effect stops on false");
 assert.ok(!cardContainer.classList.contains("badgy-card-glow"), "card glow stops on false");
 assert.equal(mainIcon.getAttribute("icon"), "mdi:home", "original icon restored on false");
