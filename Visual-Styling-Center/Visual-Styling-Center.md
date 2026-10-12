@@ -139,7 +139,7 @@ visual_styling_center:
 
 <details>
 
-<summary><b>🧩 Get this Module</b></summary>
+<summary><b>Ã°Å¸Â§Â© Get this Module</b></summary>
 
 <br>
 
@@ -174,7 +174,7 @@ visual_styling_center:
               max: 5.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "�"
+              unit_of_measurement: "Ã"
     - type: expandable
       title: "Margin & Spacing Adjustments"
       icon: "mdi:arrow-expand"
@@ -242,7 +242,7 @@ visual_styling_center:
               max: 3.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "�"
+              unit_of_measurement: "Ã"
         - name: icon_background_ratio
           label: "Icon Background Ratio"
           default: 1
@@ -252,7 +252,7 @@ visual_styling_center:
               max: 1.4
               step: 0.05
               mode: slider
-              unit_of_measurement: "�"
+              unit_of_measurement: "Ã"
         - name: subicon_size_multiplier
           label: "Sub-icon Size Multiplier"
           default: 1
@@ -262,7 +262,7 @@ visual_styling_center:
               max: 3.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "�"
+              unit_of_measurement: "Ã"
         - name: subbutton_background_ratio
           label: "Sub-button Background Ratio"
           default: 1
@@ -272,7 +272,7 @@ visual_styling_center:
               max: 1.4
               step: 0.05
               mode: slider
-              unit_of_measurement: "�"
+              unit_of_measurement: "Ã"
     - type: expandable
       title: "Icon Contrast Helper"
       icon: "mdi:contrast-circle"
@@ -318,7 +318,7 @@ visual_styling_center:
               max: 1.5
               step: 0.05
               mode: slider
-              unit_of_measurement: "�"
+              unit_of_measurement: "Ã"
         - name: enable_helper_fade
           label: "Enable Radial Fade Effect"
           default: true
@@ -368,7 +368,7 @@ visual_styling_center:
               max: 4.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "�"
+              unit_of_measurement: "Ã"
         - name: enable_slider_helper_fade
           label: "Enable Radial Fade Effect"
           default: true
@@ -969,24 +969,8 @@ visual_styling_center:
         }
       }
 
-      // We use a more gentle approach for slider updates
-      // Only watch for HA state changes to avoid interfering with user interactions
-      if (this.config.entity && this.config.entity.startsWith('light.')) {
-        // Create our own one-time state update without interfering with the standard slider behavior
-        const updateInitialSliderState = () => {
-          const entityState = hass.states[this.config.entity];
-          if (entityState && entityState.state === 'on' && entityState.attributes.brightness) {
-            // Skip updating for now - standard HA mechanisms will handle this
-            // This prevents any interference with the native slider behavior
-          }
-        };
-
-        // Initial update is optional and only happens once
-        if (!this._hasInitialSliderUpdate) {
-          updateInitialSliderState();
-          this._hasInitialSliderUpdate = true;
-        }
-      }
+      // Native Bubble Card handles slider state synchronization.
+      // Keep VSC focused on visual styling without a redundant update hook.
 
       return '';
     })()}
