@@ -72,6 +72,7 @@ def main():
         "console.log('Bubble Card template parses as JavaScript');"
     )
     subprocess.run(["node", "-e", node_check], input=code, text=True, check=True)
+    subprocess.run(["node", "tests/badgy_runtime.cjs"], input=code, text=True, check=True)
     for feature in ("formatBadgeState", "processMainBadges", "processIconsAndColors", "processCardGlow"):
         assert feature in code, "Missing feature: " + feature
     assert "transform: scale(var(--badge-scale" not in code
