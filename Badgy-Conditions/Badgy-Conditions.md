@@ -1,6 +1,6 @@
 # Badgy Condition Helper
 
-**Version:** v2025.03.16-fixed
+**Version:** v2026.10.12-beta
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT]
@@ -153,7 +153,7 @@ modules:
 ```yaml
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2026.06.19-mod"
+  version: "v2026.10.12-beta"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   description: |
@@ -188,25 +188,29 @@ badgy-condition-helper:
        ============================= */
     .bubble-sub-button-badge {
       position: absolute;
-      min-width: 18px;
-      height: 16px;
-      border-radius: 8px;
+      min-width: calc(18px * var(--badge-scale, 1));
+      height: calc(16px * var(--badge-scale, 1));
+      border-radius: calc(8px * var(--badge-scale, 1));
       background-color: var(--badge-color, var(--primary-color));
       color: white;
-      font-size: 11px;
+      font-size: calc(11px * var(--badge-scale, 1));
       font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 4px;
+      padding: 0 calc(4px * var(--badge-scale, 1));
       z-index: 1;
       box-sizing: border-box;
       box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-      transform: scale(var(--badge-scale, 1));
+      /* Size is set on dimensions, never transform: animations own transform. */
       transform-origin: center;
       pointer-events: none;
     }
     .entity-badge { top: 0; right: 0; }
+    .bubble-icon-container:has(> .bubble-sub-button-badge) { overflow: visible !important; }
+    .badgy-card-glow { box-shadow: 0 0 var(--badgy-glow-size, 14px) var(--badgy-glow-color, var(--primary-color)) !important; }
+    .badgy-card-glow.badgy-card-glow-pulse { animation: badgy-card-glow-pulse 2s ease-in-out infinite; }
+    @keyframes badgy-card-glow-pulse { 0%,100% { filter: drop-shadow(0 0 1px var(--badgy-glow-color)); } 50% { filter: drop-shadow(0 0 8px var(--badgy-glow-color)); } }
     .icon-badge   { top: 0; left: 0;  }
     .without-background {
       background-color: transparent;
@@ -216,8 +220,9 @@ badgy-condition-helper:
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 13px;
-      height: 13px;
+      width: calc(13px * var(--badge-scale, 1));
+      height: calc(13px * var(--badge-scale, 1));
+      --mdc-icon-size: calc(13px * var(--badge-scale, 1));
     }
 
     .sub-button-direct-bg { /* tracking class for JS-controlled background */ }
@@ -406,7 +411,9 @@ badgy-condition-helper:
         //      destroying/recreating it, so badge effect animations don't
         //      restart on every state update. ----
         function createBadge({subButtonNumber, content, icon, badgeColor, textColor, hPos, vPos, scale, showBackground, badgeType}) {
-          const sb = cardEl.querySelector(`.bubble-sub-button-${subButtonNumber}`);
+          const sb = subButtonNumber === 0
+            ? cardEl.querySelector(".bubble-icon-container")
+            : cardEl.querySelector(`.bubble-sub-button-${subButtonNumber}`);
           if (!sb) return;
           if (getComputedStyle(sb).position === 'static') sb.style.position = 'relative';
 
@@ -427,8 +434,10 @@ badgy-condition-helper:
           badge.dataset.hPos = hPos;
           badge.dataset.vPos = vPos;
 
+          badgeColor = badgeColor ?? config.global_defaults?.badge_color;
           if (badgeColor) badge.style.setProperty('--badge-color', processColor(badgeColor));
           else badge.style.removeProperty('--badge-color');
+          textColor = textColor ?? config.global_defaults?.badge_text_color;
           if (textColor) badge.style.color = processColor(textColor);
           else badge.style.removeProperty('color');
 
@@ -449,11 +458,47 @@ badgy-condition-helper:
           }
         }
 
+        function formatBadgeState(stObj, bc) {
+          if (bc.display_text !== undefined && bc.display_text !== "") return bc.display_text;
+          const value = stObj.state;
+          const translate = bc.translated_state === true ||
+            (bc.translated_state !== false && stObj.entity_id?.startsWith("binary_sensor."));
+          if (translate && typeof hass.formatEntityState === "function") {
+            try { return hass.formatEntityState(stObj); } catch (err) { /* raw fallback */ }
+          }
+          return value;
+        }
+
+        function chooseRule(cfg) {
+          if (!cfg) return null;
+          if (Array.isArray(cfg.rules) && cfg.rules.length) {
+            const selected = cfg.rules.find(rule => rule && checkAllConditions(rule.condition, hass));
+            if (selected) return { ...cfg, ...selected, rules: null };
+            return null;
+          }
+          return checkAllConditions(cfg.condition, hass) ? cfg : null;
+        }
+
+        function resolvedColor(cfg, name = "color") {
+          const raw = cfg?.[name];
+          const entity = cfg?.[name + "_entity"];
+          const attribute = cfg?.[name + "_attribute"];
+          const st = entity && hass.states?.[entity];
+          const dynamic = st ? (attribute ? st.attributes?.[attribute] : st.state) : null;
+          if (dynamic !== undefined && dynamic !== null && dynamic !== "") {
+            const value = String(dynamic).trim();
+            // Color attributes can contain hex, hsl/rgb functions or CSS variables.
+            // Only accept valid colors; ignore malformed device values.
+            if (typeof CSS !== "undefined" && CSS.supports?.("color", value)) return value;
+          }
+          return processColor(raw);
+        }
+
         function processEntityBadges() {
           const eBadges = config.entity_badges || {};
           const current = new Set();
           for (const [k, bc] of Object.entries(eBadges)) {
-            if (!bc?.entity) continue;
+            if (!/^\d+$/.test(k) || !bc?.entity) continue;
             const sbNum = parseInt(k) + 1;
             if (!hass.states[bc.entity]) continue;
             const conditionMet = checkAllConditions(bc.condition, hass);
@@ -463,12 +508,12 @@ badgy-condition-helper:
               let dispVal;
               const stObj = hass.states[bc.entity];
               if (bc.attribute && stObj.attributes[bc.attribute] !== undefined) dispVal = stObj.attributes[bc.attribute];
-              else dispVal = stObj.state;
+              else dispVal = formatBadgeState(stObj, bc);
               if (bc.decimals !== undefined && !isNaN(parseFloat(dispVal))) dispVal = parseFloat(dispVal).toFixed(parseInt(bc.decimals));
               if (bc.show_unit !== false && stObj.attributes.unit_of_measurement) dispVal += stObj.attributes.unit_of_measurement;
               createBadge({
                 subButtonNumber: sbNum, content: dispVal, badgeColor: bc.color, textColor: bc.text_color,
-                hPos: bc.h_pos ?? -8, vPos: bc.v_pos ?? -8, scale: bc.scale ?? 1,
+                hPos: bc.h_pos ?? config.global_defaults?.badge_h_pos ?? -8, vPos: bc.v_pos ?? config.global_defaults?.badge_v_pos ?? -8, scale: bc.scale ?? config.global_defaults?.badge_scale ?? 1,
                 showBackground: bc.show_background !== false, badgeType: 'entity-badge'
               });
             }
@@ -485,13 +530,13 @@ badgy-condition-helper:
           const iBadges = config.icon_badges || {};
           const current = new Set();
           for (const [k, bc] of Object.entries(iBadges)) {
-            if (!bc?.icon) continue;
+            if (!/^\d+$/.test(k) || !bc?.icon) continue;
             const sbNum = parseInt(k) + 1;
             if (checkAllConditions(bc.condition, hass)) {
               current.add(sbNum);
               createBadge({
                 subButtonNumber: sbNum, icon: bc.icon, badgeColor: bc.color, textColor: bc.text_color,
-                hPos: bc.h_pos ?? -8, vPos: bc.v_pos ?? -8, scale: bc.scale ?? 1,
+                hPos: bc.h_pos ?? config.global_defaults?.badge_h_pos ?? -8, vPos: bc.v_pos ?? config.global_defaults?.badge_v_pos ?? -8, scale: bc.scale ?? config.global_defaults?.badge_scale ?? 1,
                 showBackground: bc.show_background !== false, badgeType: 'icon-badge'
               });
             }
@@ -569,7 +614,7 @@ badgy-condition-helper:
           const eBE = config.entity_badge_effects || {};
           const matched = new Set();
           for (const [k, ef] of Object.entries(eBE)) {
-            if (!ef?.effect) continue;
+            if (!/^\d+$/.test(k) || !ef?.effect) continue;
             const sbN = parseInt(k) + 1;
             const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .entity-badge`);
             if (!badge) continue;
@@ -578,6 +623,7 @@ badgy-condition-helper:
             if (met) matched.add(badge);
           }
           cardEl.querySelectorAll('.bubble-sub-button-badge.entity-badge').forEach(b => {
+            if (b.closest('.bubble-icon-container')) return;
             if (!matched.has(b)) setEffect(b, null, null);
           });
         }
@@ -586,7 +632,7 @@ badgy-condition-helper:
           const iBE = config.icon_badge_effects || {};
           const matched = new Set();
           for (const [k, ef] of Object.entries(iBE)) {
-            if (!ef?.effect) continue;
+            if (!/^\d+$/.test(k) || !ef?.effect) continue;
             const sbN = parseInt(k) + 1;
             const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .icon-badge`);
             if (!badge) continue;
@@ -595,6 +641,7 @@ badgy-condition-helper:
             if (met) matched.add(badge);
           }
           cardEl.querySelectorAll('.bubble-sub-button-badge.icon-badge').forEach(b => {
+            if (b.closest('.bubble-icon-container')) return;
             if (!matched.has(b)) setEffect(b, null, null);
           });
         }
