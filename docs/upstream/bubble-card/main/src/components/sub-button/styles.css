@@ -65,6 +65,13 @@
     pointer-events: none;
 }
 
+/* Same for the alignment lane holding the groups in inline layout, the default.
+   The lane of a group with no alignment spans the whole row, so a press on its
+   empty part never reached the tap action of the card (#2243). */
+.bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane {
+    pointer-events: none;
+}
+
 /* The pointer comes back with no weight at all, so a module that moves its own
    element into a group keeps what its own rule says. sub_button_wheel adds an
    invisible layer the size of the screen and sets its pointer-events to none
@@ -84,12 +91,15 @@
     pointer-events: none;
 }
 
-/* Same reasoning for a sub-button carrying no action at all: it only reserves
+/* Same reasoning for a sub-button carrying no action at all. It only reserves
    width (a spacer holding a column open), so it must let the pointer through to
-   what sits below instead of absorbing it. Sliders and dropdowns are untouched:
-   they are action targets without being action-enabled, and setupActions gives
-   them an inline pointer-events that outranks this rule. */
-.bubble-sub-button-bottom-container .bubble-sub-button.bubble-action:not(.bubble-action-enabled):not(.is-select) {
+   what sits below instead of absorbing it. Sliders and dropdowns are untouched,
+   as action targets without being action-enabled, and setupActions gives them
+   an inline pointer-events that outranks this rule. Only the sub-buttons laid
+   out in a group are concerned. One a module moves out of its group is the
+   module's to handle, and the opener of sub_button_wheel, which has no action
+   of its own and opens the wheel on click, could no longer be clicked (#2631). */
+.bubble-sub-button-bottom-container .bubble-sub-button-group > .bubble-sub-button.bubble-action:not(.bubble-action-enabled):not(.is-select) {
     pointer-events: none;
 }
 
@@ -327,6 +337,12 @@
    next to the rest of the card. */
 .bright-background {
     color: var(--bubble-sub-button-dark-text-color, rgba(0, 0, 0, 0.65));
+}
+
+/* The other way round, on a light theme whose dark text a navy, a violet or a
+   deep red would swallow. */
+.dark-background {
+    color: var(--bubble-sub-button-light-text-color, #ffffff);
 }
 
 .background-on {

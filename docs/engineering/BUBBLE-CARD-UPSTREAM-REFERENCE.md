@@ -45,27 +45,21 @@ If upstream changes are incompatible, a source is missing, the tree is truncated
 a download fails or a hash is wrong, synchronization fails without replacing
 the existing reference directory.
 
-## Fully automatic synchronization
+## Scheduled, SHA-verified synchronization through protected main
 
 GitHub Action: .github/workflows/sync-bubble-card-reference.yml
 
-- Runs daily at **03:17 UTC**, and supports an optional manual workflow_dispatch.
-- Fetches both upstream channels, tests the synchronizer and verifies every file.
-- Automatically commits **only** changed files beneath docs/upstream/bubble-card/
-  directly to the main branch. No pull request, approval or manual merge required.
-- If no relevant source changed, produces no commit.
-- Uses a GitHub-provided token with contents:write; no custom PAT required.
-- Never edits Badgy-Conditions or other executable module files.
-- Push is fast-forward only; if main changes concurrently, the job fails safely
-  rather than overwriting changes (the next scheduled run can retry).
-- Failures are visible in GitHub Actions. They do not replace a good reference
-  with an incomplete or unverified download.
+- Runs daily and supports an optional manual `workflow_dispatch`.
+- Tests the synchronizer and verifies every mirrored Git blob SHA before publishing.
+- Commits **only** files under `docs/upstream/bubble-card/` to `automation/bubble-card-upstream-reference`.
+- Creates or updates a PR into `main`; does not bypass PR protection or merge automatically.
+- No changed source: no commit or PR needed.
+- Requires `contents: write` and `pull-requests: write` permissions.
+- **Repository setting required:** GitHub Actions must be allowed to create pull requests. If that setting is disabled, the verified branch is still pushed, but the PR creation fails visibly. A user with GitHub permissions must create the PR or enable this GitHub Actions setting.
+- Changes to the synchronizer itself require a separate reviewed PR.
+- `GITHUB_TOKEN`-generated pull requests generally do not trigger downstream PR workflows. Before merging an automated reference PR, verify the snapshot hashes and run any required checks explicitly.
 
-Only changes to the synchronization **implementation** are proposed and reviewed
-via pull requests using the separate read-only CI workflow.
-GitHub Actions commits made with GITHUB_TOKEN do not normally trigger other
-workflows, so this sync job runs its checks and verifies all snapshot hashes
-before committing.
+A passing synchronizer step does not prove the reference on `main` is current. Always check the newest sync run and pending reference PR when validating against a newly released upstream version.
 
 ## Where to find the sources
 

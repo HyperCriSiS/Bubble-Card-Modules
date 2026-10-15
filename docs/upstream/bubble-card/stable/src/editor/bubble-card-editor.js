@@ -6,6 +6,7 @@ import {
 } from 'lit';
 import { version } from '../var/version.js';
 import { fireEvent } from '../tools/utils.js';
+import { keepEqualParts, acceptConditions } from './config-identity.js';
 // Custom selector for object fields with dynamic entity-attribute context support
 import '../components/editor/ha-selector-bc_object.js';
 import { renderButtonEditor } from '../cards/button/editor.js';
@@ -18,6 +19,7 @@ import { renderCoverEditor } from '../cards/cover/editor.js';
 import { renderClimateEditor } from '../cards/climate/editor.js';
 import { CLIMATE_CARD_DOMAINS } from '../cards/climate/domains.js';
 import { renderSelectEditor } from '../cards/select/editor.js';
+import { SELECTABLE_ATTRIBUTES, hasSelectableAttribute } from '../components/dropdown/lists.js';
 import { renderCalendarEditor } from '../cards/calendar/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
 import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
@@ -90,7 +92,12 @@ class BubbleCardEditor extends LitElement {
         const prevHost = this._previewCardHost || this._previewCardRoot?.host || null;
         const previewStillConnected = !!prevHost?.isConnected;
 
-        this._config = { ...config };
+        // Every part the new config shares with the one already held stays the
+        // object already held. Home Assistant keys the rows of its conditions
+        // editor on those objects, and plugins that wrap this method hand it a
+        // deep copy each time, which had every row built again at each change
+        // (#2657).
+        this._config = { ...keepEqualParts(this._config, config) };
         // The old state keys are rewritten as state_content the first time the
         // editor sees them, and the dashboard is told once, so the config on
         // screen is the one the docs describe. A config left alone keeps
@@ -350,18 +357,7 @@ class BubbleCardEditor extends LitElement {
     }
 
     get _selectable_attributes() {
-        return [
-            'source_list', 
-            'sound_mode_list',
-            'hvac_modes',
-            'fan_modes',
-            'swing_modes',
-            'swing_horizontal_modes',
-            'preset_modes',
-            'effect_list',
-            'available_modes',
-            'operation_list'
-        ];
+        return SELECTABLE_ATTRIBUTES;
     }
 
     updated(changedProperties) {
@@ -1925,8 +1921,16 @@ class BubbleCardEditor extends LitElement {
   _ActionChanged(ev, array, index) {
     // Update config with support for nested sub_button paths
     if (array === 'button_action' || array === 'event_action') {
-      // Simple action containers
-      this._config[array] = ev.detail.value;
+      // Simple action containers. An action set back to its default comes in
+      // undefined, and neither it nor a container it leaves empty is kept.
+      const actions = Object.fromEntries(
+        Object.entries(ev.detail.value ?? {}).filter(([, action]) => action !== undefined && action !== null)
+      );
+      if (Object.keys(actions).length) {
+        this._config[array] = actions;
+      } else {
+        delete this._config[array];
+      }
     } else if (typeof array === 'string' && array.startsWith('sub_button')) {
       const patchValue = ev.detail.value; // e.g., { tap_action: {...} } or full sub-button object (from _updateActionsEntity)
 
@@ -2054,7 +2058,10 @@ class BubbleCardEditor extends LitElement {
       };
       this._config[array] = arrayCopy;
     } else if (this._config.card_type === 'pop-up') {
-      const conditions = ev.detail.value;
+      const conditions = acceptConditions(this._config.trigger, ev.detail.value);
+      // Nothing to write and nothing to announce, as when Home Assistant adds
+      // again a user who is already ticked.
+      if (conditions === this._config.trigger) return;
       this._config = {
         ...this._config,
         trigger: conditions
@@ -2540,7 +2547,7 @@ class BubbleCardEditor extends LitElement {
             this._entityCache[domain].push(entityId);
 
             // Check for selectable attributes for selectEntities
-            if (this._selectable_attributes.some(attr => entity.attributes?.[attr])) {
+            if (hasSelectableAttribute(entityId, entity)) {
                 if (!selectEntities.includes(entityId)) {
                     selectEntities.push(entityId);
                 }
@@ -2556,7 +2563,7 @@ class BubbleCardEditor extends LitElement {
         // Still need to check for other entities with selectable attributes not in input_select/select domains
         Object.keys(this._hassRender.states).forEach(entityId => {
             const entity = this._hassRender.states[entityId];
-            if (this._selectable_attributes.some(attr => entity.attributes?.[attr])) {
+            if (hasSelectableAttribute(entityId, entity)) {
                 if (!selectEntities.includes(entityId)) { // Avoid duplicates
                     selectEntities.push(entityId);
                 }
