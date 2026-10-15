@@ -100,6 +100,7 @@ class RealLovelace(unittest.TestCase):
             gradient:el.card?.style.getPropertyValue('--card-gradient') || '',
             inner:Boolean(el.content),
             subCount:el.card?.querySelectorAll('.bubble-sub-button-icon')?.length||0,
+            subSliderCount:el.card?.querySelectorAll('.bubble-sub-button-slider')?.length||0,
             range:el.card?.querySelector('.bubble-range-fill')?.getBoundingClientRect().width||0
         })""")
 
@@ -116,7 +117,9 @@ class RealLovelace(unittest.TestCase):
         data=self.card_data()
         self.assertTrue(data["inner"],data)
         self.assertGreater(data["range"],0,data)
-        self.assertGreaterEqual(data["subCount"],1,data)
+        # Always-visible sub-sliders are rendered without a host icon in
+        # Bubble Card v3.4.2; the real control uses .bubble-sub-button-slider.
+        self.assertGreaterEqual(data["subSliderCount"],1,data)
         self.assertIn("linear-gradient",data["gradient"],data)
         self.assertEqual(data["icon"],"rgb(255, 0, 0)",data)
 
@@ -153,6 +156,7 @@ class RealLovelace(unittest.TestCase):
         data=self.card_data(1)
         self.assertTrue(data["inner"],data)
         self.assertGreater(data["range"],0,data)
+        self.assertGreaterEqual(data["subSliderCount"],1,data)
 
     def test_06_navigation_and_reconnection(self):
         self.page.goto(BASE+"/lovelace-vsc-e2e/away",wait_until="domcontentloaded")
