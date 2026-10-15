@@ -5,10 +5,11 @@ on:
     - cron: '17 3 * * *'
   workflow_dispatch:
 
-# Only this workflow may write the verified upstream reference. The modules
-# themselves remain untouched, and no pull-request approval is required.
+# Never bypass main branch protection. Changes are verified, pushed to a
+# dedicated automation branch and proposed through a pull request.
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: bubble-card-upstream-reference
@@ -19,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout main with write credentials for the final commit
+      - name: Checkout main
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: main
@@ -36,26 +37,51 @@ jobs:
       - name: Verify all mirrored Git blob hashes
         run: python3 scripts/sync_bubble_card_reference.py --verify
 
-      - name: Commit verified reference changes directly to main
+      - name: Publish verified reference through pull request
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          # Stage ONLY the mirrored reference, never application/module code.
+          BRANCH='automation/bubble-card-upstream-reference'
           git add --all -- docs/upstream/bubble-card/
+
           if git diff --cached --quiet; then
-            echo 'Bubble Card reference is already current; no commit necessary.'
+            echo 'Bubble Card reference already current on main.'
             exit 0
           fi
 
-          # Fail closed if a future change ever stages a file outside this directory.
+          # Only verified upstream mirror paths may be committed.
           if git diff --cached --name-only | grep -Ev '^docs/upstream/bubble-card/'; then
-            echo 'ERROR: Refusing to commit paths outside the upstream reference.' >&2
+            echo 'ERROR: Staged files outside upstream mirror.' >&2
             exit 1
           fi
 
+          git switch -c "$BRANCH"
           git -c user.name='github-actions[bot]' \
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-              commit -m 'docs: automatically sync verified Bubble Card upstream reference'
+              commit -m 'docs: sync verified Bubble Card upstream reference'
 
-          # Fast-forward only. Conflicts must fail rather than overwrite changes.
-          git push origin HEAD:main
+          # The remote branch is dedicated exclusively to this workflow.
+          # A lease prevents overwriting external changes to the remote ref.
+          if git ls-remote --exit-code origin "refs/heads/$BRANCH"; then
+            git fetch origin "$BRANCH:refs/remotes/origin/$BRANCH"
+            git push --force-with-lease="refs/heads/$BRANCH:$(git rev-parse refs/remotes/origin/$BRANCH)" origin "HEAD:refs/heads/$BRANCH"
+          else
+            git push origin "HEAD:refs/heads/$BRANCH"
+          fi
+
+          PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$BRANCH" --base main --json number --jq '.[0].number // empty')
+          if [[ -z "$PR" ]]; then
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
+              --title 'docs: sync Bubble Card upstream source reference' \
+              --body 'Automated, SHA-verified Bubble Card stable/main source update. Only docs/upstream/bubble-card/ is modified. Please merge through the protected main branch.'
+            PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$BRANCH" --base main --json number --jq '.[0].number // empty')
+          else
+            gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" \
+              --body 'Updated, SHA-verified Bubble Card stable/main source snapshots. Only docs/upstream/bubble-card/ is modified.'
+          fi
+
+          # A PR is required by the branch rules. Do not bypass approvals or checks.
+          # The workflow never merges automatically; merging is governed by branch rules.
+          echo "Verified reference PR: https://github.com/$GITHUB_REPOSITORY/pull/$PR"
