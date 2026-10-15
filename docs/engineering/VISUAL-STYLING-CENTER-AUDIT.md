@@ -21,23 +21,31 @@
 | PyYAML/Node.js | Modulstruktur, Editor-Keys, Zustandswechsel, Konfigurationswerte, Farben, Gradienten, Teardown |
 | Chromium mit Referenz-CSS | Layouts, responsive Abstände, Gradient, Iconfarben, CSS-Kaskade und Rücksetzung |
 | Original-Bundle-Smoketest | SHA-256-prüft echtes Bubble-Card-v3.4.2-Bundle und registriertes Custom Element |
-| **Echtes Home Assistant** | **9/9 reale Lovelace-/Backend-/WebSocket-/Pointer-/Lifecycle-Tests bestanden** |
+| **Echtes Home Assistant** | **12/12 reale Lovelace-/Backend-/WebSocket-/Pointer-/Lifecycle-Tests im Wiederholungslauf bestanden** |
 
-**Beleg:** [GitHub Actions Run #38799165242](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38799165242), Home Assistant Core 2026.10.1 mit originalem Bubble Card v3.4.2. [Browser-Screenshots](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38799165242/artifacts/12003956507).
+**Früherer Beleg:** [GitHub Actions Run #38799165242](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38799165242), Home Assistant Core 2026.10.1 mit originalem Bubble Card v3.4.2. [Browser-Screenshots](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38799165242/artifacts/12003956507).
 
-Die neun E2E-Testfälle prüfen Rendering, externen Zustandswechsel, Child-RGB-Abhängigkeiten, nativen Hauptslider, native Baseline, Navigation/Reconnect, gemischte Gruppen-Farben, nativen Subslider und echten Card-Disconnect. Details: [tests/ha_e2e/README.md](../../tests/ha_e2e/README.md).
+Die ursprünglichen neun E2E-Testfälle prüfen Rendering, externen Zustandswechsel, Child-RGB-Abhängigkeiten, nativen Hauptslider, native Baseline, Navigation/Reconnect, gemischte Gruppen-Farben, nativen Subslider und echten Card-Disconnect. Details: [tests/ha_e2e/README.md](../../tests/ha_e2e/README.md).
 
 ## Historische Diagnose
 
 Ein früher Chromium-Versuch mit dem Original-Bundle scheiterte am unvollständigen künstlichen `hass`-Objekt bereits **ohne VSC**. Diese unbrauchbaren Render-Fälle bleiben ausdrücklich als `skipped` gekennzeichnet.
 
-Beim Aufbau des echten HA-Containers wurden zuerst fehlende Schreibrechte für das temporäre `/config/deps` festgestellt und behoben. Anschließend scheiterte zunächst ein Test, weil `always_visible`-Subslider absichtlich kein separates Icon-Element haben. Der Test prüft jetzt die echte Klasse `.bubble-sub-button-slider`; alle neun tatsächlichen Tests bestehen.
+Beim Aufbau des echten HA-Containers wurden zuerst fehlende Schreibrechte für das temporäre `/config/deps` festgestellt und behoben. Anschließend scheiterte zunächst ein Test, weil `always_visible`-Subslider absichtlich kein separates Icon-Element haben. Der Test prüft jetzt die echte Klasse `.bubble-sub-button-slider`; alle ursprünglichen neun tatsächlichen Tests bestehen.
 
 ## Noch nicht nachgewiesen
 
 - Visueller Karten-/Moduleditor mit allen 46 Einstellungen, inklusive Speicherung und Live-Umschaltung ohne Card-Disconnect.
-- Vollständige mobile Touch-Gesten, Pop-up-, Sections-, Grid- und alternative Subslider-Layouts.
+- Ein mobiler Chromium-Touch-Drag auf dem nativen Hauptslider ist jetzt real bestanden. Zusätzliche Gesten, Pop-up-, Sections-, Grid- und alternative Subslider-Layouts bleiben offen.
 - Konkrete Wechselwirkungen mit Drittmodulen, verschiedenen Themes, langen Laufzeiten und Performance.
-- Explizites Deaktivieren des Moduls bei weiterhin gemounteter Karte.
+- Änderungen der Modulkonfiguration bei gemounteter Karte sind jetzt inklusive Deaktivierung und Reaktivierung als E2E-Test abgedeckt. Das erfordert einen VSC-eigenen `setConfig`-Cleanup, weil Bubble Cards Teardown bei einer reinen `setConfig`-Änderung nicht automatisch ausgelöst wurde.
 
 Ein bestandener Testlauf bedeutet nicht, dass alle potentiellen Bugs behoben oder alle neuen Features genutzt werden. Folgeverifikation: [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11). **PR #7 bleibt offen**, bis die Freigabe separat bewertet ist.
+
+## Zusätzlicher Konfigurations-/Touch-Nachweis, 16. Oktober 2026
+
+Neue Tests `test_10`–`test_12` prüfen CSS-Isolation zur unmodifizierten Karte, das Deaktivieren und Reaktivieren der Modul-Styles **ohne** Card-Disconnect sowie mobilen Touch-Drag auf dem nativen Slider. Der erste Lauf [#38817607322](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38817607322) deckte einen echten VSC-Cleanup-Fehler auf: Bei `setConfig()` ohne VSC-Stil blieben CSS-Gradienten und Klassen erhalten. Der neue idempotente `setConfig`-Cleanup-Pfad beseitigt das Problem.
+
+Im Folgelauf [#38818020327](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38818020327) bestanden Cleanup- und Touch-Tests, aber zwei ältere Desktop-Pointer-Drag-Tests schlugen einmalig fehl. Der **Wiederholungslauf desselben Commits** bestand mit **12/12 Tests** (20,237 s). Die Desktop-Drag-Tests sind daher als potenziell flüchtig zu beobachten; ein einzelner erfolgreicher Wiederholungslauf beweist noch keine vollständige Zuverlässigkeit. Bei erneutem Auftreten die Ursache diagnostizieren, nicht stillschweigend Tests deaktivieren.
+
+Weiterhin offen: visueller Editor/Speichern aller 46 Optionen, die vollständige Layout-/Theme-/Drittmodulmatrix, Performancemessungen und Langzeitstabilität.
