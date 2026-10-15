@@ -153,7 +153,7 @@ modules:
 ```yaml
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2026.10.12-beta"
+  version: "v2026.10.15-beta.2"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   description: |
@@ -182,6 +182,24 @@ badgy-condition-helper:
     - Sub-button effects: Apply animations (including color for glow) to the entire sub-button container
 
     All features support Home Assistant-style conditions for state-based logic.
+  suggestions_code: |-
+    // Optional Card Picker shortcut. No network requests, timers, or side effects.
+    const domain = helpers.domainOf(entity);
+    if (domain !== "sensor" && domain !== "binary_sensor") return null;
+    const badge = { entity, scale: 1.1 };
+    if (domain === "binary_sensor") badge.translated_state = true;
+    return {
+      label: "Live main-icon badge",
+      config: {
+        card_type: "button",
+        entity,
+        name: helpers.friendlyName(entity),
+        modules: [module.id],
+        [module.id]: {
+          entity_badges: { main: badge },
+        },
+      },
+    };
   code: |
     /* =============================
        CSS for the badge visuals

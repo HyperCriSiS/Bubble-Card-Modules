@@ -51,7 +51,23 @@ def main():
     assert isolated["name"] == "Badgy Condition Helper (Beta)"
     assert isolated["version"] == new["version"]
     assert isolated["editor"] == new["editor"]
+    assert isolated["suggestions_code"] == new["suggestions_code"]
     assert isolated["code"] == new["code"].replace(MODULE, beta_id)
+    suggestions_check = (
+        "const fs=require('fs');const content=fs.readFileSync(0,'utf8');"
+        "const pick=new Function('hass','entity','stateObj','helpers','module',content);"
+        "const helpers={domainOf:e=>e.split('.')[0],friendlyName:e=>e};"
+        "for(const id of ['badgy-condition-helper','badgy-condition-helper-beta']){"
+        "const out=pick({},'binary_sensor.window',{state:'on'},helpers,{id});"
+        "if(!out||out.config.modules[0]!==id||"
+        "out.config[id].entity_badges.main.entity!=='binary_sensor.window')"
+        "throw Error('Suggestion lacks module-specific configuration');"
+        "const missing=pick({},'light.lamp',{state:'on'},helpers,{id});"
+        "if(missing!==null)throw Error('Suggestion should ignore unrelated domain');"
+        "}console.log('Card Picker suggestion: PASS');"
+    )
+    subprocess.run(["node", "-e", suggestions_check],
+                   input=new["suggestions_code"], text=True, check=True)
     print("Verified isolated test module matches source without sharing its module ID")
     old_md = subprocess.check_output(
         ["git", "show", "origin/main:" + PATH], cwd=ROOT, text=True, errors="replace"
