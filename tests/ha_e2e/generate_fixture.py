@@ -19,12 +19,12 @@ def extract_module(markdown):
 def light(name, slug):
     key = "vsc_" + slug
     def number(ch):
-        return "{{ states('input_number."+key+"_"+ch+"') | int(0) }}"
+        return "states('input_number."+key+"_"+ch+"') | int(0)"
     return {
         "name": "VSC "+name,
         "unique_id": "vsc_e2e_"+slug,
         "state": "{{ is_state('input_boolean."+key+"_enabled', 'on') }}",
-        "level": number("brightness"),
+        "level": "{{ "+number("brightness")+" }}",
         "rgb": "{{ ["+number("red")+", "+number("green")+", "+number("blue")+"] }}",
         "turn_on": [{"action":"input_boolean.turn_on","target":{"entity_id":"input_boolean."+key+"_enabled"}}],
         "turn_off": [{"action":"input_boolean.turn_off","target":{"entity_id":"input_boolean."+key+"_enabled"}}],
