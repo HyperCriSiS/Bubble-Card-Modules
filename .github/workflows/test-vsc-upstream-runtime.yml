@@ -1,0 +1,41 @@
+name: Test VSC with official Bubble Card runtime
+on:
+  pull_request:
+    paths:
+      - 'Visual-Styling-Center/**'
+      - 'tests/test_vsc_upstream_runtime.py'
+      - '.github/workflows/test-vsc-upstream-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  upstream-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install Python and Chromium dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install 'PyYAML==6.0.3' 'playwright==1.57.0'
+          .venv/bin/python -m playwright install --with-deps chromium
+      - name: Download and verify original Bubble Card v3.4.2 bundle
+        run: |
+          mkdir -p artifacts
+          curl --fail --location --retry 3 --silent --show-error \
+            --output artifacts/upstream-bubble-card.js \
+            https://github.com/Clooos/Bubble-Card/releases/download/v3.4.2/bubble-card.js
+          echo "d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae  artifacts/upstream-bubble-card.js" | sha256sum --check
+      - name: Exercise native Bubble Card style processor and lifecycle
+        run: .venv/bin/python -m unittest discover -s tests -p 'test_vsc_upstream_runtime.py' -v
+      - name: Upload browser screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: vsc-official-bubble-card-runtime
+          path: artifacts/vsc-upstream-browser/
+          if-no-files-found: ignore
+          retention-days: 7
