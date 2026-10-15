@@ -208,6 +208,14 @@ badgy-condition-helper:
     }
     .entity-badge { top: 0; right: 0; }
     .bubble-icon-container:has(> .bubble-sub-button-badge) { overflow: visible !important; }
+    /* Bubble Card 3.4.2 clips rounded cards. Extend only the clip edge on
+       cards with opt-in main icon badges, without turning them into scroll
+       containers or changing their pointer/tap behavior. */
+    @supports (overflow-clip-margin: 16px) {
+      .bubble-container:has(.bubble-main-icon-container > .bubble-sub-button-badge) {
+        overflow-clip-margin: 16px;
+      }
+    }
     .badgy-card-glow { box-shadow: 0 0 var(--badgy-glow-size, 14px) var(--badgy-glow-color, var(--primary-color)) !important; }
     .badgy-card-glow.badgy-card-glow-pulse { animation: badgy-card-glow-pulse 2s ease-in-out infinite; }
     @keyframes badgy-card-glow-pulse { 0%,100% { filter: drop-shadow(0 0 1px var(--badgy-glow-color)); } 50% { filter: drop-shadow(0 0 8px var(--badgy-glow-color)); } }
@@ -283,23 +291,23 @@ badgy-condition-helper:
       100% { transform: translate(0,0); }
     }
 
-    .effect-pulse       { animation: pulse-scale 2s infinite ease-in-out; }
-    .effect-rotate      { animation: gentle-rotate 3s infinite ease-in-out; }
-    .effect-glow        { animation: border-pulse 2s infinite ease-in-out; }
-    .effect-shake       { animation: gentle-shake 0.8s infinite ease-in-out; }
-    .effect-float       { animation: float-up-down 3s infinite ease-in-out; }
-    .effect-zoom        { animation: zoom 1.5s infinite ease-in-out; }
-    .effect-heartbeat   { animation: heartbeat 2s infinite ease-in-out; }
-    .effect-spin-360    { animation: spin360 2s linear infinite; }
-    .effect-flip        { animation: flip 2s linear infinite; }
-    .effect-vibrate     { animation: vibrate 0.6s linear infinite; }
+    .badgy-effect-pulse       { animation: pulse-scale 2s infinite ease-in-out; }
+    .badgy-effect-rotate      { animation: gentle-rotate 3s infinite ease-in-out; }
+    .badgy-effect-glow        { animation: border-pulse 2s infinite ease-in-out; }
+    .badgy-effect-shake       { animation: gentle-shake 0.8s infinite ease-in-out; }
+    .badgy-effect-float       { animation: float-up-down 3s infinite ease-in-out; }
+    .badgy-effect-zoom        { animation: zoom 1.5s infinite ease-in-out; }
+    .badgy-effect-heartbeat   { animation: heartbeat 2s infinite ease-in-out; }
+    .badgy-effect-spin-360    { animation: spin360 2s linear infinite; }
+    .badgy-effect-flip        { animation: flip 2s linear infinite; }
+    .badgy-effect-vibrate     { animation: vibrate 0.6s linear infinite; }
 
-    .bubble-sub-button-icon.has-effect {
+    .bubble-sub-button-icon.badgy-has-effect {
       position: relative;
       transform-origin: center;
       display: inline-flex;
     }
-    .bubble-icon.has-effect {
+    .bubble-icon.badgy-has-effect {
       position: relative;
       transform-origin: center;
       display: inline-flex;
@@ -440,9 +448,9 @@ badgy-condition-helper:
         }
 
         const ALL_EFFECT_CLASSES = [
-          'effect-pulse','effect-rotate','effect-glow','effect-shake',
-          'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
-          'effect-flip','effect-vibrate'
+          'badgy-effect-pulse','badgy-effect-rotate','badgy-effect-glow','badgy-effect-shake',
+          'badgy-effect-float','badgy-effect-zoom','badgy-effect-heartbeat','badgy-effect-spin-360',
+          'badgy-effect-flip','badgy-effect-vibrate'
         ];
 
         // Idempotent effect application: only mutates classes when the desired
@@ -450,18 +458,18 @@ badgy-condition-helper:
         // (global) Home Assistant state update.
         function setEffect(el, effect, color) {
           if (!el) return;
-          const desired = effect && effect !== "none" ? `effect-${effect}` : null;
+          const desired = effect && effect !== "none" ? `badgy-effect-${effect}` : null;
           for (const c of ALL_EFFECT_CLASSES) {
             if (c !== desired && el.classList.contains(c)) el.classList.remove(c);
           }
           if (desired) {
             if (!el.classList.contains(desired)) el.classList.add(desired);
-            if (!el.classList.contains('has-effect')) el.classList.add('has-effect');
+            if (!el.classList.contains('badgy-has-effect')) el.classList.add('badgy-has-effect');
             const cProc = color ? processColor(color) : null;
             if (cProc) el.style.setProperty('--effect-color', cProc);
             else el.style.removeProperty('--effect-color');
           } else {
-            if (el.classList.contains('has-effect')) el.classList.remove('has-effect');
+            if (el.classList.contains('badgy-has-effect')) el.classList.remove('badgy-has-effect');
             el.style.removeProperty('--effect-color');
           }
         }
@@ -485,6 +493,10 @@ badgy-condition-helper:
             badge.className = `bubble-sub-button-badge ${badgeType}`;
             sb.appendChild(badge);
           }
+          badgeColor = badgeColor ?? config.global_defaults?.badge_color;
+          textColor = textColor ?? config.global_defaults?.badge_text_color;
+          if (!changeGate("badge-" + subButtonNumber + "-" + badgeType,
+              badge, content, icon, badgeColor, textColor, hPos, vPos, scale, showBackground)) return;
           badge.classList.toggle('without-background', !showBackground);
 
           if (scale !== undefined && scale !== 1) badge.style.setProperty('--badge-scale', scale);
@@ -496,12 +508,10 @@ badgy-condition-helper:
           badge.dataset.hPos = hPos;
           badge.dataset.vPos = vPos;
 
-          badgeColor = badgeColor ?? config.global_defaults?.badge_color;
-          if (badgeColor) badge.style.setProperty('--badge-color', processColor(badgeColor));
-          else badge.style.removeProperty('--badge-color');
-          textColor = textColor ?? config.global_defaults?.badge_text_color;
-          if (textColor) badge.style.color = processColor(textColor);
-          else badge.style.removeProperty('color');
+          if (badgeColor) updateManagedStyle(badge, '--badge-color', processColor(badgeColor), '');
+          else updateManagedStyle(badge, '--badge-color', null, '');
+          if (textColor) updateManagedStyle(badge, 'color', processColor(textColor), '');
+          else updateManagedStyle(badge, 'color', null, '');
 
           if (icon) {
             let ic = badge.querySelector('ha-icon.badge-icon');
@@ -777,8 +787,8 @@ badgy-condition-helper:
               icon: !isEntity ? cfg.icon : undefined,
               badgeColor: cfg.color, textColor: cfg.text_color,
               scale: cfg.scale ?? config.global_defaults?.badge_scale ?? 1,
-              hPos: cfg.h_pos ?? config.global_defaults?.badge_h_pos ?? -8,
-              vPos: cfg.v_pos ?? config.global_defaults?.badge_v_pos ?? -8,
+              hPos: cfg.h_pos ?? config.global_defaults?.badge_h_pos ?? 0,
+              vPos: cfg.v_pos ?? config.global_defaults?.badge_v_pos ?? 0,
               showBackground: cfg.show_background !== false,
             });
             const effect = config[isEntity ? "entity_badge_effects" : "icon_badge_effects"]?.main;
@@ -2169,7 +2179,7 @@ badgy-condition-helper:
                   mode: slider
             - name: h_pos
               label: "Horizontal position"
-              default: -8
+              default: 0
               selector:
                 number:
                   min: -100
@@ -2178,7 +2188,7 @@ badgy-condition-helper:
                   mode: slider
             - name: v_pos
               label: "Vertical position"
-              default: -8
+              default: 0
               selector:
                 number:
                   min: -100
@@ -2722,7 +2732,7 @@ badgy-condition-helper:
                   mode: slider
             - name: h_pos
               label: "Horizontal position"
-              default: -8
+              default: 0
               selector:
                 number:
                   min: -100
@@ -2731,7 +2741,7 @@ badgy-condition-helper:
                   mode: slider
             - name: v_pos
               label: "Vertical position"
-              default: -8
+              default: 0
               selector:
                 number:
                   min: -100
