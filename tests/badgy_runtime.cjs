@@ -5,7 +5,7 @@ const fs = require("node:fs");
 
 const js = fs.readFileSync(0, "utf8");
 const template = new Function(
-  "hass", "entity", "state", "card", "checkConditionsMet", "renderTemplate", "hasChanged",
+  "hass", "entity", "state", "card", "checkConditionsMet", "renderTemplate", "hasChanged", "onTeardown",
   "return " + String.fromCharCode(96) + js + String.fromCharCode(96) + ";"
 );
 
@@ -145,8 +145,10 @@ function hasChanged(key, ...values) {
   fingerprints.set(key, values);
   return true;
 }
+let teardown = null;
+function onTeardown(callback) { teardown = callback; }
 function run() {
-  const output = template.call(context, hass, "sensor.power", hass.states["sensor.power"].state, root, checkConditionsMet, renderTemplate, hasChanged);
+  const output = template.call(context, hass, "sensor.power", hass.states["sensor.power"].state, root, checkConditionsMet, renderTemplate, hasChanged, onTeardown);
   assert.equal(typeof output, "string");
 }
 run();
@@ -231,4 +233,12 @@ assert.equal(mainIcon.getAttribute("icon"), "mdi:ceiling-light",
   "updated native icon preserved after override ends");
 assert.equal(mainIcon.style.getPropertyValue("color"), "#445566",
   "external color restored after override ends");
+
+assert.equal(typeof teardown, "function", "onTeardown registered");
+teardown();
+assert.equal(main.querySelector(".entity-badge"), null, "main badge removed on teardown");
+assert.equal(sub.querySelector(".entity-badge"), null, "sub-button badge removed on teardown");
+assert.equal(mainIcon.getAttribute("icon"), "mdi:ceiling-light", "native icon stays restored after cleanup");
+assert.equal(mainIcon.style.getPropertyValue("color"), "#445566", "restored color survives teardown");
+assert.ok(!sub.classList.contains("badgy-has-effect"), "effect class cleaned");
 console.log("Badgy runtime smoke tests: PASS");
