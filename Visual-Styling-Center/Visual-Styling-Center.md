@@ -1,6 +1,6 @@
 # Visual Styling Center
 
-**Version:** v2026.10.12
+**Version:** v2026.10.15
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
@@ -148,7 +148,7 @@ visual_styling_center:
 ```yaml
 visual_styling_center:
   name: "Visual Styling Center"
-  version: "v2026.10.12"
+  version: "v2026.10.15"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
   description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.

@@ -39,3 +39,16 @@ Browser integration tests simulate the DOM and hass.states. They are **not** a f
 - Real Home Assistant WebSocket/pointer lifecycle tests are still open. Repository setting must allow GitHub Actions to create PRs for unattended upstream-reference PR creation.
 
 - Native Bubble Card `hasChanged('vsc-gradient', ...)` is now used to skip expensive gradient hue sorting when observed input RGBs remain unchanged. The entity reads still happen on each module style pass to preserve `trackedHass` dependencies. Python/Node/Chromium mocks now exercise the change gate.
+
+## Follow-up fixes verified 2026-10-15 (PR #7)
+- Parent entity fallback for sub-buttons: Bubble Card resolves `subButton.entity ?? context.config.entity`. VSC now uses the same rule; regression tests verify inherited icon colors and subsequent HA state changes.
+- Explicit and implicit main groups and bottom groups now follow the same `.bubble-sub-button-N` class index order as Bubble Card v3.4.2. This fixes incorrect colors when YAML interleaves group items with individual buttons. Node and Chromium cover the mixed layout.
+- Inline CSS custom properties are now ownership-tracked per card. Clearing a VSC option restores an earlier inline value (including `!important` priority), instead of unconditionally deleting a value owned by another module or custom theme.
+- VSC registers Bubble Card's native `onTeardown` callback. When a card disconnects, it restores VSC-owned CSS variables, icon colors and card classes without adding WebSocket listeners or polling.
+- Tests now enforce upstream source contracts for sub-button index ordering, inherited entities, the `trackedHass` dependency proxy and `hasChanged` / `onTeardown` support.
+- The VSC GitHub Actions workflow also triggers when files under `docs/upstream/bubble-card/` change. This brings potential future API/DOM drift into the PR test cycle.
+- Module metadata version was advanced to `v2026.10.15`; module ID and all 46 editor settings are unchanged.
+
+**Verified:** Python module parsing, Node.js behavioral regressions, Chromium computed-CSS and state-change scenarios on simulated DOM using mirrored Bubble Card v3.4.2 CSS.
+
+**Not verified:** Complete Home Assistant frontend mounting, actual WebSocket `state_changed` → Bubble Card style-pass chain, native slider drag/touch, live editor and module-disable events without card disconnection. Bubble Card currently calls module teardown on card disconnection; it is not evidence of cleanup on module disable while the same card stays mounted. The browser DOM and HA state used in CI are intentionally simulated.
