@@ -1,8 +1,8 @@
 # Bubble Card
 
-[<img src="img/translate.svg" width="17" height="17" align="absmiddle" alt="">](i18n/languages.md) **[Read this in your language](i18n/languages.md)** (Français, Deutsch, Español, 简体中文, 日本語... and much more)
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Read this in your language](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)** (Français, Deutsch, Español, 简体中文, 日本語... and much more)
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card is a minimalist and customizable card collection for Home Assistant, featuring modern pop-ups and an integrated Module Store with over 100 community-made modules.
 
@@ -166,8 +166,8 @@ This card allows you to create a pop-up with any content. Each pop-up is **hidde
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
 | `popup_style` | string | Optional | `bubble` (default), `classic` or `home-assistant` | Define the pop-up visual style |
-| `popup_mode` | string | Optional | `default` (default), `fit-content`, `centered` or `adaptive-dialog` | Define the pop-up layout mode |
-| `with_bottom_offset` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: fit-content` or `adaptive-dialog`. Applies a bottom offset on mobile, useful when your dashboard includes a footer card. |
+| `popup_mode` | string | Optional | `default` (default), `fit-content`, `centered` or `adaptive-dialog` | Define the pop-up layout mode. With `popup_style: home-assistant`, only `default` (full height on mobile, like the "More info" panel) and `adaptive-dialog` (fits its content on mobile) are used. |
+| `with_bottom_offset` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: fit-content` or `adaptive-dialog`, and with `popup_style: home-assistant`. Applies a bottom offset on mobile, useful when your dashboard includes a footer card. |
 | `full_width_on_mobile` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: centered`. Expands the pop-up to full screen width on mobile, useful on smaller displays. |
 | `performance_mode` | string | Optional | `default` (default) or `performance` | Optimize the pop-up open animation. `performance` slightly delays content rendering and background blur, also disables backdrop blur if set. |
 | `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
@@ -719,7 +719,7 @@ icon_close: mdi:roller-shade-closed
 
 This card allows you to add a dropdown menu for your `input_select` / `select` entities. This card also supports the sub-buttons and all the common Bubble Card features.
 
-It also works with any entity that exposes its options as an attribute list: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` and `preset_modes` on a climate, `available_modes` on a humidifier, `operation_list` on a water heater, `effect_list` on a light, `source_list` and `sound_mode_list` on a media player.
+It also works with any entity that exposes its options as an attribute list. That covers `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` and `preset_modes` on a climate, `preset_modes` and `direction` on a fan, `available_modes` on a humidifier, `operation_list` on a water heater, `effect_list` on a light, `source_list` and `sound_mode_list` on a media player, `fan_speed_list` on a vacuum and `activity_list` on a remote. An alarm control panel offers its modes with `alarm_modes`, and when a mode needs a code, a keypad appears in the menu to type it.
 
 > [!TIP]
 > You can also have select sub-buttons if you want, this feature is available in all the cards that support the sub-buttons.
@@ -2745,7 +2745,7 @@ Bubble Card speaks your language. Its editor is translated in the 64 languages t
 
 At the bottom of the editor, next to the version number, an **Auto** switch follows your Home Assistant language. Turn it off and the whole editor goes back to English, which is handy to follow a tutorial or to report an issue. Your choice is remembered in your browser.
 
-This documentation is translated too, [in 62 languages](i18n/languages.md), every one of them but British English, which reads the original. Those pages are open to everyone, so a wording that does not match your own Home Assistant can be fixed in a couple of clicks. The English version stays the reference for the content itself.
+This documentation is translated too, [in 62 languages](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), every one of them but British English, which reads the original. Those pages are open to everyone, so a wording that does not match your own Home Assistant can be fixed in a couple of clicks. The English version stays the reference for the content itself.
 
 <br>
 
@@ -2774,7 +2774,7 @@ Got questions or thoughts about Bubble Card? Want to share your dashboards or di
 
 Contributions are welcome! Whether it's bug fixes, new features, translations, or documentation improvements, feel free to open a pull request.
 
-Before getting started, please read the [developer guide](DEVELOPERS.md) which covers how to set up your local environment, build the project, and test your changes.
+Before getting started, please read the [developer guide](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) which covers how to set up your local environment, build the project, and test your changes.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

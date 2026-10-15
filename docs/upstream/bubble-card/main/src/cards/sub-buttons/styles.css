@@ -23,11 +23,13 @@
 }
 
 ha-card.footer-mode {
-  /* Where the dashboard content starts, measured from HA's own rendered panel
-     (tools/content-inset.js). --mdc-drawer-width is deliberately gone from
-     this chain: HA drops --ha-sidebar-width when the sidebar is hidden, and
-     the legacy token then re-adds a sidebar that is not on screen, pushing
-     this fixed footer off to the side (same defect as #2537). */
+  /* Where the dashboard content starts. Home Assistant publishes it as
+     --ha-sidebar-width from 2026.6, and before that it is measured from the
+     panel HA rendered (tools/content-inset.js). --mdc-drawer-width is
+     deliberately gone from this chain. HA drops --ha-sidebar-width when the
+     sidebar is hidden, and the legacy token would then re-add a sidebar that
+     is not on screen, pushing this fixed footer off to the side (same defect
+     as #2537). */
   --bubble-sub-buttons-content-inline-start: var(--bubble-content-inline-start, var(--ha-sidebar-width, 0px));
   bottom: var(--bubble-footer-bottom, 16px);
   height: auto;
@@ -39,8 +41,15 @@ ha-card.footer-mode {
 }
 
 ha-card.footer-mode:not(.footer-full-width) {
-  width: var(--bubble-footer-width, 500px);
-  inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + (100% - var(--bubble-sub-buttons-content-inline-start) - var(--bubble-footer-width, 500px)) / 2);
+  /* The configured width, never wider than the content area actually is. A
+     max-width media query used to force full width below 600px, which threw
+     away a configured width that had room to fit. A phone in portrait is under
+     that breakpoint, the same phone in landscape is not, and a 300px footer
+     only obeyed one of the two (#2620). Clamping answers the question the
+     breakpoint was really asking. */
+  --bubble-footer-resolved-width: min(var(--bubble-footer-width, 500px), 100% - var(--bubble-sub-buttons-content-inline-start) - 16px);
+  width: var(--bubble-footer-resolved-width);
+  inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + (100% - var(--bubble-sub-buttons-content-inline-start) - var(--bubble-footer-resolved-width)) / 2);
 }
 
 @media only screen and (max-width: 600px) {
@@ -49,9 +58,11 @@ ha-card.footer-mode:not(.footer-full-width) {
     inset-inline-start: 8px;
   }
 
+  /* A footer with no configured width keeps filling a narrow screen, as it
+     always did. Only the default is swapped here, so a configured width that
+     fits is still obeyed. */
   ha-card.footer-mode:not(.footer-full-width) {
-    width: calc(100% - 16px);
-    inset-inline-start: 8px;
+    --bubble-footer-resolved-width: min(var(--bubble-footer-width, 100%), 100% - var(--bubble-sub-buttons-content-inline-start) - 16px);
   }
 }
 
