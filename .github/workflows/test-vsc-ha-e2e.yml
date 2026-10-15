@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      HA_CONFIG: ${{ runner.temp }}/vsc-homeassistant-config
-      HA_E2E_AUTH_FILE: ${{ runner.temp }}/vsc-ha-auth.json
+      HA_CONFIG: /tmp/vsc-homeassistant-config
+      HA_E2E_AUTH_FILE: /tmp/vsc-ha-auth.json
       HA_E2E_BASE: http://127.0.0.1:8123
       HA_E2E_ARTIFACTS: artifacts/vsc-ha-e2e
     steps:
