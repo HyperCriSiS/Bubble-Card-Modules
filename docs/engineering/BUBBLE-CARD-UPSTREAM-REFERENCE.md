@@ -2,78 +2,40 @@
 
 ## Purpose
 
-This repository automatically maintains a searchable, read-only mirror of the technical
-Bubble Card sources relevant to our Home Assistant modules. It does not modify any
-module code or inject upstream JavaScript into a build or test pipeline.
+This repository keeps a verified, read-only mirror of technical Bubble Card sources used to review our custom Home Assistant modules.
 
-Original source: https://github.com/Clooos/Bubble-Card
+Original: https://github.com/Clooos/Bubble-Card
 
-## Source selection
+## Sources
 
-- Original LICENSE, official README, DEVELOPERS guide, package/hacs metadata
-- src/modules: module schema, parser, registration, editor, lifecycle
-- src/components/sub-button: component implementation, sub-button selectors and styles
-- src/cards/sub-buttons: sub-button card integration
-- Selected src/tools files: HA conditions, styling, cleanup and runtime helpers
-- Selected src/editor, src/cards/button, src/components/base-card entry points
+- Stable: latest non-prerelease GitHub release
+- Main: upstream development branch
+- docs/upstream/bubble-card/README.md: source index and manifests
+- docs/upstream/bubble-card/CHANNEL-DIFF.md: comparison
+- docs/upstream/bubble-card/UPDATES.md: refresh history
 
-Only JS, CSS, Markdown and JSON source text is collected. Tests, dist bundles,
-translations, media assets and other unrelated files are excluded.
-Each mirrored byte is compared with the Git blob SHA from the upstream tree.
+The synchronizer uses upstream Git blob hashes and fails without publishing if any selected source cannot be verified. Only selected JS, CSS, JSON, and documentation files are mirrored. These files are reference material, not executable build inputs.
 
-## Two separate channels
+## Synchronization
 
-- stable: latest published non-prerelease GitHub release
-- main: upstream main development branch
+Workflow: `.github/workflows/sync-bubble-card-reference.yml`. Daily schedule and manual dispatch.
 
-Each channel has its own manifest.json with source_commit_sha and SHA for every file.
-The main snapshot changes only when relevant selected sources change. Unrelated upstream
-commits do not cause extra commits. CHANNEL-DIFF.md lists differences between these
-channels. UPDATES.md records reference refreshes.
+1. Check out protected `main`, run synchronizer tests.
+2. Fetch both snapshots and verify every mirrored file.
+3. If changes exist, commit **only** `docs/upstream/bubble-card/` to `automation/bubble-card-upstream-reference`.
+4. Create or update a synchronization pull request into `main`.
+5. Merge using the repository's ordinary branch rules. No direct push to `main` or policy bypass.
 
-## Local commands (optional)
+The workflow requires `contents: write` and `pull-requests: write` permission for `GITHUB_TOKEN`. If GitHub Actions is not allowed to create PRs in repository settings, the branch push can succeed but the PR-create step will fail explicitly until this permission is enabled. A failed sync must not be treated as an up-to-date reference.
 
-    python3 -m unittest discover -s tests -p 'test_bubble_card_reference.py' -v
-    python3 scripts/sync_bubble_card_reference.py --dry-run
-    python3 scripts/sync_bubble_card_reference.py
-    python3 scripts/sync_bubble_card_reference.py --verify
+**Important:** This process automatically maintains an update PR; it does **not** automatically merge into protected `main`. Consequently, check the latest workflow runs and open sync PR before relying on the mirrored version. Automation-based merging can only be introduced separately if the existing protection rules permit it.
 
-Python 3.10+ and its standard library suffice. GITHUB_TOKEN is optional locally
-but recommended to avoid GitHub's unauthenticated API rate limit.
+## Local verification
 
-If upstream changes are incompatible, a source is missing, the tree is truncated,
-a download fails or a hash is wrong, synchronization fails without replacing
-the existing reference directory.
+```bash
+python3 -m unittest discover -s tests -p 'test_bubble_card_reference.py' -v
+python3 scripts/sync_bubble_card_reference.py --dry-run
+python3 scripts/sync_bubble_card_reference.py --verify
+```
 
-## Fully automatic synchronization
-
-GitHub Action: .github/workflows/sync-bubble-card-reference.yml
-
-- Runs daily at **03:17 UTC**, and supports an optional manual workflow_dispatch.
-- Fetches both upstream channels, tests the synchronizer and verifies every file.
-- Automatically commits **only** changed files beneath docs/upstream/bubble-card/
-  directly to the main branch. No pull request, approval or manual merge required.
-- If no relevant source changed, produces no commit.
-- Uses a GitHub-provided token with contents:write; no custom PAT required.
-- Never edits Badgy-Conditions or other executable module files.
-- Push is fast-forward only; if main changes concurrently, the job fails safely
-  rather than overwriting changes (the next scheduled run can retry).
-- Failures are visible in GitHub Actions. They do not replace a good reference
-  with an incomplete or unverified download.
-
-Only changes to the synchronization **implementation** are proposed and reviewed
-via pull requests using the separate read-only CI workflow.
-GitHub Actions commits made with GITHUB_TOKEN do not normally trigger other
-workflows, so this sync job runs its checks and verifies all snapshot hashes
-before committing.
-
-## Where to find the sources
-
-- docs/upstream/bubble-card/README.md: reference index
-- docs/upstream/bubble-card/stable/: newest stable Bubble Card release
-- docs/upstream/bubble-card/main/: newest relevant upstream main files
-- docs/upstream/bubble-card/CHANNEL-DIFF.md: stable/main comparison
-- docs/upstream/bubble-card/UPDATES.md: update history
-
-All mirrored source files are untrusted reference material and must not be
-executed by the workflow.
+Python 3.10+ standard library is sufficient. The optional `GITHUB_TOKEN` avoids unauthenticated GitHub API rate limits.
