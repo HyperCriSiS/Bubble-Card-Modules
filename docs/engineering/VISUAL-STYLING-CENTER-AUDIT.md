@@ -52,3 +52,9 @@ Browser integration tests simulate the DOM and hass.states. They are **not** a f
 **Verified:** Python module parsing, Node.js behavioral regressions, Chromium computed-CSS and state-change scenarios on simulated DOM using mirrored Bubble Card v3.4.2 CSS.
 
 **Not verified:** Complete Home Assistant frontend mounting, actual WebSocket `state_changed` → Bubble Card style-pass chain, native slider drag/touch, live editor and module-disable events without card disconnection. Bubble Card currently calls module teardown on card disconnection; it is not evidence of cleanup on module disable while the same card stays mounted. The browser DOM and HA state used in CI are intentionally simulated.
+
+## Original-Bubble-Card-Bundle-Smoke-Test (2026-10-15)
+- GitHub Actions downloads the unchanged Bubble Card **v3.4.2** release asset `bubble-card.js` and checks SHA-256 `d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae`.
+- Chromium verifies that the real production bundle registers `customElements.get('bubble-card')`, exposes `setConfig` and the `hass` setter, and appears in the native card-picker registry.
+- **Important limitation demonstrated in runs [38763892291](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38763892291), [38764404463](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38764404463), and [38765504975](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38765504975):** Rendering the actual element hangs during `card.hass = ...` in the standalone fixture, even with `styles: ""` and VSC absent. This does **not** establish a VSC bug. The artificially incomplete HA environment is not sufficient for full render/slider testing.
+- Those unsupported render scenarios are explicitly marked `unittest.skip`; CI passes only the objectively verified production-bundle registration smoke test. They must be replaced with authentic HA/Lovelace integration cases per Issue #11, not treated as passed.
