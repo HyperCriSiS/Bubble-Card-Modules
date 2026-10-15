@@ -1,60 +1,54 @@
-# Visual Styling Center — audit and automated test evidence (2026-10-12)
+# Visual Styling Center – Architektur-Audit und Testnachweise
 
-## Basis
-- Read-only reference: Bubble Card stable v3.4.2 at docs/upstream/bubble-card/stable/.
-- Module ID: visual_styling_center. All 46 legacy editor keys remain unchanged.
-- Proposed changes live in pull request #7; no module release or merge is implied.
+Stand: **15. Oktober 2026** · PR [#7](https://github.com/HyperCriSiS/Bubble-Card-Modules/pull/7) · Bubble Card **v3.4.2** · VSC **v2026.10.15**
 
-## Implemented
-- Removed obsolete slider initialization stub: Bubble Card manages native slider updates.
-- Repaired embedded YAML and Markdown structure, version metadata and invalid UTF-8-like multiplication units.
-- Restored module-owned icon inline colors on state/option changes; supported legacy and sectioned/group sub-button config.
-- Replaced problematic numeric || defaults with ??; stopped mutating this.config.
-- Fixed scene/script/automation detection and optional function colors.
-- Removed redundant inline sub-button background writes.
-- Module defaults and color resets now restore previously selected backgrounds.
-- Linked AGENTS.md to the verified local upstream mirror.
+## Code-Audit und Kompatibilität
 
-## Verification
-- Python/PyYAML checks: module parses, 46 editor keys stable and JS syntax valid.
-- Node.js mock runtime: colors, state changes, groups, gradient members, zero values, no config mutation.
-- Chromium DOM integration: actual computed style and JS execution, against exact mirrored upstream base-card/button/sub-button CSS. Checks normal/large card geometry, colors, external simulated states, group gradients, contrast pseudo-elements, background cleanup, mobile spacing and native slider appearance when gradient is off.
-- Screenshots from browser scenarios are attached to the GitHub Actions run.
+- Veralteten Initial-Slider-Update-Stub entfernt. Haupt- und Sub-Button-Slider werden nativ durch Bubble Card aktualisiert.
+- Beschädigte YAML-/Markdown-Struktur, problematische Einheiten und alte Beschreibungen repariert.
+- Modul-ID `visual_styling_center` sowie alle **46 gespeicherten Editor-Optionsnamen** unverändert erhalten.
+- Numerische Nullwerte korrekt behandelt; keine direkte Mutation von `this.config`.
+- Entity-basierte Haupt- und Sub-Icon-Farben reagieren auf Zustandsänderungen. Sub-Buttons erben ohne eigenes Entity-Feld die Haupt-Entity.
+- Unterstützung für explizite und implizite `main`-/`bottom`-Gruppen anhand tatsächlicher Bubble-Card-Klassenindizes.
+- Fremde Inline-CSS-Variablen werden nicht überschrieben oder dauerhaft gelöscht. Für eigene CSS-Variablen, Icon-Farben und Klassen sind Rücksetzung und nativer `onTeardown`-Hook implementiert.
+- `hasChanged` verhindert unnötige Sortierung identischer Gradientendaten; `trackedHass` zeichnet Entity-Abhängigkeiten auf. Es werden keine zusätzlichen HA-WebSocket-Listener oder Polling-Intervalle benötigt.
+- Gradientengestaltung auf die Hauptkarte eingegrenzt; native Sub-Slider-Darstellung bleibt grundsätzlich Bubble Card überlassen.
+- `AGENTS.md` enthält direkte Verweise auf die synchronisierte, schreibgeschützte Upstream-Referenz.
 
-## Known boundary
-Browser integration tests simulate the DOM and hass.states. They are **not** a full Home Assistant frontend and do **not** test native slider pointer events, HA WebSocket subscriptions or the real Bubble Card lifecycle. Those require an isolated HA instance with installed Bubble Card and actual frontend/browser automation. The tests cannot certify that every Bubble Card layout, theme or third-party module is compatible.
+## Automatische Tests
 
-## Remaining genuine HA verification
-- Native main/sub-button slider pointer interactions, drag and outside-HA state changes.
-- Actual card editor selectors and live update behavior in HA.
-- Complex sections/grid and mixed-group layouts, module interactions, overlays and mobile touch.
-- Visual screenshot diff snapshots across supported browsers and themes.
+| Stufe | Umfang | Stand |
+| --- | --- | --- |
+| Python + PyYAML | Vollständiger Modulimport, Kompatibilitätsnamen, Upstream-Quellcode-Verträge | Bestanden |
+| Node.js | Farben, Nullwerte, dynamische Gradienten, Gruppen, Konfiguration und Teardown | Bestanden |
+| Chromium (simuliertes DOM) | Berechnete CSS-Werte mit v3.4.2-Referenz-Stylesheets, Layout, responsive Verhalten und Style-Cleanup | Bestanden |
+| Original-Bundle-Smoke | SHA-256-verified Release-Bundle, tatsächliche `bubble-card`-Registrierung | Bestanden |
+| **Home Assistant + Lovelace E2E** | Echter HA-Backend-Container und originale Bubble-Card-Komponente; API/WebSocket-/Pointer-Interaktionen | **6 von 6 bestanden** |
 
-## Compatibility improvements added 2026-10-15
-- Read-only upstream mirror updated to v3.4.2 in PR #10, and sync workflow changed to protected-main PRs in PR #9.
-- Removed broad slider-fill styling, restricting VSC gradients to the main card slider. Native sub-slider contrast and state colors remain Bubble Card responsibilities.
-- Native sub-button backgrounds remain active unless a VSC-specific background color is configured.
-- CSS variables and gradients are written only when their values change; removed layout configuration fields no longer leave stale variables.
-- Chromium tests cover native nested sub-slider preservation and custom sub-button background override.
-- Real Home Assistant WebSocket/pointer lifecycle tests are still open. Repository setting must allow GitHub Actions to create PRs for unattended upstream-reference PR creation.
+**Echte HA-Nachweise:** [GitHub Actions Run #38797293013](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38797293013), Home Assistant Core **2026.10.1**, Original-Bubble-Card-Bundle **v3.4.2** mit SHA-256 `d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae`.
 
-- Native Bubble Card `hasChanged('vsc-gradient', ...)` is now used to skip expensive gradient hue sorting when observed input RGBs remain unchanged. The entity reads still happen on each module style pass to preserve `trackedHass` dependencies. Python/Node/Chromium mocks now exercise the change gate.
+Die sechs E2E-Prüfungen:
+1. Echte Lovelace-Karte mit VSC, Hauptslider, dauerhaft sichtbarem Sub-Button-Slider und dynamischem Gradienten.
+2. Externe API-Lichtzustände werden per echter HA-State/WebSocket-Kette bis zur Icon-Farbe übernommen.
+3. RGB-Änderungen eines einzelnen Kindlichts aktualisieren den gruppenbasierten VSC-Gradienten.
+4. Echte Pointer-Slider-Geste verändert die Helligkeit des HA-Backends.
+5. Unveränderte Bubble Card ohne VSC läuft parallel als native Baseline.
+6. Dashboard-Navigation und Neuerstellung der Karte funktionieren.
 
-## Follow-up fixes verified 2026-10-15 (PR #7)
-- Parent entity fallback for sub-buttons: Bubble Card resolves `subButton.entity ?? context.config.entity`. VSC now uses the same rule; regression tests verify inherited icon colors and subsequent HA state changes.
-- Explicit and implicit main groups and bottom groups now follow the same `.bubble-sub-button-N` class index order as Bubble Card v3.4.2. This fixes incorrect colors when YAML interleaves group items with individual buttons. Node and Chromium cover the mixed layout.
-- Inline CSS custom properties are now ownership-tracked per card. Clearing a VSC option restores an earlier inline value (including `!important` priority), instead of unconditionally deleting a value owned by another module or custom theme.
-- VSC registers Bubble Card's native `onTeardown` callback. When a card disconnects, it restores VSC-owned CSS variables, icon colors and card classes without adding WebSocket listeners or polling.
-- Tests now enforce upstream source contracts for sub-button index ordering, inherited entities, the `trackedHass` dependency proxy and `hasChanged` / `onTeardown` support.
-- The VSC GitHub Actions workflow also triggers when files under `docs/upstream/bubble-card/` change. This brings potential future API/DOM drift into the PR test cycle.
-- Module metadata version was advanced to `v2026.10.15`; module ID and all 46 editor settings are unchanged.
+Testdateien und Isolation: [tests/ha_e2e/README.md](../../tests/ha_e2e/README.md).
 
-**Verified:** Python module parsing, Node.js behavioral regressions, Chromium computed-CSS and state-change scenarios on simulated DOM using mirrored Bubble Card v3.4.2 CSS.
+## Historischer Testaufbau und Fehlerdiagnose
 
-**Not verified:** Complete Home Assistant frontend mounting, actual WebSocket `state_changed` → Bubble Card style-pass chain, native slider drag/touch, live editor and module-disable events without card disconnection. Bubble Card currently calls module teardown on card disconnection; it is not evidence of cleanup on module disable while the same card stays mounted. The browser DOM and HA state used in CI are intentionally simulated.
+Vor dieser vollständigen HA-E2E-Suite wurde das Original-Bubble-Card-Bundle bereits in Chromium geladen. Eine rein simulierte `hass`-Umgebung konnte jedoch nicht den kompletten Render-Lifecycle bereitstellen – selbst **ohne VSC**. Diese unvollständigen Original-Bundle-Render-Tests sind daher ausdrücklich übersprungen und nicht als erfolgreiche Tests gezählt.
 
-## Original-Bubble-Card-Bundle-Smoke-Test (2026-10-15)
-- GitHub Actions downloads the unchanged Bubble Card **v3.4.2** release asset `bubble-card.js` and checks SHA-256 `d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae`.
-- Chromium verifies that the real production bundle registers `customElements.get('bubble-card')`, exposes `setConfig` and the `hass` setter, and appears in the native card-picker registry.
-- **Important limitation demonstrated in runs [38763892291](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38763892291), [38764404463](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38764404463), and [38765504975](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38765504975):** Rendering the actual element hangs during `card.hass = ...` in the standalone fixture, even with `styles: ""` and VSC absent. This does **not** establish a VSC bug. The artificially incomplete HA environment is not sufficient for full render/slider testing.
-- Those unsupported render scenarios are explicitly marked `unittest.skip`; CI passes only the objectively verified production-bundle registration smoke test. They must be replaced with authentic HA/Lovelace integration cases per Issue #11, not treated as passed.
+Der erste echte HA-Testlauf wurde durch fehlende Schreibrechte auf dem temporären Docker-Mount blockiert. Nach Korrektur startete die Instanz; fünf von sechs Tests liefen sofort erfolgreich. Die sechste Prüfung erwartete fälschlich ein Icon für einen `always_visible`-Subslider. Bubble Card verwendet dafür tatsächlich `.bubble-sub-button-slider` ohne Icon-Host. Nach Anpassung bestanden sechs von sechs Tests.
+
+## Verbleibende Grenzen und Risiken
+
+- **Nicht getestet:** alle 46 Felder im *visuellen* Modul-Editor einschließlich Konfigurationspersistenz und Umschalten ohne Card-Disconnect.
+- Mobile Touch-Drags, weitere Slider-Typen, Pop-up-/Sections-/Grid-Varianten und sämtliche Gruppenanordnungen sind nicht vollständig durch echte HA-E2E-Tests abgedeckt.
+- Drittmodule, Themes, `!important`-Kaskaden und Langzeit-/Performance-Verhalten benötigen weitere Systemtests.
+- `onTeardown` bei Card-Disconnect ist im simulierten Browser getestet. Der vollständige reale Deaktivierungspfad ohne Disconnect ist noch nicht abgesichert.
+- Ein bestandener Testlauf garantiert nicht die Abwesenheit weiterer Fehler oder vollständige Ausschöpfung aller neuen Bubble-Card-Funktionen.
+
+Weitere Aufgaben stehen in [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11). PR #7 bleibt bis zur gesonderten Freigabe offen.
