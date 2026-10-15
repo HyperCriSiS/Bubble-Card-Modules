@@ -74,7 +74,7 @@ class VSCBrowser(unittest.TestCase):
         self.page.locator("#native").evaluate("(e,v)=>e.textContent=v", self.native)
         self.page.locator("#module").evaluate("(e,v)=>e.textContent=v", self.css)
         self.page.evaluate("""expr => {
-            window.runner = new Function('card','hass','hasChanged','return '+expr+';');
+            window.runner = new Function('card','hass','hasChanged','onTeardown','return '+expr+';');
             window.cfg={entity:'light.main',visual_styling_center:{},sub_button:{
                 main:[{group:[{entity:'light.first'},{entity:'light.second'}]}],
                 bottom:[{entity:'light.main'}]}};
@@ -90,7 +90,7 @@ class VSCBrowser(unittest.TestCase):
                 window.gradientGates.set(key,sig);
                 return old!==sig;
             };
-            window.render=()=>window.runner.call({config:window.cfg},document.querySelector('#card'),window.hass,window.hasChanged);
+            window.render=()=>window.runner.call({config:window.cfg},document.querySelector('#card'),window.hass,window.hasChanged,fn=>window.vscTeardown=fn);
             window.render();
         }""", self.expr)
 
@@ -195,6 +195,20 @@ class VSCBrowser(unittest.TestCase):
         self.change(states={'light.main':{'state':'off','attributes':{}}})
         self.page.wait_for_timeout(400)
         self.assertEqual(self.cssval('#sub1','color'),'rgb(150, 150, 150)')
+
+    def test_foreign_custom_style_ownership_and_teardown(self):
+        self.page.locator('#card').evaluate("e => e.style.setProperty('--icon-color','rgb(12, 34, 56)')")
+        self.change()
+        self.assertEqual(self.cssval('#card','--icon-color'),'rgb(12, 34, 56)')
+        self.change(cfg={'manual_icon_color':'#ffcc00','hide_icon_background':True})
+        self.assertEqual(self.cssval('#card','--icon-color'),'#ffcc00')
+        self.page.evaluate("""() => {delete window.cfg.visual_styling_center.manual_icon_color;window.render()}""")
+        self.assertEqual(self.cssval('#card','--icon-color'),'rgb(12, 34, 56)')
+        self.change(cfg={'manual_icon_background_color':'#ab12cd'})
+        self.page.evaluate("() => window.vscTeardown()")
+        self.assertEqual(self.cssval('#card','--icon-background-color'),'')
+        self.assertFalse(self.page.locator('#card').evaluate("e=>e.classList.contains('hide-icon-background')"))
+        self.assertEqual(self.cssval('#card','--icon-color'),'rgb(12, 34, 56)')
 
     def test_native_slider_restored_when_gradient_disabled(self):
         self.assertEqual(self.cssval('#fill','background-image'),'none')

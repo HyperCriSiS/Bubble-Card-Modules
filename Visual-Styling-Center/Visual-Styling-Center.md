@@ -493,15 +493,46 @@ visual_styling_center:
   code: |
    ${(() => {
       const config = this.config.visual_styling_center || {};
-      // Avoid style recalculations when a HA pass produces identical values.
-      const setCardVariable = (name, value) => {
-        const current = card.style.getPropertyValue(name);
-        if (value === undefined || value === null) {
-          if (current) card.style.removeProperty(name);
-        } else if (current !== String(value)) {
-          card.style.setProperty(name, String(value));
+      // Keep each inline CSS variable's pre-module value. Without ownership,
+      // an unset VSC option would delete another module's or theme's overrides.
+      const ownedVariables = card._vscOwnedVariables ?? (card._vscOwnedVariables = new Map());
+      const restoreOwnedVariable = (name) => {
+        const saved = ownedVariables.get(name);
+        if (!saved) return;
+        if (card.style.getPropertyValue(name) === saved.applied) {
+          if (saved.previous) card.style.setProperty(name, saved.previous, saved.priority);
+          else card.style.removeProperty(name);
         }
+        ownedVariables.delete(name);
       };
+      const setCardVariable = (name, value) => {
+        if (value == null) {
+          restoreOwnedVariable(name);
+          return;
+        }
+        const desired = String(value);
+        const current = card.style.getPropertyValue(name);
+        let saved = ownedVariables.get(name);
+        if (!saved) {
+          saved = { previous: current, priority: card.style.getPropertyPriority(name), applied: desired };
+          ownedVariables.set(name, saved);
+        } else {
+          saved.applied = desired;
+        }
+        if (current !== desired) card.style.setProperty(name, desired);
+      };
+      // onTeardown fires when Bubble Card detaches a card, including view
+      // caching/re-attachment. Keep registration idempotent across style passes.
+      const vscClassNames = [
+        'slider-background-mode', 'vsc-custom-subbutton-background',
+        'use-function-button-color', 'hide-icon-background',
+        'hide-subbutton-background', 'icon-helper-enabled',
+        'helper-fade-enabled', 'helper-main-icon', 'helper-sub-icons',
+        'slider-helper-enabled', 'slider-helper-fade-enabled',
+        'use-gradient-background', 'use-gradient-slider'
+      ];
+      const initialClasses = card._vscInitialClasses ?? (card._vscInitialClasses =
+        new Map(vscClassNames.map(name => [name, card.classList.contains(name)])));
 
       // Derive defaults without mutating the saved Bubble Card configuration.
       const gradientTarget = config.gradient_target ?? 'slider';
@@ -844,7 +875,17 @@ visual_styling_center:
       setCardVariable('--slider-gradient', backgroundGradientActive ? null : appliedGradient);
 
       // Native Bubble Card handles slider state synchronization.
-      // Keep VSC focused on visual styling without a redundant update hook.
+      // Release only VSC-owned styles if Bubble Card disconnects this card.
+      if (typeof onTeardown === 'function') {
+        onTeardown(() => {
+          Array.from(ownedVariables.keys()).forEach(restoreOwnedVariable);
+          applyOwnedIconColor(card.querySelector('.bubble-icon'), null);
+          card.querySelectorAll('.bubble-sub-button-icon').forEach(icon => applyOwnedIconColor(icon, null));
+          initialClasses.forEach((wasPresent, name) => card.classList.toggle(name, wasPresent));
+          if (card._vscOwnedVariables === ownedVariables) delete card._vscOwnedVariables;
+          if (card._vscInitialClasses === initialClasses) delete card._vscInitialClasses;
+        });
+      }
 
       return '';
     })()}

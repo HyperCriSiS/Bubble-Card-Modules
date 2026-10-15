@@ -59,7 +59,7 @@ class VisualStylingCenterTests(unittest.TestCase):
         expression = code[start + 2:end - 1]
         with tempfile.TemporaryDirectory() as directory:
             script = Path(directory) / "expression.js"
-            script.write_text("function runner(card,hass,hasChanged){ return " + expression + "; }\n",
+            script.write_text("function runner(card,hass,hasChanged,onTeardown){ return " + expression + "; }\n",
                               encoding="utf-8")
             check = subprocess.run(["node", "--check", str(script)],
                                    capture_output=True, text=True)

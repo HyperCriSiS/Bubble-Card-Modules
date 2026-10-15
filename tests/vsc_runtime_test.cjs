@@ -30,7 +30,7 @@ function makeCard(){
       const m=q.match(/^\.bubble-sub-button-(\d+) \.bubble-sub-button-icon$/);
       return m?sub[+m[1]-1]??null:null;
     },
-    querySelectorAll(){return []}
+    querySelectorAll(q){return q===".bubble-sub-button-icon"?sub:[]}
   };
 }
 function st(state,rgb){return {state,attributes:rgb?{rgb_color:rgb}:{}}}
@@ -47,7 +47,8 @@ const nativeHasChanged = (key,...values) => {
   gradientGates.set(key,sig);
   return was !== sig;
 };
-const run=()=>runner.call(ctx,card,hass,nativeHasChanged);
+let teardownVSC = null;
+const run=()=>runner.call(ctx,card,hass,nativeHasChanged,fn=>{teardownVSC=fn});
 test("entity state colors update",()=>{
   run();assert.equal(card.main.style.getPropertyValue("color"),"rgb(100, 20, 40)");
   assert.equal(card.sub[0].style.getPropertyValue("color"),"rgb(150, 150, 150)");
@@ -161,4 +162,35 @@ test("removing layout configuration resets module-owned CSS variables",()=>{
   delete cfg.inner_padding;
   run();
   assert.equal(card.style.getPropertyValue("--inner-padding"),"");
+});
+
+test("foreign CSS variables survive empty settings and return after override",()=>{
+  delete cfg.manual_icon_color;
+  delete cfg.custom_icon_color;
+  card.style.setProperty("--icon-color","rgb(1, 2, 3)","important");
+  run();
+  assert.equal(card.style.getPropertyValue("--icon-color"),"rgb(1, 2, 3)");
+  cfg.manual_icon_color="#abcdef";
+  run();
+  assert.equal(card.style.getPropertyValue("--icon-color"),"#abcdef");
+  delete cfg.manual_icon_color;
+  run();
+  assert.equal(card.style.getPropertyValue("--icon-color"),"rgb(1, 2, 3)");
+  assert.equal(card.style.getPropertyPriority("--icon-color"),"important");
+});
+test("native teardown restores VSC owned variables, classes and icon colors",()=>{
+  cfg.manual_icon_background_color="#aabbcc";
+  cfg.hide_icon_background=true;
+  cfg.enable_entity_colored_main_icon=true;
+  ctx.config.entity="light.a";
+  hass.states["light.a"]=st("on",[45,56,67]);
+  run();
+  assert.equal(card.classList.contains("hide-icon-background"),true);
+  assert.equal(card.main.style.getPropertyValue("color"),"rgb(45, 56, 67)");
+  assert.equal(typeof teardownVSC,"function");
+  teardownVSC();
+  assert.equal(card.main.style.getPropertyValue("color"),"magenta");
+  assert.equal(card.classList.contains("hide-icon-background"),false);
+  assert.equal(card.style.getPropertyValue("--icon-background-color"),"");
+  assert.equal(card.style.getPropertyValue("--icon-color"),"rgb(1, 2, 3)");
 });
