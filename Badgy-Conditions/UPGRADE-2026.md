@@ -42,7 +42,8 @@ The isolated import artifact is currently `v2026.10.15-beta.3`.
   selected sensor or binary sensor in Bubble Card 3.4.2's Card Picker.
 
 The native Card Picker and visual editor still require testing in a real HA
-frontend; the automated Node mock does not reproduce layout or HA's shadow DOM.
+frontend; neither the Node mock nor the standalone Chromium smoke test reproduces
+Home Assistant's real editor, entity subscriptions or shadow DOM.
 
 ## Bug fixes
 
@@ -212,6 +213,12 @@ The Badgy CI workflow:
 - Runs mocked DOM regression tests for repeated sensor updates, main badges,
   animation start/stop, localized values, dynamic color rules, Jinja colors,
   icon restoration and global scale.
+- Runs three headless Chromium Playwright smoke tests against a synthetic Bubble
+  Card DOM: real computed CSS, color-mix alpha, scaled badges, animation
+  start/stop, foreign badge isolation, repeated sensor updates, replacement of
+  a lost badge node and onTeardown cleanup.
+- These browser tests run in CI but **do not replace** a live Home Assistant
+  acceptance test or visual review of actual Bubble Card layouts.
 
 Source of original bug reports and community fixes:
 https://github.com/Clooos/Bubble-Card/discussions/1333

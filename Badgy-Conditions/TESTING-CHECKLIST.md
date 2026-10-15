@@ -4,7 +4,10 @@ Target: Bubble Card **v3.4.2**, a separate dashboard, and the isolated
 `badgy-condition-helper-beta` module. The original module and existing cards
 must not be modified during the tests.
 
-This is a **manual** release gate. Unit tests do not substitute for these checks.
+This is a **manual** release gate. The Node tests and the headless Chromium
+Playwright smoke tests now run automatically in GitHub Actions. Chromium tests
+exercise real CSS on a **synthetic card DOM**, not the real Home Assistant editor.
+None of the checkboxes below are considered complete based on those tests.
 
 ## Installation and editor
 
