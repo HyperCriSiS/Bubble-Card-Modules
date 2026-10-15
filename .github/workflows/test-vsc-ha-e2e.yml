@@ -40,12 +40,23 @@ jobs:
           echo "d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae  $HA_CONFIG/www/bubble-card.js" | sha256sum --check
       - name: Start isolated Home Assistant Core 2026.10.1
         run: |
+          # The image runs HA as an unprivileged user. This config contains
+          # only disposable virtual fixtures and no credentials.
+          mkdir -p "$HA_CONFIG/deps"
+          chmod 0777 "$HA_CONFIG" "$HA_CONFIG/deps"
           docker pull ghcr.io/home-assistant/home-assistant:2026.10.1
           docker run -d --name vsc-isolated-ha --restart=no \
             --cap-drop=ALL --security-opt=no-new-privileges \
             -e TZ=UTC -p 127.0.0.1:8123:8123 \
             -v "$HA_CONFIG:/config" \
             ghcr.io/home-assistant/home-assistant:2026.10.1
+          # Fail promptly if the container exits before onboarding, avoiding
+          # a five-minute readiness timeout that hides the actual failure.
+          sleep 5
+          if [ "$(docker inspect --format '{{.State.Running}}' vsc-isolated-ha)" != "true" ]; then
+            docker logs --tail 150 vsc-isolated-ha
+            exit 1
+          fi
       - name: Onboard isolated HA and verify real API
         run: .venv/bin/python tests/ha_e2e/bootstrap.py --base "$HA_E2E_BASE" --output "$HA_E2E_AUTH_FILE"
       - name: Run native Lovelace and WebSocket E2E tests
