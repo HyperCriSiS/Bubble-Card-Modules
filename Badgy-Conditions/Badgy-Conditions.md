@@ -399,7 +399,6 @@ badgy-condition-helper:
         function updateManagedStyle(node, name, value, priority = "important") {
           if (!node) return;
           const owned = node.__badgyOwnedStyles || (node.__badgyOwnedStyles = Object.create(null));
-          node.classList.add("badgy-managed-style");
           const current = node.style.getPropertyValue(name);
           const currentPriority = node.style.getPropertyPriority(name);
           const old = owned[name];
@@ -430,6 +429,7 @@ badgy-condition-helper:
           entry.applied = next;
           entry.priority = priority;
           owned[name] = entry;
+          node.classList.add("badgy-managed-style");
         }
 
         function backgroundWithOpacity(color, opacity) {
