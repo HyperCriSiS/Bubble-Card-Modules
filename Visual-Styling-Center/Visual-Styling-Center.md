@@ -874,16 +874,45 @@ visual_styling_center:
       setCardVariable('--card-gradient', backgroundGradientActive ? appliedGradient : null);
       setCardVariable('--slider-gradient', backgroundGradientActive ? null : appliedGradient);
 
-      // Native Bubble Card handles slider state synchronization.
-      // Release only VSC-owned styles if Bubble Card disconnects this card.
+      // Restore our own changes when disconnected OR when the module is
+      // removed from a still-mounted card using setConfig(). Bubble Card's
+      // native onTeardown currently runs on disconnect, not on this edit path.
+      const cleanupVSC = () => {
+        Array.from(ownedVariables.keys()).forEach(restoreOwnedVariable);
+        applyOwnedIconColor(card.querySelector('.bubble-icon'), null);
+        card.querySelectorAll('.bubble-sub-button-icon').forEach(icon => applyOwnedIconColor(icon, null));
+        initialClasses.forEach((wasPresent, name) => card.classList.toggle(name, wasPresent));
+        if (card._vscOwnedVariables === ownedVariables) delete card._vscOwnedVariables;
+        if (card._vscInitialClasses === initialClasses) delete card._vscInitialClasses;
+      };
+      // Update the current cleanup callback on each pass without stacking hooks.
+      this._vscCleanupCurrent = cleanupVSC;
+      if (typeof this.setConfig === 'function' && !this._vscSetConfigWrapper) {
+        const host = this;
+        const originalSetConfig = this.setConfig;
+        const wrappedSetConfig = function(nextConfig) {
+          const previousCode = String(host.config?.styles ?? '');
+          const incomingCode = String(nextConfig?.styles ?? '');
+          // Only react to removing the inline VSC source: other cards/modules
+          // may legitimately use styles without embedding VSC source.
+          if (previousCode.includes('this.config.visual_styling_center') &&
+              !incomingCode.includes('this.config.visual_styling_center')) {
+            host._vscCleanupCurrent?.();
+          }
+          return originalSetConfig.call(this, nextConfig);
+        };
+        this._vscSetConfigWrapper = { originalSetConfig, wrappedSetConfig };
+        this.setConfig = wrappedSetConfig;
+      }
       if (typeof onTeardown === 'function') {
         onTeardown(() => {
-          Array.from(ownedVariables.keys()).forEach(restoreOwnedVariable);
-          applyOwnedIconColor(card.querySelector('.bubble-icon'), null);
-          card.querySelectorAll('.bubble-sub-button-icon').forEach(icon => applyOwnedIconColor(icon, null));
-          initialClasses.forEach((wasPresent, name) => card.classList.toggle(name, wasPresent));
-          if (card._vscOwnedVariables === ownedVariables) delete card._vscOwnedVariables;
-          if (card._vscInitialClasses === initialClasses) delete card._vscInitialClasses;
+          cleanupVSC();
+          const wrapper = this._vscSetConfigWrapper;
+          if (wrapper && this.setConfig === wrapper.wrappedSetConfig) {
+            this.setConfig = wrapper.originalSetConfig;
+          }
+          delete this._vscSetConfigWrapper;
+          delete this._vscCleanupCurrent;
         });
       }
 
