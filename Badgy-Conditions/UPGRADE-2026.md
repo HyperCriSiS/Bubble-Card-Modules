@@ -18,6 +18,32 @@ This document describes the update proposed in the 2026 Badgy PR.
 The existing YAML module ID and **all 240 pre-existing editor configuration
 paths are preserved**. Existing cards should not require migration.
 
+## Bubble Card v3.4.2 hardening (2026-10-15)
+
+The isolated import artifact is currently `v2026.10.15-beta.2`.
+
+- All Badgy animation CSS class names, keyframes, and effect color variables
+  are namespaced. The effect cleanup no longer removes unowned classes.
+- Native background, color, and icon properties are preserved. If Bubble Card
+  changes one while Badgy is active, Badgy records the newer native value and
+  restores it when the rule stops matching. Styles touched by other modules
+  after the last Badgy write are left alone when disabling the rule.
+- Background transparency now uses CSS `color-mix()`, rather than setting
+  `opacity` on the complete sub-button or main icon (which dimmed text and
+  badges too). Modern Chromium-based Home Assistant frontends support this.
+- Main-icon badges default to in-card offsets. Supported browsers receive
+  `overflow-clip-margin` on just the card with these opt-in badges; unlike
+  `overflow: visible`, this preserves Bubble Card's no-scroll clipping behavior.
+- The native `hasChanged()` hook gates unchanged badge/background updates,
+  using live DOM element identity as part of each fingerprint.
+- `onTeardown()` restores owned CSS/icons and removes owned badges/effects when
+  Bubble Card disconnects a card, without patching its lifecycle callbacks.
+- `suggestions_code` offers one opt-in main-icon badge configuration for a
+  selected sensor or binary sensor in Bubble Card 3.4.2's Card Picker.
+
+The native Card Picker and visual editor still require testing in a real HA
+frontend; the automated Node mock does not reproduce layout or HA's shadow DOM.
+
 ## Bug fixes
 
 - Stop sub-button icon/container animations as soon as their conditions turn false.
