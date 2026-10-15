@@ -232,6 +232,60 @@ badgy-condition-helper-beta:
           return "var(--" + value + "-color)";
         }
 
+        // Preserve pre-existing styles without deleting changes made by Bubble
+        // Card itself or by other modules while Badgy is active. The registry
+        // lives on the DOM node across style passes; a new node gets fresh state.
+        function updateManagedStyle(node, name, value, priority = "important") {
+          if (!node) return;
+          const owned = node.__badgyOwnedStyles || (node.__badgyOwnedStyles = Object.create(null));
+          const current = node.style.getPropertyValue(name);
+          const currentPriority = node.style.getPropertyPriority(name);
+          const old = owned[name];
+          if (value === null || value === undefined || value === "") {
+            if (!old) return;
+            if (current === old.applied && currentPriority === old.priority) {
+              if (old.original) node.style.setProperty(name, old.original, old.originalPriority || "");
+              else node.style.removeProperty(name);
+            }
+            delete owned[name];
+            return;
+          }
+          const next = String(value);
+          const entry = old || {
+            original: current,
+            originalPriority: currentPriority,
+            applied: null,
+            priority,
+          };
+          if (old && (current !== old.applied || currentPriority !== old.priority)) {
+            // Another writer changed the value: restore this newer value later.
+            entry.original = current;
+            entry.originalPriority = currentPriority;
+          }
+          if (current !== next || currentPriority !== priority)
+            node.style.setProperty(name, next, priority);
+          entry.applied = next;
+          entry.priority = priority;
+          owned[name] = entry;
+        }
+
+        function backgroundWithOpacity(color, opacity) {
+          if (!color) return null;
+          const alpha = Number(opacity ?? 1);
+          const fraction = Number.isFinite(alpha) ? Math.max(0, Math.min(1, alpha)) : 1;
+          if (fraction === 1) return color;
+          // Unlike applying opacity to the container, this does not dim the
+          // icon, text or badges. CSS color-mix works with theme var() colors.
+          return "color-mix(in srgb, " + color + " " +
+            (fraction * 100).toFixed(2) + "%, transparent)";
+        }
+
+        function changeGate(label, ...values) {
+          // Gate by both the live element and the computed values, never by
+          // an entity ID alone: newly created DOM must still be initialized.
+          return typeof hasChanged !== "function" || hasChanged("badgy:" + label, ...values);
+        }
+
         const ALL_EFFECT_CLASSES = [
           'effect-pulse','effect-rotate','effect-glow','effect-shake',
           'effect-float','effect-zoom','effect-heartbeat','effect-spin-360',
@@ -425,31 +479,33 @@ badgy-condition-helper-beta:
             let background = null;
             if (bg) {
               const type = bg.type ?? "solid";
+              const opacity = bg.opacity ?? 1;
               if (type === "solid") {
-                background = resolvedColor(bg, "color");
-              } else if (type === "two-color") {
-                const a = resolvedColor(bg, "color1") || "#ff0000";
-                const b = resolvedColor(bg, "color2") || "#0000ff";
-                background = "linear-gradient(135deg, " + a + " 0%, " + b + " 100%)";
-              } else if (type === "three-color") {
-                const a = resolvedColor(bg, "color1") || "#ff0000";
-                const b = resolvedColor(bg, "color2") || "#00ff00";
-                const c = resolvedColor(bg, "color3") || "#0000ff";
-                background = "linear-gradient(135deg, " + a + " 0%, " + b + " 50%, " + c + " 100%)";
+                background = backgroundWithOpacity(resolvedColor(bg, "color"), opacity);
+              } else if (type === "two-color" || type === "three-color") {
+                const a = backgroundWithOpacity(resolvedColor(bg, "color1") || "#ff0000", opacity);
+                const b = backgroundWithOpacity(resolvedColor(bg, "color2") || "#0000ff", opacity);
+                if (type === "two-color") {
+                  background = "linear-gradient(135deg, " + a + " 0%, " + b + " 100%)";
+                } else {
+                  const c = backgroundWithOpacity(resolvedColor(bg, "color3") || "#0000ff", opacity);
+                  background = "linear-gradient(135deg, " + a + " 0%, " +
+                    b + " 50%, " + c + " 100%)";
+                }
               }
             }
-            // Only touch properties that Badgy owns. Other modules must keep theirs.
-            if (background) {
-              if (sb.style.getPropertyValue("background") !== background)
-                sb.style.setProperty("background", background, "important");
-              const opacity = String(bg.opacity ?? 1);
-              if (sb.style.getPropertyValue("opacity") !== opacity)
-                sb.style.setProperty("opacity", opacity, "important");
-              sb.classList.add("sub-button-direct-bg");
-            } else if (sb.classList.contains("sub-button-direct-bg")) {
+            const previousBackground = sb.style.getPropertyValue("background");
+            const previousPriority = sb.style.getPropertyPriority("background");
+            if (changeGate("sub-background-" + i, sb, background, previousBackground, previousPriority)) {
+              updateManagedStyle(sb, "background", background);
+            }
+            // Remove overrides left by older Badgy versions without making the
+            // whole sub-button (including its icon and badge) transparent.
+            if (sb.classList.contains("sub-button-direct-bg")) {
               sb.classList.remove("sub-button-direct-bg");
-              sb.style.removeProperty("background");
-              sb.style.removeProperty("opacity");
+              if (sb.style.getPropertyValue("opacity") !== "" &&
+                  !sb.__badgyOwnedStyles?.opacity)
+                sb.style.removeProperty("opacity");
             }
           }
         }
@@ -522,18 +578,17 @@ badgy-condition-helper-beta:
           const mBg = chooseRule(config.main_icon_background);
           const mainCont = cardEl.querySelector(".bubble-icon-container");
           if (!mainCont) return;
-          const color = mBg ? resolvedColor(mBg) : null;
-          if (color) {
-            if (mainCont.style.getPropertyValue("background") !== color)
-              mainCont.style.setProperty("background", color, "important");
-            const opacity = String(mBg.opacity ?? 1);
-            if (mainCont.style.getPropertyValue("opacity") !== opacity)
-              mainCont.style.setProperty("opacity", opacity, "important");
-            mainCont.dataset.badgyBackgroundManaged = "1";
-          } else if (mainCont.dataset.badgyBackgroundManaged) {
-            mainCont.style.removeProperty("background");
-            mainCont.style.removeProperty("opacity");
+          const color = mBg
+            ? backgroundWithOpacity(resolvedColor(mBg), mBg.opacity ?? 1) : null;
+          const current = mainCont.style.getPropertyValue("background");
+          const priority = mainCont.style.getPropertyPriority("background");
+          if (changeGate("main-background", mainCont, color, current, priority))
+            updateManagedStyle(mainCont, "background", color);
+          // Legacy code wrote opacity directly on the element. Clear only the
+          // old Badgy marker, not an unrelated module's new style.
+          if (mainCont.dataset.badgyBackgroundManaged) {
             delete mainCont.dataset.badgyBackgroundManaged;
+            mainCont.style.removeProperty("opacity");
           }
         }
 
@@ -581,36 +636,30 @@ badgy-condition-helper-beta:
 
         function updateManagedIcon(el, requested) {
           if (!el) return;
-          if (requested) {
-            if (!Object.prototype.hasOwnProperty.call(el.dataset, "badgyOriginalIcon")) {
-              el.dataset.badgyOriginalIcon = el.getAttribute("icon") || "";
+          const now = el.getAttribute("icon");
+          const existing = el.__badgyIconOverride;
+          if (!requested) {
+            if (existing) {
+              // Never overwrite a new native icon selected by Bubble Card.
+              if (now === existing.applied) {
+                if (existing.original === null) el.removeAttribute("icon");
+                else el.setAttribute("icon", existing.original);
+              }
+              delete el.__badgyIconOverride;
             }
-            if (el.getAttribute("icon") !== requested) el.setAttribute("icon", requested);
-          } else if (Object.prototype.hasOwnProperty.call(el.dataset, "badgyOriginalIcon")) {
-            const original = el.dataset.badgyOriginalIcon;
-            if (original) el.setAttribute("icon", original);
-            else el.removeAttribute("icon");
-            delete el.dataset.badgyOriginalIcon;
+            return;
           }
+          const entry = existing || { original: now, applied: null };
+          if (existing && now !== existing.applied) entry.original = now;
+          if (now !== requested) el.setAttribute("icon", requested);
+          entry.applied = requested;
+          el.__badgyIconOverride = entry;
         }
 
         function updateManagedColor(el, chosen) {
           if (!el) return;
           const value = chosen ? resolvedColor(chosen) : null;
-          if (value) {
-            if (!Object.prototype.hasOwnProperty.call(el.dataset, "badgyOriginalColor")) {
-              el.dataset.badgyOriginalColor = el.style.getPropertyValue("color");
-              el.dataset.badgyOriginalColorPriority = el.style.getPropertyPriority("color");
-            }
-            if (el.style.getPropertyValue("color") !== value)
-              el.style.setProperty("color", value, "important");
-          } else if (Object.prototype.hasOwnProperty.call(el.dataset, "badgyOriginalColor")) {
-            const original = el.dataset.badgyOriginalColor;
-            if (original) el.style.setProperty("color", original, el.dataset.badgyOriginalColorPriority || "");
-            else el.style.removeProperty("color");
-            delete el.dataset.badgyOriginalColor;
-            delete el.dataset.badgyOriginalColorPriority;
-          }
+          updateManagedStyle(el, "color", value);
         }
 
         function processIconsAndColors() {
@@ -641,11 +690,11 @@ badgy-condition-helper-beta:
           target.classList.toggle("badgy-card-glow-pulse", active && effect.animate === true);
           if (active) {
             const color = resolvedColor(effect) || "var(--primary-color)";
-            target.style.setProperty("--badgy-glow-color", color);
-            target.style.setProperty("--badgy-glow-size", String(effect.intensity ?? 14) + "px");
+            updateManagedStyle(target, "--badgy-glow-color", color, "");
+            updateManagedStyle(target, "--badgy-glow-size", String(effect.intensity ?? 14) + "px", "");
           } else {
-            target.style.removeProperty("--badgy-glow-color");
-            target.style.removeProperty("--badgy-glow-size");
+            updateManagedStyle(target, "--badgy-glow-color", null, "");
+            updateManagedStyle(target, "--badgy-glow-size", null, "");
           }
         }
 
