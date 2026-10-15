@@ -112,6 +112,18 @@ test("gradient follows child light RGB changes",()=>{
   run();
   assert.notEqual(card.style.getPropertyValue("--card-gradient"),initial);
 });
+test("sub-button without entity inherits parent light state",()=>{
+  ctx.config.entity="light.a";
+  ctx.config.sub_button={main:[{entity:null}]};
+  cfg.enable_entity_colored_subicons=true;
+  cfg.enable_function_button_color=false;
+  hass.states["light.a"]=st("on",[17,34,51]);
+  run();
+  assert.equal(card.sub[0].style.getPropertyValue("color"),"rgb(17, 34, 51)");
+  hass.states["light.a"]=st("off");
+  run();
+  assert.equal(card.sub[0].style.getPropertyValue("color"),"rgb(150, 150, 150)");
+});
 test("hide background resets custom styling correctly",()=>{
   cfg.manual_icon_background_color="#123456";cfg.hide_icon_background=true;run();
   assert.equal(card.style.getPropertyValue("--icon-background-color"),"transparent");

@@ -170,6 +170,18 @@ class VSCBrowser(unittest.TestCase):
         self.change(cfg={'subbutton_column_spacing':12})
         self.assertEqual(self.cssval('.bubble-sub-button-container','column-gap'),'12px')
 
+    def test_sub_button_without_entity_inherits_parent_color(self):
+        self.page.evaluate("""() => {
+            delete window.cfg.sub_button.main[0].group[0].entity;
+            window.cfg.visual_styling_center.enable_entity_colored_subicons = true;
+            window.render();
+        }""")
+        self.page.wait_for_timeout(400)
+        self.assertEqual(self.cssval('#sub1','color'),'rgb(255, 0, 0)')
+        self.change(states={'light.main':{'state':'off','attributes':{}}})
+        self.page.wait_for_timeout(400)
+        self.assertEqual(self.cssval('#sub1','color'),'rgb(150, 150, 150)')
+
     def test_native_slider_restored_when_gradient_disabled(self):
         self.assertEqual(self.cssval('#fill','background-image'),'none')
         self.change(cfg={'enable_gradient':True,'gradient_target':'slider','gradient_entity':'light.main'})

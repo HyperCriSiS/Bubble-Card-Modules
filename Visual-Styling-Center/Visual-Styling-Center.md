@@ -644,7 +644,8 @@ visual_styling_center:
       }
       subButtonConfigs.forEach((buttonConfig, index) => {
         const icon = card.querySelector(`.bubble-sub-button-${index + 1} .bubble-sub-button-icon`);
-        const entityId = buttonConfig.entity;
+        // Bubble Card falls back to the parent entity when the sub-button has none.
+        const entityId = buttonConfig.entity ?? this.config.entity;
         const color = (config.enable_entity_colored_subicons === true && getEntityColor(entityId)) ||
           getFunctionOnlyColor(entityId);
         applyOwnedIconColor(icon, color);
