@@ -40,7 +40,14 @@ const ctx={config:{entity:"light.a",sub_button:[{entity:"light.b"}],visual_styli
   enable_entity_colored_main_icon:true,enable_entity_colored_subicons:true
 }}};
 const cfg=ctx.config.visual_styling_center,card=makeCard();
-const run=()=>runner.call(ctx,card,hass);
+const gradientGates = new Map();
+const nativeHasChanged = (key,...values) => {
+  const sig = JSON.stringify(values);
+  const was = gradientGates.get(key);
+  gradientGates.set(key,sig);
+  return was !== sig;
+};
+const run=()=>runner.call(ctx,card,hass,nativeHasChanged);
 test("entity state colors update",()=>{
   run();assert.equal(card.main.style.getPropertyValue("color"),"rgb(100, 20, 40)");
   assert.equal(card.sub[0].style.getPropertyValue("color"),"rgb(150, 150, 150)");

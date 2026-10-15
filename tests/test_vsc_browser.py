@@ -74,7 +74,7 @@ class VSCBrowser(unittest.TestCase):
         self.page.locator("#native").evaluate("(e,v)=>e.textContent=v", self.native)
         self.page.locator("#module").evaluate("(e,v)=>e.textContent=v", self.css)
         self.page.evaluate("""expr => {
-            window.runner = new Function('card','hass','return '+expr+';');
+            window.runner = new Function('card','hass','hasChanged','return '+expr+';');
             window.cfg={entity:'light.main',visual_styling_center:{},sub_button:{
                 main:[{group:[{entity:'light.first'},{entity:'light.second'}]}],
                 bottom:[{entity:'light.main'}]}};
@@ -84,7 +84,13 @@ class VSCBrowser(unittest.TestCase):
                 'light.second':{state:'off',attributes:{}},
                 'light.group':{state:'on',attributes:{entity_id:['light.first','light.second']}}
             }};
-            window.render=()=>window.runner.call({config:window.cfg},document.querySelector('#card'),window.hass);
+            window.gradientGates=new Map();
+            window.hasChanged=(key,...values)=>{
+                const sig=JSON.stringify(values),old=window.gradientGates.get(key);
+                window.gradientGates.set(key,sig);
+                return old!==sig;
+            };
+            window.render=()=>window.runner.call({config:window.cfg},document.querySelector('#card'),window.hass,window.hasChanged);
             window.render();
         }""", self.expr)
 

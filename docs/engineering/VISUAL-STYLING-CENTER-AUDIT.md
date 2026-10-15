@@ -37,3 +37,5 @@ Browser integration tests simulate the DOM and hass.states. They are **not** a f
 - CSS variables and gradients are written only when their values change; removed layout configuration fields no longer leave stale variables.
 - Chromium tests cover native nested sub-slider preservation and custom sub-button background override.
 - Real Home Assistant WebSocket/pointer lifecycle tests are still open. Repository setting must allow GitHub Actions to create PRs for unattended upstream-reference PR creation.
+
+- Native Bubble Card `hasChanged('vsc-gradient', ...)` is now used to skip expensive gradient hue sorting when observed input RGBs remain unchanged. The entity reads still happen on each module style pass to preserve `trackedHass` dependencies. Python/Node/Chromium mocks now exercise the change gate.
