@@ -733,11 +733,11 @@ visual_styling_center:
         let coloredLights = [];
 
         // Get light colors from group or single light
-        if (entityState && entityState.attributes && entityState.attributes.entity_id) {
+        if (Array.isArray(entityState?.attributes?.entity_id)) {
           entityState.attributes.entity_id.forEach(childId => {
             if (childId.startsWith('light.')) {
               const lightState = hass?.states?.[childId];
-              if (lightState && lightState.state === 'on' && lightState.attributes.rgb_color) {
+              if (lightState?.state === 'on' && Array.isArray(lightState.attributes?.rgb_color) && lightState.attributes.rgb_color.length >= 3) {
                 coloredLights.push({
                   rgb: lightState.attributes.rgb_color,
                   brightness: lightState.attributes.brightness || 255,
@@ -746,7 +746,7 @@ visual_styling_center:
               }
             }
           });
-        } else if (entityState && entityState.state === 'on' && entityState.attributes.rgb_color) {
+        } else if (entityState?.state === 'on' && Array.isArray(entityState.attributes?.rgb_color) && entityState.attributes.rgb_color.length >= 3) {
           coloredLights.push({
             rgb: entityState.attributes.rgb_color,
             brightness: entityState.attributes.brightness || 255,
@@ -754,7 +754,18 @@ visual_styling_center:
           });
         }
 
-        if (coloredLights.length > 0) {
+        // Always read child states above: Bubble Card's trackedHass observes
+        // these dependencies and will refresh on external child RGB changes.
+        // hasChanged only skips expensive hue sorting when the inputs are equal.
+        const gradientProperty = gradientTarget === 'background' ? '--card-gradient' : '--slider-gradient';
+        const gradientInputs = coloredLights.map(light => light.rgb.slice(0, 3).join(','));
+        const needsGradientRebuild = typeof hasChanged !== 'function' ||
+          hasChanged('vsc-gradient', gradientEntity, gradientTarget, config.disable_default_gradient === true, gradientInputs);
+        const previousGradient = card.style.getPropertyValue(gradientProperty);
+
+        if (!needsGradientRebuild && previousGradient) {
+          appliedGradient = previousGradient;
+        } else if (coloredLights.length > 0) {
           // RGB to HSL conversion helper
           const rgbToHsl = (r, g, b) => {
             r /= 255; g /= 255; b /= 255;
