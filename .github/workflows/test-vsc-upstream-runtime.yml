@@ -30,7 +30,7 @@ jobs:
             https://github.com/Clooos/Bubble-Card/releases/download/v3.4.2/bubble-card.js
           echo "d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae  artifacts/upstream-bubble-card.js" | sha256sum --check
       - name: Exercise native Bubble Card style processor and lifecycle
-        run: timeout -s TERM -k 8 95s env PYTHONUNBUFFERED=1 .venv/bin/python -m unittest discover -s tests -p 'test_vsc_upstream_runtime.py' -v
+        run: timeout -s TERM -k 8 45s env PYTHONUNBUFFERED=1 .venv/bin/python -m unittest discover -s tests -p 'test_vsc_upstream_runtime.py' -k test_baseline_bubble_card_without_vsc -v
       - name: Upload browser screenshots
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

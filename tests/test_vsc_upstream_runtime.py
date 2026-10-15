@@ -35,7 +35,7 @@ class OfficialBubbleCard(unittest.TestCase):
         cls.playwright.stop()
 
     def setUp(self):
-        faulthandler.dump_traceback_later(18, repeat=True)
+        faulthandler.dump_traceback_later(12, repeat=False)
         print("starting upstream runtime browser",flush=True)
         self.page=self.browser.new_page(viewport={"width":1280,"height":800})
         self.errors=[]
@@ -82,7 +82,7 @@ class OfficialBubbleCard(unittest.TestCase):
             self.page.close()
             faulthandler.cancel_dump_traceback_later()
 
-    def mount(self,options):
+    def mount(self,options,include_styles=True):
         print("phase 1: creating custom element",flush=True)
         self.page.evaluate("""() => {
             window.card=document.createElement('bubble-card');
@@ -92,9 +92,9 @@ class OfficialBubbleCard(unittest.TestCase):
             window.card.setConfig({
               type:'custom:bubble-card',card_type:'button',button_type:'slider',
               entity:'light.main',sub_button:{main:[{entity:'light.child'}]},
-              styles:input.styles,visual_styling_center:input.options
+              styles:input.include_styles ? input.styles : "",visual_styling_center:input.options
             });
-        }""",{"styles":read_styles(),"options":options})
+        }""",{"styles":read_styles(),"options":options,"include_styles":include_styles})
         print("phase 3: appending custom element",flush=True)
         self.page.evaluate("() => document.querySelector('#target').append(window.card)")
         print("phase 4: assigning hass snapshot",flush=True)
@@ -102,6 +102,11 @@ class OfficialBubbleCard(unittest.TestCase):
         print("phase 5: waiting for styles",flush=True)
         self.page.wait_for_timeout(700)
         print("phase 6: mount completed",flush=True)
+
+    def test_baseline_bubble_card_without_vsc(self):
+        print("baseline: actual Bubble Card without VSC styles",flush=True)
+        self.mount({},include_styles=False)
+        self.assertTrue(self.page.evaluate("() => !!window.card.card"),self.errors)
 
     def test_actual_renderer_and_state_dependencies(self):
         self.mount({"enable_entity_colored_main_icon":True,"enable_gradient":True,
