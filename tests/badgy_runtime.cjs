@@ -5,13 +5,13 @@ const fs = require("node:fs");
 
 const js = fs.readFileSync(0, "utf8");
 const template = new Function(
-  "hass", "entity", "state", "card", "checkConditionsMet", "renderTemplate",
+  "hass", "entity", "state", "card", "checkConditionsMet", "renderTemplate", "hasChanged",
   "return " + String.fromCharCode(96) + js + String.fromCharCode(96) + ";"
 );
 
 class Styles {
-  constructor() { this.data = new Map(); }
-  setProperty(k, v, priority = "") { this.data.set(k, [String(v), priority]); }
+  constructor() { this.data = new Map(); this.writes = new Map(); }
+  setProperty(k, v, priority = "") { this.data.set(k, [String(v), priority]); this.writes.set(k, (this.writes.get(k)||0)+1); }
   getPropertyValue(k) { return this.data.get(k)?.[0] || ""; }
   getPropertyPriority(k) { return this.data.get(k)?.[1] || ""; }
   removeProperty(k) { this.data.delete(k); }
@@ -134,8 +134,19 @@ function checkConditionsMet(items) {
 function renderTemplate(t) {
   return t.startsWith("{{") ? hass.states["sensor.palette"].attributes.hex : t;
 }
+const fingerprints = new Map();
+let gateSkips = 0;
+function hasChanged(key, ...values) {
+  const old = fingerprints.get(key);
+  if (old && old.length === values.length && old.every((x, i) => Object.is(x, values[i]))) {
+    gateSkips++;
+    return false;
+  }
+  fingerprints.set(key, values);
+  return true;
+}
 function run() {
-  const output = template.call(context, hass, "sensor.power", hass.states["sensor.power"].state, root, checkConditionsMet, renderTemplate);
+  const output = template.call(context, hass, "sensor.power", hass.states["sensor.power"].state, root, checkConditionsMet, renderTemplate, hasChanged);
   assert.equal(typeof output, "string");
 }
 run();
@@ -149,27 +160,27 @@ assert.equal(subBadge.style.getPropertyValue("--badge-scale"), "1.7");
 assert.equal(mainBadge.style.getPropertyValue("--badge-scale"), "1.3");
 assert.ok(main.querySelector(".icon-badge"), "main icon icon-badge rendered");
 assert.ok(groupedSub.querySelector(".entity-badge"), "badge works on grouped sub-button");
-assert.ok(groupedIcon.classList.contains("effect-rotate"), "grouped sub-button icon effect works");
-assert.ok(subIcon.classList.contains("effect-spin-360"));
-assert.ok(sub.classList.contains("effect-pulse"));
+assert.ok(groupedIcon.classList.contains("badgy-effect-rotate"), "grouped sub-button icon effect works");
+assert.ok(subIcon.classList.contains("badgy-effect-spin-360"));
+assert.ok(sub.classList.contains("badgy-effect-pulse"));
 assert.ok(cardContainer.classList.contains("badgy-card-glow"));
 assert.equal(mainIcon.getAttribute("icon"), "mdi:flash");
 assert.equal(sub.style.getPropertyValue("background"), "#ff0000");
-const additions = subIcon.classList.addCount.get("effect-spin-360");
+const additions = subIcon.classList.addCount.get("badgy-effect-spin-360");
 const amountCreated = created;
 hass.states["sensor.power"].state = "26";
 run();
 assert.equal(created, amountCreated, "no badge DOM churn on sensor update");
 assert.equal(sub.querySelector(".entity-badge"), subBadge, "badge identity is stable");
 assert.equal(subBadge.textContent, "26W");
-assert.equal(subIcon.classList.addCount.get("effect-spin-360"), additions, "animation is not restarted");
+assert.equal(subIcon.classList.addCount.get("badgy-effect-spin-360"), additions, "animation is not restarted");
 hass.states["sensor.flag"].state = "off";
 hass.states["binary_sensor.window"].state = "off";
 run();
 assert.equal(mainBadge.textContent, "Closed", "binary sensor state updates in place");
-assert.ok(!subIcon.classList.contains("effect-spin-360"), "icon effect stops on false");
-assert.ok(!groupedIcon.classList.contains("effect-rotate"), "grouped icon effect stops on false");
-assert.ok(!sub.classList.contains("effect-pulse"), "container effect stops on false");
+assert.ok(!subIcon.classList.contains("badgy-effect-spin-360"), "icon effect stops on false");
+assert.ok(!groupedIcon.classList.contains("badgy-effect-rotate"), "grouped icon effect stops on false");
+assert.ok(!sub.classList.contains("badgy-effect-pulse"), "container effect stops on false");
 assert.ok(!cardContainer.classList.contains("badgy-card-glow"), "card glow stops on false");
 assert.equal(mainIcon.getAttribute("icon"), "mdi:home", "original icon restored on false");
 assert.equal(sub.style.getPropertyValue("background"), "var(--black-color, black)", "named color uses theme with CSS fallback");
@@ -180,5 +191,44 @@ cfg.global_defaults = { badge_scale: 1.1, sub_button_effect: "none" };
 delete cfg.entity_badges["0"].scale;
 run();
 assert.equal(subBadge.style.getPropertyValue("--badge-scale"), "1.1", "global badge size works");
-assert.ok(!sub.classList.contains("has-effect"), "none is not treated as an effect");
+assert.ok(!sub.classList.contains("badgy-has-effect"), "none is not treated as an effect");
+
+assert.ok(!sub.style.getPropertyValue("opacity"), "no global opacity applied by Badgy");
+const badgeWriteBefore = subBadge.style.writes.get("--badge-scale") || 0;
+run();
+run();
+assert.ok(gateSkips > 0, "hasChanged gate avoids repeated badge work");
+assert.equal(subBadge.style.writes.get("--badge-scale") || 0, badgeWriteBefore,
+  "unchanged badge scale does not trigger further writes");
+
+// Set an external background, then verify that Badgy records that newer
+// value as the restoration target instead of deleting it.
+cfg.sub_buttons_background["0"] = {type:"solid", color:"#1155ff", opacity:0.4};
+run();
+assert.match(sub.style.getPropertyValue("background"), /^color-mix\(in srgb,/);
+assert.equal(sub.style.getPropertyValue("opacity"), "", "background alpha never dims icon");
+sub.style.setProperty("background", "#339900");
+run();
+assert.match(sub.style.getPropertyValue("background"), /^color-mix\(in srgb,/);
+delete cfg.sub_buttons_background["0"];
+run();
+assert.equal(sub.style.getPropertyValue("background"), "#339900",
+  "new native/external background restored on disabling Badgy");
+
+// Same behavior for colors and icons; if the underlying HA icon changes
+// while an override is active we must restore that latest native icon.
+hass.states["sensor.flag"].state = "on";
+run();
+assert.equal(mainIcon.getAttribute("icon"), "mdi:flash");
+mainIcon.setAttribute("icon", "mdi:ceiling-light");
+mainIcon.style.setProperty("color", "#445566");
+run();
+assert.equal(mainIcon.getAttribute("icon"), "mdi:flash");
+assert.notEqual(mainIcon.style.getPropertyValue("color"), "#445566");
+hass.states["sensor.flag"].state = "off";
+run();
+assert.equal(mainIcon.getAttribute("icon"), "mdi:ceiling-light",
+  "updated native icon preserved after override ends");
+assert.equal(mainIcon.style.getPropertyValue("color"), "#445566",
+  "external color restored after override ends");
 console.log("Badgy runtime smoke tests: PASS");
