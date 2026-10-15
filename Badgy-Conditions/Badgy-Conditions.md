@@ -204,7 +204,7 @@ badgy-condition-helper:
     /* =============================
        CSS for the badge visuals
        ============================= */
-    .bubble-sub-button-badge {
+    .bubble-sub-button-badge.badgy-owned-badge {
       position: absolute;
       min-width: calc(18px * var(--badge-scale, 1));
       height: calc(16px * var(--badge-scale, 1));
@@ -224,25 +224,25 @@ badgy-condition-helper:
       transform-origin: center;
       pointer-events: none;
     }
-    .entity-badge { top: 0; right: 0; }
-    .bubble-icon-container:has(> .bubble-sub-button-badge) { overflow: visible !important; }
+    .badgy-owned-badge.entity-badge { top: 0; right: 0; }
+    .bubble-icon-container:has(> .badgy-owned-badge) { overflow: visible !important; }
     /* Bubble Card 3.4.2 clips rounded cards. Extend only the clip edge on
        cards with opt-in main icon badges, without turning them into scroll
        containers or changing their pointer/tap behavior. */
     @supports (overflow-clip-margin: 16px) {
-      .bubble-container:has(.bubble-main-icon-container > .bubble-sub-button-badge) {
+      .bubble-container:has(.bubble-main-icon-container > .badgy-owned-badge) {
         overflow-clip-margin: 16px;
       }
     }
     .badgy-card-glow { box-shadow: 0 0 var(--badgy-glow-size, 14px) var(--badgy-glow-color, var(--primary-color)) !important; }
     .badgy-card-glow.badgy-card-glow-pulse { animation: badgy-card-glow-pulse 2s ease-in-out infinite; }
     @keyframes badgy-card-glow-pulse { 0%,100% { filter: drop-shadow(0 0 1px var(--badgy-glow-color)); } 50% { filter: drop-shadow(0 0 8px var(--badgy-glow-color)); } }
-    .icon-badge   { top: 0; left: 0;  }
-    .without-background {
+    .badgy-owned-badge.icon-badge { top: 0; left: 0; }
+    .badgy-owned-badge.without-background {
       background-color: transparent;
       box-shadow: none;
     }
-    .badge-icon {
+    .badgy-owned-badge .badge-icon {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -504,9 +504,9 @@ badgy-condition-helper:
             ? cardEl.querySelector(".bubble-icon-container")
             : cardEl.querySelector(`.bubble-sub-button-${subButtonNumber}`);
           if (!sb) return;
-          if (getComputedStyle(sb).position === 'static') sb.style.position = 'relative';
+          if (getComputedStyle(sb).position === 'static') updateManagedStyle(sb, 'position', 'relative', '');
 
-          let badge = sb.querySelector(`.${badgeType}`);
+          let badge = sb.querySelector(`.badgy-owned-badge.${badgeType}`);
           if (!badge) {
             badge = document.createElement('div');
             badge.className = `bubble-sub-button-badge badgy-owned-badge ${badgeType}`;
@@ -624,7 +624,7 @@ badgy-condition-helper:
           for (let i = 1; i <= 10; i++) {
             if (!current.has(i)) {
               const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
-              if (sb) { const b = sb.querySelector('.entity-badge'); if (b) sb.removeChild(b); }
+              if (sb) { const b = sb.querySelector('.badgy-owned-badge.entity-badge'); if (b) b.remove(); }
             }
           }
         }
@@ -647,7 +647,7 @@ badgy-condition-helper:
           for (let i = 1; i <= 10; i++) {
             if (!current.has(i)) {
               const sb = cardEl.querySelector(`.bubble-sub-button-${i}`);
-              if (sb) { const b = sb.querySelector('.icon-badge'); if (b) sb.removeChild(b); }
+              if (sb) { const b = sb.querySelector('.badgy-owned-badge.icon-badge'); if (b) b.remove(); }
             }
           }
         }
@@ -684,12 +684,9 @@ badgy-condition-helper:
             }
             // Remove overrides left by older Badgy versions without making the
             // whole sub-button (including its icon and badge) transparent.
-            if (sb.classList.contains("sub-button-direct-bg")) {
-              sb.classList.remove("sub-button-direct-bg");
-              if (sb.style.getPropertyValue("opacity") !== "" &&
-                  !sb.__badgyOwnedStyles?.opacity)
-                sb.style.removeProperty("opacity");
-            }
+            // Older Badgy releases used this marker, but did not record
+            // ownership of opacity. Preserve any later native/third-party value.
+            sb.classList.remove("sub-button-direct-bg");
           }
         }
 
@@ -727,13 +724,13 @@ badgy-condition-helper:
           for (const [k, ef] of Object.entries(eBE)) {
             if (!/^\d+$/.test(k) || !ef?.effect) continue;
             const sbN = parseInt(k) + 1;
-            const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .entity-badge`);
+            const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .badgy-owned-badge.entity-badge`);
             if (!badge) continue;
             const met = checkAllConditions(ef.condition, hass);
             setEffect(badge, met ? ef.effect : null, ef.color);
             if (met) matched.add(badge);
           }
-          cardEl.querySelectorAll('.bubble-sub-button-badge.entity-badge').forEach(b => {
+          cardEl.querySelectorAll('.badgy-owned-badge.entity-badge').forEach(b => {
             if (b.closest('.bubble-icon-container')) return;
             if (!matched.has(b)) setEffect(b, null, null);
           });
@@ -745,13 +742,13 @@ badgy-condition-helper:
           for (const [k, ef] of Object.entries(iBE)) {
             if (!/^\d+$/.test(k) || !ef?.effect) continue;
             const sbN = parseInt(k) + 1;
-            const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .icon-badge`);
+            const badge = cardEl.querySelector(`.bubble-sub-button-${sbN} .badgy-owned-badge.icon-badge`);
             if (!badge) continue;
             const met = checkAllConditions(ef.condition, hass);
             setEffect(badge, met ? ef.effect : null, ef.color);
             if (met) matched.add(badge);
           }
-          cardEl.querySelectorAll('.bubble-sub-button-badge.icon-badge').forEach(b => {
+          cardEl.querySelectorAll('.badgy-owned-badge.icon-badge').forEach(b => {
             if (b.closest('.bubble-icon-container')) return;
             if (!matched.has(b)) setEffect(b, null, null);
           });
@@ -767,12 +764,10 @@ badgy-condition-helper:
           const priority = mainCont.style.getPropertyPriority("background");
           if (changeGate("main-background", mainCont, color, current, priority))
             updateManagedStyle(mainCont, "background", color);
-          // Legacy code wrote opacity directly on the element. Clear only the
-          // old Badgy marker, not an unrelated module's new style.
-          if (mainCont.dataset.badgyBackgroundManaged) {
+          // Remove only our old tracking marker; without an ownership record
+          // the opacity might now belong to Bubble Card or another module.
+          if (mainCont.dataset.badgyBackgroundManaged)
             delete mainCont.dataset.badgyBackgroundManaged;
-            mainCont.style.removeProperty("opacity");
-          }
         }
 
         function processMainBadges() {
@@ -788,7 +783,7 @@ badgy-condition-helper:
               checkAllConditions(cfg.condition, hass) &&
               (!isEntity || cfg.show_if_off !== false || state.state !== "off"));
             if (!visible) {
-              const old = parent.querySelector("." + cls);
+              const old = parent.querySelector(".badgy-owned-badge." + cls);
               if (old) old.remove();
               continue;
             }
@@ -813,7 +808,7 @@ badgy-condition-helper:
             });
             const effect = config[isEntity ? "entity_badge_effects" : "icon_badge_effects"]?.main;
             const matched = effect?.effect && checkAllConditions(effect.condition, hass);
-            setEffect(parent.querySelector("." + cls), matched ? effect.effect : null, effect?.color);
+            setEffect(parent.querySelector(".badgy-owned-badge." + cls), matched ? effect.effect : null, effect?.color);
           }
         }
 

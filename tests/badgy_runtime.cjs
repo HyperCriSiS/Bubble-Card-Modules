@@ -96,6 +96,16 @@ const groupedContainer = cardContainer.appendChild(new El("div", "bubble-sub-but
 const groupedSub = groupedContainer.appendChild(new El("div", "bubble-sub-button-2"));
 const groupedIcon = groupedSub.appendChild(new El("ha-icon", "bubble-sub-button-icon"));
 groupedIcon.setAttribute("icon", "mdi:fan");
+// Legacy tracking markers do not grant CSS property ownership.
+sub.classList.add("sub-button-direct-bg");
+sub.style.setProperty("opacity", "0.60");
+main.dataset.badgyBackgroundManaged = "1";
+main.style.setProperty("opacity", "0.75");
+const externalBadge = sub.appendChild(new El("div", "bubble-sub-button-badge entity-badge"));
+externalBadge.textContent = "external";
+const externalMain = main.appendChild(new El("div", "bubble-sub-button-badge entity-badge"));
+externalMain.textContent = "native";
+global.getComputedStyle = node => ({ position: node === groupedSub ? "static" : "relative" });
 
 const state = (id, value, attributes = {}) => ({entity_id: id, state: value, attributes});
 const hass = {
@@ -152,10 +162,16 @@ function run() {
   assert.equal(typeof output, "string");
 }
 run();
-const subBadge = sub.querySelector(".entity-badge");
-const mainBadge = main.querySelector(".entity-badge");
+const subBadge = sub.querySelector(".badgy-owned-badge.entity-badge");
+const mainBadge = main.querySelector(".badgy-owned-badge.entity-badge");
 assert.ok(subBadge, "sub-button entity badge rendered");
 assert.ok(mainBadge, "main icon entity badge rendered");
+assert.equal(externalBadge.textContent, "external", "do not hijack another module's badge");
+assert.equal(externalMain.textContent, "native", "do not hijack existing main badges");
+assert.ok(!externalBadge.classList.contains("badgy-owned-badge"));
+assert.equal(sub.style.getPropertyValue("opacity"), "0.60", "native sub opacity survives legacy cleanup");
+assert.equal(main.style.getPropertyValue("opacity"), "0.75", "native main opacity survives legacy cleanup");
+assert.equal(groupedSub.style.getPropertyValue("position"), "relative", "position managed during rendering");
 assert.equal(mainBadge.textContent, "Open", "binary sensor state is localized");
 assert.equal(subBadge.textContent, "25W");
 assert.equal(subBadge.style.getPropertyValue("--badge-scale"), "1.7");
@@ -173,7 +189,7 @@ const amountCreated = created;
 hass.states["sensor.power"].state = "26";
 run();
 assert.equal(created, amountCreated, "no badge DOM churn on sensor update");
-assert.equal(sub.querySelector(".entity-badge"), subBadge, "badge identity is stable");
+assert.equal(sub.querySelector(".badgy-owned-badge.entity-badge"), subBadge, "badge identity is stable");
 assert.equal(subBadge.textContent, "26W");
 assert.equal(subIcon.classList.addCount.get("badgy-effect-spin-360"), additions, "animation is not restarted");
 hass.states["sensor.flag"].state = "off";
@@ -195,7 +211,7 @@ run();
 assert.equal(subBadge.style.getPropertyValue("--badge-scale"), "1.1", "global badge size works");
 assert.ok(!sub.classList.contains("badgy-has-effect"), "none is not treated as an effect");
 
-assert.ok(!sub.style.getPropertyValue("opacity"), "no global opacity applied by Badgy");
+assert.equal(sub.style.getPropertyValue("opacity"), "0.60", "no opacity overwritten by Badgy");
 const badgeWriteBefore = subBadge.style.writes.get("--badge-scale") || 0;
 run();
 run();
@@ -208,7 +224,7 @@ assert.equal(subBadge.style.writes.get("--badge-scale") || 0, badgeWriteBefore,
 cfg.sub_buttons_background["0"] = {type:"solid", color:"#1155ff", opacity:0.4};
 run();
 assert.match(sub.style.getPropertyValue("background"), /^color-mix\(in srgb,/);
-assert.equal(sub.style.getPropertyValue("opacity"), "", "background alpha never dims icon");
+assert.equal(sub.style.getPropertyValue("opacity"), "0.60", "background alpha never changes element opacity");
 sub.style.setProperty("background", "#339900");
 run();
 assert.match(sub.style.getPropertyValue("background"), /^color-mix\(in srgb,/);
@@ -236,8 +252,12 @@ assert.equal(mainIcon.style.getPropertyValue("color"), "#445566",
 
 assert.equal(typeof teardown, "function", "onTeardown registered");
 teardown();
-assert.equal(main.querySelector(".entity-badge"), null, "main badge removed on teardown");
-assert.equal(sub.querySelector(".entity-badge"), null, "sub-button badge removed on teardown");
+assert.equal(main.querySelector(".badgy-owned-badge.entity-badge"), null, "main badge removed on teardown");
+assert.equal(main.querySelector(".entity-badge"), externalMain, "foreign main badge survives teardown");
+assert.equal(sub.querySelector(".badgy-owned-badge.entity-badge"), null, "sub badge removed on teardown");
+assert.equal(sub.querySelector(".entity-badge"), externalBadge, "foreign sub badge survives teardown");
+assert.equal(groupedSub.style.getPropertyValue("position"), "", "container position restored on teardown");
+assert.equal(sub.style.getPropertyValue("opacity"), "0.60", "native opacity survives teardown");
 assert.equal(mainIcon.getAttribute("icon"), "mdi:ceiling-light", "native icon stays restored after cleanup");
 assert.equal(mainIcon.style.getPropertyValue("color"), "#445566", "restored color survives teardown");
 assert.ok(!sub.classList.contains("badgy-has-effect"), "effect class cleaned");
