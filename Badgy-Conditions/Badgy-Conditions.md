@@ -238,51 +238,51 @@ badgy-condition-helper:
     /* =============================
        Animations for effects
        ============================= */
-    @keyframes pulse-scale {
+    @keyframes badgy-pulse-scale {
       0%, 100% { transform: scale(1); }
       50%      { transform: scale(1.05); }
     }
-    @keyframes gentle-rotate {
+    @keyframes badgy-gentle-rotate {
       0% { transform: rotate(0deg); }
       25% { transform: rotate(5deg); }
       75% { transform: rotate(-5deg); }
       100% { transform: rotate(0deg); }
     }
-    @keyframes border-pulse {
+    @keyframes badgy-border-pulse {
       0%, 100% { box-shadow: 0 0 0 transparent; }
-      50%      { box-shadow: 0 0 10px var(--effect-color, rgba(255,255,255,0.7)); }
+      50%      { box-shadow: 0 0 10px var(--badgy-effect-color, rgba(255,255,255,0.7)); }
     }
-    @keyframes gentle-shake {
+    @keyframes badgy-gentle-shake {
       0%, 100% { transform: translateX(0); }
       25%      { transform: translateX(-2px); }
       75%      { transform: translateX(2px); }
     }
-    @keyframes float-up-down {
+    @keyframes badgy-float-up-down {
       0%, 100% { transform: translateY(0); }
       50%      { transform: translateY(-3px); }
     }
-    @keyframes zoom {
+    @keyframes badgy-zoom {
       0%   { transform: scale(1); }
       50%  { transform: scale(1.15); }
       100% { transform: scale(1); }
     }
-    @keyframes heartbeat {
+    @keyframes badgy-heartbeat {
       0%   { transform: scale(1); }
       25%  { transform: scale(1.07); }
       40%  { transform: scale(1); }
       60%  { transform: scale(1.07); }
       100% { transform: scale(1); }
     }
-    @keyframes spin360 {
+    @keyframes badgy-spin360 {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    @keyframes flip {
+    @keyframes badgy-flip {
       0% { transform: rotateY(0deg); }
       50% { transform: rotateY(180deg); }
       100% { transform: rotateY(360deg); }
     }
-    @keyframes vibrate {
+    @keyframes badgy-vibrate {
       0%   { transform: translate(0,0); }
       20%  { transform: translate(-1px,0); }
       40%  { transform: translate(1px,0); }
@@ -291,16 +291,16 @@ badgy-condition-helper:
       100% { transform: translate(0,0); }
     }
 
-    .badgy-effect-pulse       { animation: pulse-scale 2s infinite ease-in-out; }
-    .badgy-effect-rotate      { animation: gentle-rotate 3s infinite ease-in-out; }
-    .badgy-effect-glow        { animation: border-pulse 2s infinite ease-in-out; }
-    .badgy-effect-shake       { animation: gentle-shake 0.8s infinite ease-in-out; }
-    .badgy-effect-float       { animation: float-up-down 3s infinite ease-in-out; }
-    .badgy-effect-zoom        { animation: zoom 1.5s infinite ease-in-out; }
-    .badgy-effect-heartbeat   { animation: heartbeat 2s infinite ease-in-out; }
-    .badgy-effect-spin-360    { animation: spin360 2s linear infinite; }
-    .badgy-effect-flip        { animation: flip 2s linear infinite; }
-    .badgy-effect-vibrate     { animation: vibrate 0.6s linear infinite; }
+    .badgy-effect-pulse       { animation: badgy-pulse-scale 2s infinite ease-in-out; }
+    .badgy-effect-rotate      { animation: badgy-gentle-rotate 3s infinite ease-in-out; }
+    .badgy-effect-glow        { animation: badgy-border-pulse 2s infinite ease-in-out; }
+    .badgy-effect-shake       { animation: badgy-gentle-shake 0.8s infinite ease-in-out; }
+    .badgy-effect-float       { animation: badgy-float-up-down 3s infinite ease-in-out; }
+    .badgy-effect-zoom        { animation: badgy-zoom 1.5s infinite ease-in-out; }
+    .badgy-effect-heartbeat   { animation: badgy-heartbeat 2s infinite ease-in-out; }
+    .badgy-effect-spin-360    { animation: badgy-spin360 2s linear infinite; }
+    .badgy-effect-flip        { animation: badgy-flip 2s linear infinite; }
+    .badgy-effect-vibrate     { animation: badgy-vibrate 0.6s linear infinite; }
 
     .bubble-sub-button-icon.badgy-has-effect {
       position: relative;
@@ -399,6 +399,7 @@ badgy-condition-helper:
         function updateManagedStyle(node, name, value, priority = "important") {
           if (!node) return;
           const owned = node.__badgyOwnedStyles || (node.__badgyOwnedStyles = Object.create(null));
+          node.classList.add("badgy-managed-style");
           const current = node.style.getPropertyValue(name);
           const currentPriority = node.style.getPropertyPriority(name);
           const old = owned[name];
@@ -409,6 +410,7 @@ badgy-condition-helper:
               else node.style.removeProperty(name);
             }
             delete owned[name];
+            if (Object.keys(owned).length === 0) node.classList.remove("badgy-managed-style");
             return;
           }
           const next = String(value);
@@ -466,11 +468,10 @@ badgy-condition-helper:
             if (!el.classList.contains(desired)) el.classList.add(desired);
             if (!el.classList.contains('badgy-has-effect')) el.classList.add('badgy-has-effect');
             const cProc = color ? processColor(color) : null;
-            if (cProc) el.style.setProperty('--effect-color', cProc);
-            else el.style.removeProperty('--effect-color');
+            updateManagedStyle(el, '--badgy-effect-color', cProc, '');
           } else {
             if (el.classList.contains('badgy-has-effect')) el.classList.remove('badgy-has-effect');
-            el.style.removeProperty('--effect-color');
+            updateManagedStyle(el, '--badgy-effect-color', null, '');
           }
         }
 
@@ -490,9 +491,10 @@ badgy-condition-helper:
           let badge = sb.querySelector(`.${badgeType}`);
           if (!badge) {
             badge = document.createElement('div');
-            badge.className = `bubble-sub-button-badge ${badgeType}`;
+            badge.className = `bubble-sub-button-badge badgy-owned-badge ${badgeType}`;
             sb.appendChild(badge);
           }
+          badge.classList.add("badgy-owned-badge");
           badgeColor = badgeColor ?? config.global_defaults?.badge_color;
           textColor = textColor ?? config.global_defaults?.badge_text_color;
           if (!changeGate("badge-" + subButtonNumber + "-" + badgeType,
@@ -809,6 +811,7 @@ badgy-condition-helper:
                 else el.setAttribute("icon", existing.original);
               }
               delete el.__badgyIconOverride;
+              el.classList.remove("badgy-managed-icon");
             }
             return;
           }
@@ -817,6 +820,7 @@ badgy-condition-helper:
           if (now !== requested) el.setAttribute("icon", requested);
           entry.applied = requested;
           el.__badgyIconOverride = entry;
+          el.classList.add("badgy-managed-icon");
         }
 
         function updateManagedColor(el, chosen) {
@@ -859,6 +863,31 @@ badgy-condition-helper:
             updateManagedStyle(target, "--badgy-glow-color", null, "");
             updateManagedStyle(target, "--badgy-glow-size", null, "");
           }
+        }
+
+        // Bubble Card 3.3+ unregisters the callback automatically when the
+        // card is disconnected. No monkey-patching disconnectedCallback or
+        // permanent state listeners. Each pass replaces this module's callback.
+        if (typeof onTeardown === "function") {
+          onTeardown(() => {
+            const descendants = selector => {
+              const nodes = Array.from(cardEl.querySelectorAll(selector));
+              if (cardEl.matches?.(selector)) nodes.push(cardEl);
+              return nodes;
+            };
+            for (const node of descendants(".badgy-managed-style")) {
+              for (const prop of Object.keys(node.__badgyOwnedStyles || {}))
+                updateManagedStyle(node, prop, null);
+            }
+            for (const icon of descendants(".badgy-managed-icon"))
+              updateManagedIcon(icon, null);
+            for (const node of descendants(".badgy-has-effect"))
+              setEffect(node, null, null);
+            for (const node of descendants(".badgy-card-glow")) {
+              node.classList.remove("badgy-card-glow", "badgy-card-glow-pulse");
+            }
+            for (const badge of descendants(".badgy-owned-badge")) badge.remove();
+          });
         }
 
         // The module code is re-evaluated by Bubble Card on every hass update,
