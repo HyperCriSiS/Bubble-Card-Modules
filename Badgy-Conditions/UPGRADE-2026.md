@@ -20,7 +20,7 @@ paths are preserved**. Existing cards should not require migration.
 
 ## Bubble Card v3.4.2 hardening (2026-10-15)
 
-The isolated import artifact is currently `v2026.10.15-beta.2`.
+The isolated import artifact is currently `v2026.10.15-beta.3`.
 
 - All Badgy animation CSS class names, keyframes, and effect color variables
   are namespaced. The effect cleanup no longer removes unowned classes.
@@ -181,6 +181,14 @@ color configuration. Colors from dynamic sources are not JavaScript-evaluated.
           - condition: state
             entity_id: switch.plug
             state: "on"
+
+## Additional beta.3 safety fixes
+
+- Badge CSS and runtime selectors are scoped to `badgy-owned-badge`; other modules' entity/icon badges are never reused, animated or deleted.
+- Legacy class cleanup no longer strips third-party `opacity` values.
+- Changes to a static sub-button container's CSS position are registered and undone via onTeardown.
+- Fallback `not` conditions now negate all nested conditions (equivalent to Home Assistant's NOT), not only the first.
+- Automated tests include foreign badge coexistence, legacy-opacity ownership, position restoration and the fallback NOT truth table.
 
 ## Constraints
 

@@ -44,6 +44,12 @@ This is a **manual** release gate. Unit tests do not substitute for these checks
       No badges or effect classes should leak, and each reopen should render.
 - [ ] Change card entity state/native icon while Badgy overrides it; after
       disabling the rule the *new* native icon/color should reappear.
+- [ ] Place an unrelated module badge with the `entity-badge` class next
+      to Badgy; Badgy must not update/remove or animate the unrelated badge.
+- [ ] Set `opacity` on a sub-button or main icon with an old Badgy marker
+      still present, then disable the Badgy condition; `opacity` must remain.
+- [ ] Test nested `not` conditions where only the *second* child matches,
+      including fallback conditions on older Bubble Card versions.
 - [ ] Use another styling module that changes the same background/color.
       Removing a Badgy condition must not erase the other module's current style.
 - [ ] Reload the dashboard and reconnect HA; no increased memory use, error
