@@ -71,6 +71,7 @@ class BadgyBrowserTests(unittest.TestCase):
         self.page=self.browser.new_page(viewport={'width':375,'height':720})
         self.errors=[]
         self.page.on('pageerror',lambda e:self.errors.append(str(e)))
+        self.page.on('console',lambda m:self.errors.append(m.text) if m.type == 'error' else None)
         self.page.set_content(HTML)
         self.page.evaluate(BOOT,[self.code,MODULE])
 
@@ -91,7 +92,8 @@ class BadgyBrowserTests(unittest.TestCase):
         color:getComputedStyle(badge).backgroundColor,main:mainBadge.textContent,
         iconBg:getComputedStyle(iconBadge).backgroundColor,
         overflow:getComputedStyle(main).overflow,clip:getComputedStyle(card).overflowClipMargin,
-        background:sub.style.background,opacity:getComputedStyle(sub).opacity};}''')
+        background:sub.style.background,computedBackground:getComputedStyle(sub).backgroundColor,
+        opacity:getComputedStyle(sub).opacity};}''')
         self.assertEqual(result['foreign'],'Foreign')
         self.assertFalse(result['foreignOwned'])
         self.assertNotEqual(result['foreignPosition'],'absolute')
@@ -103,6 +105,8 @@ class BadgyBrowserTests(unittest.TestCase):
         self.assertEqual(result['overflow'],'visible')
         self.assertEqual(result['clip'],'16px')
         self.assertIn('color-mix(',result['background'])
+        self.assertIn('/ 0.5',result['computedBackground'],
+                      'Background transparency must render in Chromium, not just parse')
         self.assertEqual(result['opacity'],'1')
 
     def test_real_animation_stop_and_icon_restoration(self):
@@ -114,8 +118,24 @@ class BadgyBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.locator('.bubble-icon').get_attribute('icon'),'mdi:home')
 
     def test_dynamic_updates_and_teardown(self):
-        self.page.evaluate("window.fixture.hass.states['sensor.power'].state='26';window.fixture.run()")
-        self.assertEqual(self.page.locator('.bubble-sub-button-1 .badgy-owned-badge.entity-badge').text_content(),'26W')
+        self.page.evaluate("""() => {
+          const sub=window.fixture.card.querySelector('.bubble-sub-button-1');
+          const badge=sub.querySelector('.badgy-owned-badge.entity-badge');
+          for (let i=0;i<60;i++) {
+            window.fixture.hass.states['sensor.power'].state=String(i);
+            window.fixture.run();
+            if (sub.querySelector('.badgy-owned-badge.entity-badge')!==badge)
+              throw new Error('Sensor updates must reuse the exact badge DOM node');
+          }
+        }""")
+        self.assertEqual(self.page.locator('.bubble-sub-button-1 .badgy-owned-badge.entity-badge').text_content(),'59W')
+        # A card may rebuild an individual badge while its entity is unchanged.
+        self.page.evaluate("""() => {
+          const badge=window.fixture.card.querySelector('.bubble-sub-button-1 .badgy-owned-badge.entity-badge');
+          badge.remove();
+          window.fixture.run();
+        }""")
+        self.assertEqual(self.page.locator('.bubble-sub-button-1 .badgy-owned-badge.entity-badge').text_content(),'59W')
         self.page.evaluate('window.fixture.teardown()')
         self.assertEqual(self.page.locator('.badgy-owned-badge').count(),0)
         self.assertEqual(self.page.locator('#foreign').text_content(),'Foreign')
