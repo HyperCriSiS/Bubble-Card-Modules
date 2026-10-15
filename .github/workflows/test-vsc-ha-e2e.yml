@@ -1,0 +1,68 @@
+name: VSC - isolated Home Assistant E2E
+
+on:
+  pull_request:
+    paths:
+      - 'Visual-Styling-Center/**'
+      - 'tests/ha_e2e/**'
+      - '.github/workflows/test-vsc-ha-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-ha-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HA_CONFIG: ${{ runner.temp }}/vsc-homeassistant-config
+      HA_E2E_AUTH_FILE: ${{ runner.temp }}/vsc-ha-auth.json
+      HA_E2E_BASE: http://127.0.0.1:8123
+      HA_E2E_ARTIFACTS: artifacts/vsc-ha-e2e
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install Chromium and dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install 'PyYAML==6.0.3' 'playwright==1.57.0' 'requests==2.32.5'
+          .venv/bin/python -m playwright install --with-deps chromium
+      - name: Validate isolated E2E fixture before container starts
+        run: .venv/bin/python -m unittest discover -s tests/ha_e2e -p 'test_fixture_structure.py' -v
+      - name: Generate virtual-only HA configuration
+        run: .venv/bin/python tests/ha_e2e/generate_fixture.py --repo . --config-dir "$HA_CONFIG"
+      - name: Download and verify Bubble Card v3.4.2 release bundle
+        run: |
+          curl --fail --location --retry 3 --silent --show-error \
+            --output "$HA_CONFIG/www/bubble-card.js" \
+            https://github.com/Clooos/Bubble-Card/releases/download/v3.4.2/bubble-card.js
+          echo "d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae  $HA_CONFIG/www/bubble-card.js" | sha256sum --check
+      - name: Start isolated Home Assistant Core 2026.10.1
+        run: |
+          docker pull ghcr.io/home-assistant/home-assistant:2026.10.1
+          docker run -d --name vsc-isolated-ha --restart=no \
+            --cap-drop=ALL --security-opt=no-new-privileges \
+            -e TZ=UTC -p 127.0.0.1:8123:8123 \
+            -v "$HA_CONFIG:/config" \
+            ghcr.io/home-assistant/home-assistant:2026.10.1
+      - name: Onboard isolated HA and verify real API
+        run: .venv/bin/python tests/ha_e2e/bootstrap.py --base "$HA_E2E_BASE" --output "$HA_E2E_AUTH_FILE"
+      - name: Run native Lovelace and WebSocket E2E tests
+        run: .venv/bin/python -m unittest discover -s tests/ha_e2e -p 'test_lovelace.py' -v
+      - name: Print HA logs on failure
+        if: failure()
+        run: docker logs --tail 250 vsc-isolated-ha 2>&1 || true
+      - name: Upload screenshot artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: vsc-isolated-ha-e2e
+          path: artifacts/vsc-ha-e2e/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Destroy ephemeral container and token
+        if: always()
+        run: |
+          docker rm -f vsc-isolated-ha >/dev/null 2>&1 || true
+          rm -f "$HA_E2E_AUTH_FILE"
