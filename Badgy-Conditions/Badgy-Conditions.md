@@ -1,6 +1,6 @@
 # Badgy Condition Helper
 
-**Version:** v2026.10.12-beta
+**Version:** v2026.10.15-beta.3
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT]
@@ -153,7 +153,7 @@ modules:
 ```yaml
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2026.10.15-beta.2"
+  version: "v2026.10.15-beta.3"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   description: |
@@ -376,7 +376,7 @@ badgy-condition-helper:
               return condObj.conditions.some(sc => evaluateSingleCondition(sc, hass));
             case 'not':
               if (Array.isArray(condObj.conditions) && condObj.conditions.length > 0) {
-                return !evaluateSingleCondition(condObj.conditions[0], hass);
+                return !condObj.conditions.some(sc => evaluateSingleCondition(sc, hass));
               }
               if (condObj.condition_obj) return !evaluateSingleCondition(condObj.condition_obj, hass);
               return false;

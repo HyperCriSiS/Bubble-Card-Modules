@@ -135,7 +135,9 @@ const cfg = {
   card_effects: {effect: "glow", color: "#ffffff", condition: check}
 };
 const context = {config: {"badgy-condition-helper": cfg}};
+let forceFallback = false;
 function checkConditionsMet(items) {
+  if (forceFallback) throw Error("Native conditions unavailable");
   return items.every(x => {
     if (x.condition === "state") return hass.states[x.entity_id]?.state === x.state;
     return false;
@@ -249,6 +251,21 @@ assert.equal(mainIcon.getAttribute("icon"), "mdi:ceiling-light",
   "updated native icon preserved after override ends");
 assert.equal(mainIcon.style.getPropertyValue("color"), "#445566",
   "external color restored after override ends");
+
+// Fallback NOT must negate all nested conditions, not just the first one.
+forceFallback = true;
+cfg.icon_badges["0"] = {icon: "mdi:alert", condition: {condition: "not", conditions: [
+  {condition: "state", entity_id: "sensor.flag", state: "on"},
+  {condition: "state", entity_id: "sensor.power", state: "26"}
+]}};
+run();
+assert.equal(sub.querySelector(".badgy-owned-badge.icon-badge"), null,
+  "fallback NOT hides badge when the second condition matches");
+hass.states["sensor.power"].state = "27";
+run();
+assert.ok(sub.querySelector(".badgy-owned-badge.icon-badge"),
+  "fallback NOT shows badge when no nested condition matches");
+forceFallback = false;
 
 assert.equal(typeof teardown, "function", "onTeardown registered");
 teardown();
