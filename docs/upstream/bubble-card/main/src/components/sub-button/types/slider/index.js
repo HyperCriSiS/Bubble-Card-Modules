@@ -98,6 +98,13 @@ function enableGlobalInteractionBlocker(context, element) {
   if (!element || element._globalBlockerAdded) return;
   const handler = (ev) => {
     if (!element.sliderOpen || element.sliderAlwaysVisible) return;
+    // A slider left open on a card that is gone (a dashboard rebuilt, a pop-up
+    // closed) must neither swallow the next press on the page nor keep its
+    // card alive, so it closes and lets go of the document.
+    if (element.isConnected === false) {
+      hideSubSlider(context, element);
+      return;
+    }
     const target = ev.target;
     const inside = isEventInsideSlider(element, target) || isEventInsideByPath(element, ev);
     const type = ev.type;
@@ -271,7 +278,9 @@ export function ensureSliderForSubButton(context, element, options) {
         cardWrapper: context.elements.cardWrapper || context.elements.mainContainer || context.content
       },
       content: context.content,
-      card: context.card
+      card: context.card,
+      // The fill of the card's own slider, when this slider is laid over one.
+      getCardRangeFill: () => (context.config?.button_type === 'slider' ? context.elements?.rangeFill : null) ?? null
     };
 
     createSliderStructure(sliderContext, {
@@ -430,12 +439,6 @@ export function ensureSliderForSubButton(context, element, options) {
     if (element.sliderCloseBtn) {
       element.sliderCloseBtn.style.display = 'none';
     }
-    // Ensure no document-level listener remains when always visible
-    if (element._outsideClickListenerAdded && element._outsideClickHandler) {
-      try { document.removeEventListener('click', element._outsideClickHandler, false); } catch (_) {}
-      try { delete element._outsideClickHandler; } catch (_) {}
-      element._outsideClickListenerAdded = false;
-    }
     // Ensure global blocker is disabled in always visible mode
     disableGlobalInteractionBlocker(element);
   } else {
@@ -466,6 +469,13 @@ export function ensureSliderForSubButton(context, element, options) {
         } catch (_) {}
         element.sliderCloseBtn.addEventListener('click', closeHandler);
         element.sliderCloseBtn.addEventListener('touchend', closeHandler);
+        // The close button sits on the overlay, outside the sub-button the
+        // parent slider knows how to ignore. Left to bubble, its press reached
+        // a parent in tap to slide, which took it for a slide, set its value
+        // under the button and kept the click that closes the overlay (#2498).
+        element.sliderCloseBtn.addEventListener('pointerdown', (ev) => {
+          ev.stopPropagation();
+        });
         element.sliderCloseBtn.addEventListener('touchstart', (ev) => {
           ev.preventDefault();
           ev.stopPropagation();
@@ -494,31 +504,12 @@ export function ensureSliderForSubButton(context, element, options) {
     try { element._parentGroupContainer = useCardOverlay ? null : (options.groupContainer || null); } catch (_) {}
   }
 
-  // Close on outside click (document-level). Avoid duplicates and ignore when always visible
-  if (!options.alwaysVisible) {
-    if (!element._outsideClickListenerAdded) {
-      const outsideHandler = (ev) => {
-        if (!element.sliderOpen || element.sliderAlwaysVisible) return;
-        const target = ev.target;
-        const inside = (element.sliderContainer && element.sliderContainer.contains(target)) || isEventInsideByPath(element, ev);
-        const startedInside = element._blockerPointerDownInside === true;
-        const isDragging = !!(element.sliderContext && element.sliderContext.dragging);
-        // Ignore clicks within the slider or on the sub-button itself
-        if (inside) return;
-        if (element.contains && element.contains(target)) return;
-        if (startedInside || isDragging) return;
-        hideSubSlider(context, element);
-      };
-      document.addEventListener('click', outsideHandler, { passive: true });
-      element._outsideClickListenerAdded = true;
-      element._outsideClickHandler = outsideHandler;
-    }
-  } else if (element._outsideClickListenerAdded && element._outsideClickHandler) {
-    // Defensive: if previously added but now alwaysVisible, remove it
-    try { document.removeEventListener('click', element._outsideClickHandler, false); } catch (_) {}
-    try { delete element._outsideClickHandler; } catch (_) {}
-    element._outsideClickListenerAdded = false;
-  }
+  // A press outside an open slider closes it through the blocker showSubSlider
+  // puts on the document for as long as the slider is open. Each sub-slider
+  // used to keep a click listener of its own on the document as well, for the
+  // life of the page. It did nothing the blocker had not already done, and it
+  // held the card, so every card Home Assistant threw away when it rebuilt the
+  // dashboard stayed in memory with its whole section.
 
   // Update close button vertical alignment depending on overlay level
   try {

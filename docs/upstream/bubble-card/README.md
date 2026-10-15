@@ -5,8 +5,8 @@ These copies are not dependencies or executable build inputs.
 
 | Channel | Reference commit | Files | Module documentation |
 | --- | --- | ---: | --- |
-| [stable](./stable/manifest.json) | [v3.4.1](https://github.com/Clooos/Bubble-Card/tree/061ed8376134307ba1086446869d0ab736265fcf) | 54 | [Specification](./stable/src/modules/module-documentation.md) |
-| [main](./main/manifest.json) | [061ed8376134](https://github.com/Clooos/Bubble-Card/tree/061ed8376134307ba1086446869d0ab736265fcf) | 54 | [Specification](./main/src/modules/module-documentation.md) |
+| [stable](./stable/manifest.json) | [v3.4.2](https://github.com/Clooos/Bubble-Card/tree/91a5c77ddbd563d2586368905ead6ded8b1c9fda) | 54 | [Specification](./stable/src/modules/module-documentation.md) |
+| [main](./main/manifest.json) | [91a5c77ddbd5](https://github.com/Clooos/Bubble-Card/tree/91a5c77ddbd563d2586368905ead6ded8b1c9fda) | 54 | [Specification](./main/src/modules/module-documentation.md) |
 
 ## Reference layout
 

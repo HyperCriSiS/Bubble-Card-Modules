@@ -1,6 +1,7 @@
 import { getState } from "./utils.js";
 import { getWeatherIcon } from "./icon.js";
 import { getSubButtonsStates } from "../components/sub-button/changes.js";
+import { refreshSurfaceTones } from "../components/sub-button/utils.js";
 import { checkConditionsMet } from './validate-condition.js';
 import { getTemplateResult, setStyleRefresher, TEMPLATE_STYLE } from './render-template.js';
 import { splitStyleTemplate, isTemplate, templateResultToText } from './jinja.js';
@@ -263,7 +264,11 @@ function getOrCreateStyleElement(context, element) {
 
   if (!context.styleElement || context.styleElement.parentElement !== element) {
     const styleElementToCache = document.createElement("style");
-    styleElementToCache.id = "bubble-styles"; 
+    styleElementToCache.id = "bubble-styles";
+    // A legacy pop-up puts it straight into the #root of the card holding it,
+    // and a square grid card shows every child of its #root that is not
+    // hidden, the text of a style element included. Hidden, it still styles.
+    styleElementToCache.hidden = true;
     element.appendChild(styleElementToCache);
     context.styleElement = styleElementToCache;
   }
@@ -508,6 +513,9 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
 
     if (stylesHaveChanged) {
       styleElementToInjectInto.textContent = finalStylesToInject;
+      // The sub-buttons were drawn before these styles, which may scope the
+      // accent they paint.
+      refreshSurfaceTones(context);
     }
 
     // Keyed on the marker the hide itself set, not on initialLoad: that flag

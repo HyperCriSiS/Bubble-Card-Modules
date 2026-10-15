@@ -1,9 +1,9 @@
 {
   "upstream_repository": "Clooos/Bubble-Card",
   "channel": "stable",
-  "release_tag": "v3.4.1",
-  "source_commit_sha": "061ed8376134307ba1086446869d0ab736265fcf",
-  "source_tree_sha": "96ab71f0614372ccad9b81d412d1c664d3921aad",
+  "release_tag": "v3.4.2",
+  "source_commit_sha": "91a5c77ddbd563d2586368905ead6ded8b1c9fda",
+  "source_tree_sha": "93d5a723bfe19b3363ad191bb7a8593e94d927df",
   "tracked_files": [
     {
       "path": "DEVELOPERS.md",
@@ -17,8 +17,8 @@
     },
     {
       "path": "README.md",
-      "sha": "9d36939a7db83ff76c9341df95818514547d47fb",
-      "bytes": 120672
+      "sha": "b6bd44f2fd1c84941a3905ec774c0102e798c313",
+      "bytes": 121364
     },
     {
       "path": "hacs.json",
@@ -57,8 +57,8 @@
     },
     {
       "path": "src/cards/sub-buttons/create.js",
-      "sha": "0eff29dfbcade5c7655947c3e760c240163375d3",
-      "bytes": 2977
+      "sha": "ef10edf785545ff2d01e9778764904897a6090da",
+      "bytes": 3021
     },
     {
       "path": "src/cards/sub-buttons/editor.js",
@@ -72,8 +72,8 @@
     },
     {
       "path": "src/cards/sub-buttons/styles.css",
-      "sha": "6af0f8cfd01f9b7e5f41fd16fa52f354705f15f5",
-      "bytes": 2439
+      "sha": "3a4b448b1c4287db26bbf7740714ce529de7254f",
+      "bytes": 3362
     },
     {
       "path": "src/components/base-card/styles.css",
@@ -107,8 +107,8 @@
     },
     {
       "path": "src/components/sub-button/editor/utils.js",
-      "sha": "14f4babdb59665e893ca3df2b0f881123dd73a0b",
-      "bytes": 27622
+      "sha": "5cd289b18a46cf668128644f8cb1134cd8cd60e3",
+      "bytes": 27710
     },
     {
       "path": "src/components/sub-button/index.js",
@@ -117,8 +117,8 @@
     },
     {
       "path": "src/components/sub-button/styles.css",
-      "sha": "21546f8d9380e9f17707af6e02880a62010191e4",
-      "bytes": 24117
+      "sha": "d11bd37b4e79151557fdf3924bd515d981fab9d8",
+      "bytes": 24922
     },
     {
       "path": "src/components/sub-button/types/default/index.js",
@@ -132,18 +132,18 @@
     },
     {
       "path": "src/components/sub-button/types/slider/index.js",
-      "sha": "a628d1fbe9a08791ae555545d0ca998c226d1cf4",
-      "bytes": 29216
+      "sha": "4cb2da65e489f6bb61464ceffb55c6d777497429",
+      "bytes": 28816
     },
     {
       "path": "src/components/sub-button/utils.js",
-      "sha": "253d0505b87e4ad10efa77ef85af7ccf59354294",
-      "bytes": 25252
+      "sha": "abe71fdbdffa41ad343f66e1f67822a1d52946e6",
+      "bytes": 28465
     },
     {
       "path": "src/editor/bubble-card-editor.js",
-      "sha": "dde21587f763f8471dd6068cc895fb47169cbf8e",
-      "bytes": 146324
+      "sha": "fcf1e06d291c8fb89dbf777c2a397a0a822ebb25",
+      "bytes": 147122
     },
     {
       "path": "src/editor/styles.css",
@@ -262,8 +262,8 @@
     },
     {
       "path": "src/tools/style-processor.js",
-      "sha": "94443f76cdaa546e7c4ebbebecb1ef72d0892d8e",
-      "bytes": 35443
+      "sha": "8eac6fcdc66a7b7d4b45f5a236df6fc5b620e45e",
+      "bytes": 35925
     },
     {
       "path": "src/tools/style.js",
