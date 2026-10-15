@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'Visual-Styling-Center/**'
+      - 'docs/upstream/bubble-card/**'
       - 'tests/test_visual_styling_center.py'
       - 'tests/vsc_runtime_test.cjs'
       - 'tests/test_vsc_browser.py'

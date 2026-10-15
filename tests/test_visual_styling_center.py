@@ -51,6 +51,19 @@ class VisualStylingCenterTests(unittest.TestCase):
                           "config.gradient_target =", "config.gradient_entity ="):
             self.assertNotIn(forbidden, code)
 
+    def test_upstream_group_index_and_lifecycle_contract(self):
+        # This test deliberately detects incompatible upstream changes.
+        upstream = ROOT / "docs/upstream/bubble-card/stable/src"
+        changes = (upstream / "components/sub-button/changes.js").read_text(encoding="utf-8")
+        utils = (upstream / "components/sub-button/utils.js").read_text(encoding="utf-8")
+        style = (upstream / "tools/style-processor.js").read_text(encoding="utf-8")
+        self.assertRegex(changes, r"mainExplicitGroups,\\s*\\.\\.\\.mainNonGroupGroups")
+        self.assertRegex(changes, r"bottomGroups,\\s*\\.\\.\\.bottomNonGroupGroups")
+        self.assertIn("const entity = subButton.entity ?? context.config.entity", utils)
+        self.assertIn("trackedHass(context)", style)
+        self.assertIn("registerModuleTeardown(context", style)
+        self.assertIn("hasChanged(context", style)
+
     def test_js_regression_scenarios(self):
         code = self.module["code"]
         marker = chr(36) + chr(123) + "(() => {"
