@@ -493,6 +493,15 @@ visual_styling_center:
   code: |
    ${(() => {
       const config = this.config.visual_styling_center || {};
+      // Avoid style recalculations when a HA pass produces identical values.
+      const setCardVariable = (name, value) => {
+        const current = card.style.getPropertyValue(name);
+        if (value === undefined || value === null) {
+          if (current) card.style.removeProperty(name);
+        } else if (current !== String(value)) {
+          card.style.setProperty(name, String(value));
+        }
+      };
 
       // Derive defaults without mutating the saved Bubble Card configuration.
       const gradientTarget = config.gradient_target ?? 'slider';
@@ -504,40 +513,20 @@ visual_styling_center:
         card.classList.remove('slider-background-mode');
       }
       // Apply all size and spacing configurations
-      if (config.height_multiplier !== undefined) {
-        card.style.setProperty('--height-multiplier', config.height_multiplier);
-      }
-      if (config.inner_padding !== undefined) {
-        card.style.setProperty('--inner-padding', `${config.inner_padding}px`);
-      }
-      if (config.icon_vertical_margin !== undefined) {
-        card.style.setProperty('--icon-vertical-margin', `${config.icon_vertical_margin}px`);
-      }
-      if (config.subbutton_horizontal_margin !== undefined) {
-        card.style.setProperty('--subbutton-horizontal-margin', `${config.subbutton_horizontal_margin}px`);
-      }
-      if (config.subbutton_row_spacing !== undefined) {
-        card.style.setProperty('--subbutton-row-spacing', `${config.subbutton_row_spacing}px`);
-      }
-      if (config.subbutton_column_spacing !== undefined) {
-        card.style.setProperty('--subbutton-column-spacing', `${config.subbutton_column_spacing}px`);
-      }
-      if (config.icon_size_multiplier !== undefined) {
-        card.style.setProperty('--icon-size-multiplier', config.icon_size_multiplier);
-      }
-      if (config.icon_background_ratio !== undefined) {
-        card.style.setProperty('--icon-background-ratio', config.icon_background_ratio);
-      }
-      if (config.subicon_size_multiplier !== undefined) {
-        card.style.setProperty('--subicon-size-multiplier', config.subicon_size_multiplier);
-      }
-      if (config.subbutton_background_ratio !== undefined) {
-        card.style.setProperty('--subbutton-background-ratio', config.subbutton_background_ratio);
-      }
+      setCardVariable('--height-multiplier', config.height_multiplier);
+      setCardVariable('--inner-padding', config.inner_padding == null ? null : `${config.inner_padding}px`);
+      setCardVariable('--icon-vertical-margin', config.icon_vertical_margin == null ? null : `${config.icon_vertical_margin}px`);
+      setCardVariable('--subbutton-horizontal-margin', config.subbutton_horizontal_margin == null ? null : `${config.subbutton_horizontal_margin}px`);
+      setCardVariable('--subbutton-row-spacing', config.subbutton_row_spacing == null ? null : `${config.subbutton_row_spacing}px`);
+      setCardVariable('--subbutton-column-spacing', config.subbutton_column_spacing == null ? null : `${config.subbutton_column_spacing}px`);
+      setCardVariable('--icon-size-multiplier', config.icon_size_multiplier);
+      setCardVariable('--icon-background-ratio', config.icon_background_ratio);
+      setCardVariable('--subicon-size-multiplier', config.subicon_size_multiplier);
+      setCardVariable('--subbutton-background-ratio', config.subbutton_background_ratio);
       if (config.slider_bg_opacity !== undefined) {
-        card.style.setProperty('--slider-bg-opacity', config.slider_bg_opacity);
+        setCardVariable('--slider-bg-opacity', config.slider_bg_opacity);
       } else {
-        card.style.setProperty('--slider-bg-opacity', 0.6);
+        setCardVariable('--slider-bg-opacity', 0.6);
       }
 
       // Only keep module-owned variables while an option has a value.
@@ -548,13 +537,12 @@ visual_styling_center:
         }
         return typeof selected === 'string' && selected.trim() ? selected : null;
       };
-      const setCardVariable = (name, value) => {
-        if (value != null) card.style.setProperty(name, value);
-        else card.style.removeProperty(name);
-      };
       setCardVariable('--icon-color', resolveColor(config.manual_icon_color, config.custom_icon_color));
       setCardVariable('--subicon-color', resolveColor(config.manual_subicon_color, config.custom_subicon_color));
-      setCardVariable('--subbutton-background-color', resolveColor(config.manual_subbutton_background_color, config.custom_subbutton_background_color));
+      const customSubbuttonBackground = resolveColor(config.manual_subbutton_background_color, config.custom_subbutton_background_color);
+      setCardVariable('--subbutton-background-color', customSubbuttonBackground);
+      // Keep the native on/off background and v3.4.2 contrast unless overridden.
+      card.classList.toggle('vsc-custom-subbutton-background', customSubbuttonBackground != null);
       const iconBackgroundColor = resolveColor(config.manual_icon_background_color, config.custom_icon_background_color);
       setCardVariable('--icon-background-color', config.hide_icon_background === true ? 'transparent' : iconBackgroundColor);
 
@@ -586,7 +574,9 @@ visual_styling_center:
             icon.dataset.vscPreviousColor = icon.style.getPropertyValue('color');
             icon.dataset.vscPreviousPriority = icon.style.getPropertyPriority('color');
           }
-          icon.style.setProperty('color', color, 'important');
+          if (icon.style.getPropertyValue('color') !== color || icon.style.getPropertyPriority('color') !== 'important') {
+            icon.style.setProperty('color', color, 'important');
+          }
           icon.dataset.vscAppliedColor = color;
         } else if (Object.prototype.hasOwnProperty.call(icon.dataset, 'vscAppliedColor')) {
           if (icon.style.getPropertyValue('color') === icon.dataset.vscAppliedColor) {
@@ -678,9 +668,9 @@ visual_styling_center:
           helperColor = `rgba(255, 255, 255, ${config.helper_opacity ?? 0.7})`;
         }
 
-        card.style.setProperty('--helper-color', helperColor);
-        card.style.setProperty('--helper-size', config.helper_size_ratio ?? 0.7);
-        card.style.setProperty('--fade-strength', config.fade_strength ?? 1.0);
+        setCardVariable('--helper-color', helperColor);
+        setCardVariable('--helper-size', config.helper_size_ratio ?? 0.7);
+        setCardVariable('--fade-strength', config.fade_strength ?? 1.0);
 
         if (config.enable_helper_fade === true) {
           card.classList.add('helper-fade-enabled');
@@ -721,9 +711,9 @@ visual_styling_center:
           sliderHelperColor = `rgba(0, 0, 0, ${config.slider_helper_opacity ?? 0.7})`;
         }
 
-        card.style.setProperty('--slider-helper-color', sliderHelperColor);
-        card.style.setProperty('--slider-helper-size', config.slider_helper_size_ratio ?? 0.7);
-        card.style.setProperty('--slider-fade-strength', config.slider_fade_strength ?? 1.0);
+        setCardVariable('--slider-helper-color', sliderHelperColor);
+        setCardVariable('--slider-helper-size', config.slider_helper_size_ratio ?? 0.7);
+        setCardVariable('--slider-fade-strength', config.slider_fade_strength ?? 1.0);
 
         if (config.enable_slider_helper_fade === true) {
           card.classList.add('slider-helper-fade-enabled');
@@ -734,22 +724,19 @@ visual_styling_center:
         card.classList.remove('slider-helper-enabled', 'slider-helper-fade-enabled');
       }
 
-      // Reset and apply gradient effects
-      card.classList.remove('use-gradient-slider');
-      card.classList.remove('use-gradient-background');
-      card.style.removeProperty('--slider-gradient');
-      card.style.removeProperty('--card-gradient');
+      // Collect the final gradient before updating the DOM.
+      let appliedGradient = null;
 
       if (config.enable_gradient === true && gradientEntity) {
         const entityId = gradientEntity;
-        const entityState = hass.states[entityId];
+        const entityState = hass?.states?.[entityId];
         let coloredLights = [];
 
         // Get light colors from group or single light
         if (entityState && entityState.attributes && entityState.attributes.entity_id) {
           entityState.attributes.entity_id.forEach(childId => {
             if (childId.startsWith('light.')) {
-              const lightState = hass.states[childId];
+              const lightState = hass?.states?.[childId];
               if (lightState && lightState.state === 'on' && lightState.attributes.rgb_color) {
                 coloredLights.push({
                   rgb: lightState.attributes.rgb_color,
@@ -819,27 +806,18 @@ visual_styling_center:
             gradientColors = stops.map(stop => `rgb(${stop.rgb[0]}, ${stop.rgb[1]}, ${stop.rgb[2]}) ${stop.position}%`).join(', ');
           }
 
-          // Apply the gradient to the target element
-          const gradient = `linear-gradient(to right, ${gradientColors})`;
-          if (gradientTarget === 'background') {
-            card.style.setProperty('--card-gradient', gradient);
-            card.classList.add('use-gradient-background');
-          } else {
-            card.style.setProperty('--slider-gradient', gradient);
-            card.classList.add('use-gradient-slider');
-          }
+          appliedGradient = `linear-gradient(to right, ${gradientColors})`;
         } else if (config.disable_default_gradient !== true) {
           // Fallback rainbow gradient if no colored lights are found and option is not disabled
-          const defaultGradient = 'linear-gradient(to right, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3)';
-          if (gradientTarget === 'background') {
-            card.style.setProperty('--card-gradient', defaultGradient);
-            card.classList.add('use-gradient-background');
-          } else {
-            card.style.setProperty('--slider-gradient', defaultGradient);
-            card.classList.add('use-gradient-slider');
-          }
+          appliedGradient = 'linear-gradient(to right, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3)';
         }
       }
+
+      const backgroundGradientActive = appliedGradient != null && gradientTarget === 'background';
+      card.classList.toggle('use-gradient-background', backgroundGradientActive);
+      card.classList.toggle('use-gradient-slider', appliedGradient != null && !backgroundGradientActive);
+      setCardVariable('--card-gradient', backgroundGradientActive ? appliedGradient : null);
+      setCardVariable('--slider-gradient', backgroundGradientActive ? null : appliedGradient);
 
       // Native Bubble Card handles slider state synchronization.
       // Keep VSC focused on visual styling without a redundant update hook.
@@ -859,25 +837,11 @@ visual_styling_center:
       box-sizing: border-box !important;
       height: 100% !important;
     }
-    /* Style for regular range fill (slider) */
-    .bubble-range-fill {
-      background-color: var(--slider-color, var(--bubble-accent-color, var(--accent-color))) !important;
-      z-index: 1 !important;
-      opacity: 1 !important;
-    }
-
-    /* Enhance clickability of slider */
-    .bubble-range-slider {
-      cursor: pointer !important;
-      z-index: 1 !important;
-    }
-
-    .bubble-range-slider:hover {
-      cursor: ew-resize !important;
-    }
+    /* Native Bubble Card manages default slider colors and interaction states.
+       VSC only overrides the main slider when an explicit gradient is active. */
 
     /* Gradient slider styles - target only the slider fill */
-    .use-gradient-slider .bubble-range-fill {
+    .use-gradient-slider .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill {
       background: var(--slider-gradient) !important;
       background-size: 100% 100% !important;
       background-position: center !important;
@@ -892,7 +856,7 @@ visual_styling_center:
     }
 
     /* Improve slider visibility with background gradient - move to bottom edge */
-    .use-gradient-background .bubble-range-fill {
+    .use-gradient-background .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill {
       background-color: rgba(255, 255, 255, var(--slider-bg-opacity, 0.6)) !important; /* Higher contrast */
       box-shadow: 0 0 4px rgba(255, 255, 255, 0.8) !important; /* Glow effect */
       height: 12px !important; /* Thinner height */
@@ -903,12 +867,12 @@ visual_styling_center:
     }
 
     /* Slider Contrast Helper Implementation - creating a glow effect around the edges */
-    .slider-helper-enabled.use-gradient-background .bubble-range-fill {
+    .slider-helper-enabled.use-gradient-background .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill {
       /* Maintain existing styles but add glow effect */
       box-shadow: 0 0 calc(3px * var(--slider-helper-size, 0.7)) var(--slider-helper-color, rgba(0, 0, 0, 0.7)) !important;
     }
 
-    .slider-helper-fade-enabled.use-gradient-background .bubble-range-fill {
+    .slider-helper-fade-enabled.use-gradient-background .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill {
       /* For the fade effect, a more complex shadow with variable fade strength */
       box-shadow: 
         0 0 calc(2px * var(--slider-helper-size, 0.7)) var(--slider-helper-color, rgba(0, 0, 0, 0.7)),
@@ -933,7 +897,9 @@ visual_styling_center:
     .bubble-sub-button {
       height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px) !important;
       min-height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px) !important;
-      background-color: var(--subbutton-background-color, var(--bubble-sub-button-background-color, var(--bubble-secondary-background-color))) !important;
+    }
+    .vsc-custom-subbutton-background .bubble-sub-button {
+      background-color: var(--subbutton-background-color) !important;
     }
     /* Hide sub-button backgrounds when option is enabled - with !important to override inline styles */
     .hide-subbutton-background .bubble-sub-button {
