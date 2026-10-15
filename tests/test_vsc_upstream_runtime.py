@@ -83,19 +83,25 @@ class OfficialBubbleCard(unittest.TestCase):
             faulthandler.cancel_dump_traceback_later()
 
     def mount(self,options):
-        print("mounting real bubble-card",flush=True)
-        self.page.evaluate("""input => {
+        print("phase 1: creating custom element",flush=True)
+        self.page.evaluate("""() => {
             window.card=document.createElement('bubble-card');
+        }""")
+        print("phase 2: applying full card configuration",flush=True)
+        self.page.evaluate("""input => {
             window.card.setConfig({
               type:'custom:bubble-card',card_type:'button',button_type:'slider',
               entity:'light.main',sub_button:{main:[{entity:'light.child'}]},
               styles:input.styles,visual_styling_center:input.options
             });
-            document.querySelector('#target').append(window.card);
-            window.card.hass=window.hass;
         }""",{"styles":read_styles(),"options":options})
+        print("phase 3: appending custom element",flush=True)
+        self.page.evaluate("() => document.querySelector('#target').append(window.card)")
+        print("phase 4: assigning hass snapshot",flush=True)
+        self.page.evaluate("() => {window.card.hass=window.hass}")
+        print("phase 5: waiting for styles",flush=True)
         self.page.wait_for_timeout(700)
-        print("real bubble-card mount completed",flush=True)
+        print("phase 6: mount completed",flush=True)
 
     def test_actual_renderer_and_state_dependencies(self):
         self.mount({"enable_entity_colored_main_icon":True,"enable_gradient":True,
