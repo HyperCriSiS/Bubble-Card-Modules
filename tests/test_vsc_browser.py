@@ -1,4 +1,4 @@
-"""Chromium/CSS integration tests using mirrored Bubble Card v3.4.1 CSS.
+"""Chromium/CSS integration tests using mirrored Bubble Card v3.4.2 CSS.
 
 The DOM and Home Assistant state are simulated. These are not live HA E2E tests.
 """
@@ -34,8 +34,9 @@ ha-icon{display:inline-block;width:24px;height:24px}
 <div class=bubble-icon-container><ha-icon class='bubble-icon bubble-main-icon' id=main>●</ha-icon></div>
 <div class=bubble-name-container>Sample Light</div>
 <div class=bubble-sub-button-container>
-<div class='bubble-sub-button bubble-sub-button-1'><ha-icon class=bubble-sub-button-icon id=sub1>●</ha-icon></div>
+<div class='bubble-sub-button bubble-sub-button-1 background-on bright-background'><ha-icon class=bubble-sub-button-icon id=sub1>●</ha-icon></div>
 <div class='bubble-sub-button bubble-sub-button-2'><ha-icon class=bubble-sub-button-icon id=sub2>●</ha-icon></div>
+<div class=bubble-sub-button-slider><div class=bubble-range-slider><div id=subfill class=bubble-range-fill style='background-color:rgb(24,48,96)'></div></div></div>
 </div><div class=bubble-sub-button-bottom-container>
 <div class='bubble-sub-button bubble-sub-button-3'><ha-icon class=bubble-sub-button-icon id=sub3>●</ha-icon></div>
 </div></div></div></div>"""
@@ -168,3 +169,24 @@ class VSCBrowser(unittest.TestCase):
         self.change(cfg={'enable_gradient':False})
         self.assertEqual(self.cssval('#fill','background-image'),'none')
         self.assertNotEqual(self.cssval('#fill','background-color'),'rgba(0, 0, 0, 0)')
+
+
+    def test_subslider_keeps_native_v342_colors(self):
+        # Main gradient must never restyle a nested sub-slider fill.
+        self.assertEqual(self.cssval('#subfill', 'background-color'), 'rgb(24, 48, 96)')
+        native_height = self.cssval('#subfill', 'height')
+        self.change(cfg={'enable_gradient':True,'gradient_target':'slider','gradient_entity':'light.main'})
+        self.assertIn('linear-gradient', self.cssval('#fill','background-image'))
+        self.assertEqual(self.cssval('#subfill', 'background-image'), 'none')
+        self.assertEqual(self.cssval('#subfill','background-color'), 'rgb(24, 48, 96)')
+        self.change(cfg={'gradient_target':'background','enable_slider_helper':True})
+        self.assertEqual(self.cssval('#subfill','height'), native_height)
+        self.assertEqual(self.cssval('#subfill','background-color'), 'rgb(24, 48, 96)')
+
+    def test_subbutton_native_background_except_explicit_override(self):
+        native = self.cssval('.bubble-sub-button-1','background-color')
+        self.assertEqual(native, 'rgb(60, 140, 220)')
+        self.change(cfg={'manual_subbutton_background_color':'#123456'})
+        self.assertEqual(self.cssval('.bubble-sub-button-1','background-color'),'rgb(18, 52, 86)')
+        self.change(cfg={'manual_subbutton_background_color':''})
+        self.assertEqual(self.cssval('.bubble-sub-button-1','background-color'),native)

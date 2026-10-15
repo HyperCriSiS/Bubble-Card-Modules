@@ -1,7 +1,7 @@
 # Visual Styling Center — audit and automated test evidence (2026-10-12)
 
 ## Basis
-- Read-only reference: Bubble Card stable v3.4.1 at docs/upstream/bubble-card/stable/.
+- Read-only reference: Bubble Card stable v3.4.2 at docs/upstream/bubble-card/stable/.
 - Module ID: visual_styling_center. All 46 legacy editor keys remain unchanged.
 - Proposed changes live in pull request #7; no module release or merge is implied.
 
@@ -29,3 +29,11 @@ Browser integration tests simulate the DOM and hass.states. They are **not** a f
 - Actual card editor selectors and live update behavior in HA.
 - Complex sections/grid and mixed-group layouts, module interactions, overlays and mobile touch.
 - Visual screenshot diff snapshots across supported browsers and themes.
+
+## Compatibility improvements added 2026-10-15
+- Read-only upstream mirror updated to v3.4.2 in PR #10, and sync workflow changed to protected-main PRs in PR #9.
+- Removed broad slider-fill styling, restricting VSC gradients to the main card slider. Native sub-slider contrast and state colors remain Bubble Card responsibilities.
+- Native sub-button backgrounds remain active unless a VSC-specific background color is configured.
+- CSS variables and gradients are written only when their values change; removed layout configuration fields no longer leave stale variables.
+- Chromium tests cover native nested sub-slider preservation and custom sub-button background override.
+- Real Home Assistant WebSocket/pointer lifecycle tests are still open. Repository setting must allow GitHub Actions to create PRs for unattended upstream-reference PR creation.

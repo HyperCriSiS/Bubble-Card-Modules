@@ -42,6 +42,8 @@ class VisualStylingCenterTests(unittest.TestCase):
         self.assertEqual(len(names), len(set(names)))
         self.assertEqual(set(names), set(REQUIRED))
         self.assertIn("cover", self.module["unsupported"])
+        diff = (ROOT / "docs/upstream/bubble-card/CHANNEL-DIFF.md").read_text(encoding="utf-8")
+        self.assertIn("v3.4.2", diff)
 
     def test_no_obsolete_polling_or_config_mutation(self):
         code = self.module["code"]

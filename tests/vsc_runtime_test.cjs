@@ -5,11 +5,13 @@ const assert = require("node:assert/strict");
 const runner = vm.runInNewContext(fs.readFileSync(process.argv[2], "utf8") + "\nrunner;", {});
 function style() {
   const values = new Map(), priorities = new Map();
+  let writes = 0;
   return {
-    setProperty(k,v,p=""){values.set(k,String(v));priorities.set(k,p)},
-    removeProperty(k){values.delete(k);priorities.delete(k)},
+    setProperty(k,v,p=""){writes++;values.set(k,String(v));priorities.set(k,p)},
+    removeProperty(k){writes++;values.delete(k);priorities.delete(k)},
     getPropertyValue(k){return values.get(k)||""},
-    getPropertyPriority(k){return priorities.get(k)||""}
+    getPropertyPriority(k){return priorities.get(k)||""},
+    getWrites(){return writes}
   };
 }
 function classes() {
@@ -110,4 +112,19 @@ test("hide background resets custom styling correctly",()=>{
   assert.equal(card.style.getPropertyValue("--icon-background-color"),"#123456");
   delete cfg.manual_icon_background_color;run();
   assert.equal(card.style.getPropertyValue("--icon-background-color"),"");
+});
+
+test("unchanged render does not rewrite CSS variables",()=>{
+  run();
+  const before=card.style.getWrites();
+  run();
+  assert.equal(card.style.getWrites(),before);
+});
+test("removing layout configuration resets module-owned CSS variables",()=>{
+  cfg.inner_padding=13;
+  run();
+  assert.equal(card.style.getPropertyValue("--inner-padding"),"13px");
+  delete cfg.inner_padding;
+  run();
+  assert.equal(card.style.getPropertyValue("--inner-padding"),"");
 });
