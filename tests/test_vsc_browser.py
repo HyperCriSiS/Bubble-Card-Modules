@@ -170,6 +170,20 @@ class VSCBrowser(unittest.TestCase):
         self.change(cfg={'subbutton_column_spacing':12})
         self.assertEqual(self.cssval('.bubble-sub-button-container','column-gap'),'12px')
 
+    def test_mixed_group_icon_indices_match_upstream(self):
+        self.page.evaluate("""() => {
+            window.cfg.sub_button={
+                main:[{entity:'light.main'},{group:[{entity:'light.first'}]}],
+                bottom:[{entity:'light.second'}]
+            };
+            window.cfg.visual_styling_center.enable_entity_colored_subicons=true;
+            window.render();
+        }""")
+        self.page.wait_for_timeout(400)
+        self.assertEqual(self.cssval('#sub1','color'),'rgb(0, 255, 0)')
+        self.assertEqual(self.cssval('#sub2','color'),'rgb(255, 0, 0)')
+        self.assertEqual(self.cssval('#sub3','color'),'rgb(150, 150, 150)')
+
     def test_sub_button_without_entity_inherits_parent_color(self):
         self.page.evaluate("""() => {
             delete window.cfg.sub_button.main[0].group[0].entity;

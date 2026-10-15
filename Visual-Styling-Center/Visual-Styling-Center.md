@@ -625,8 +625,10 @@ visual_styling_center:
         getFunctionOnlyColor(mainEntityId);
       applyOwnedIconColor(card.querySelector('.bubble-icon'), mainColor);
 
-      // Bubble Card v3.4+ supports legacy arrays and sectioned main/bottom
-      // structures with nested groups. Preserve the visible 1-based index order.
+      // Match Bubble Card's actual class numbering in updateGroupButtons().
+      // In mixed layouts explicit groups are indexed first, followed by the
+      // implicit main group, then bottom groups and bottom individual buttons.
+      // Flattening YAML order directly would color the wrong icons.
       const subButtonConfigs = [];
       const collectSubButtons = (items) => {
         if (!Array.isArray(items)) return;
@@ -637,11 +639,21 @@ visual_styling_center:
         });
       };
       const configuredSubButtons = this.config.sub_button;
-      if (Array.isArray(configuredSubButtons)) collectSubButtons(configuredSubButtons);
-      else if (configuredSubButtons && typeof configuredSubButtons === 'object') {
-        collectSubButtons(configuredSubButtons.main);
-        collectSubButtons(configuredSubButtons.bottom);
-      }
+      const mainItems = Array.isArray(configuredSubButtons) ? configuredSubButtons
+        : (Array.isArray(configuredSubButtons?.main) ? configuredSubButtons.main : []);
+      const bottomItems = Array.isArray(configuredSubButtons?.bottom) ? configuredSubButtons.bottom : [];
+      const mainGroups = mainItems.filter(item => Array.isArray(item?.group) && item.group.length > 0);
+      const bottomGroups = bottomItems.filter(item => Array.isArray(item?.group) && item.group.length > 0);
+      const mainSingles = mainItems.filter(item => item && !Array.isArray(item.group));
+      const bottomSingles = bottomItems.filter(item => item && !Array.isArray(item.group));
+      const mainLayout = configuredSubButtons?.main_layout ?? 'inline';
+      const mainUsesAutoGroup = mainLayout === 'rows' || mainGroups.length > 0 ||
+        bottomGroups.length > 0 || bottomSingles.length > 0;
+      if (!mainUsesAutoGroup) collectSubButtons(mainSingles);
+      mainGroups.forEach(item => collectSubButtons(item.group));
+      if (mainUsesAutoGroup) collectSubButtons(mainSingles);
+      bottomGroups.forEach(item => collectSubButtons(item.group));
+      collectSubButtons(bottomSingles);
       subButtonConfigs.forEach((buttonConfig, index) => {
         const icon = card.querySelector(`.bubble-sub-button-${index + 1} .bubble-sub-button-icon`);
         // Bubble Card falls back to the parent entity when the sub-button has none.

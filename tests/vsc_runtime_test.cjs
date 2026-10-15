@@ -112,6 +112,21 @@ test("gradient follows child light RGB changes",()=>{
   run();
   assert.notEqual(card.style.getPropertyValue("--card-gradient"),initial);
 });
+test("mixed groups use Bubble Card's class index rather than YAML order",()=>{
+  ctx.config.entity="light.a";
+  ctx.config.sub_button={
+    main:[{entity:"light.a"},{group:[{entity:"light.b"}]}],
+    bottom:[{entity:"light.a"}]
+  };
+  cfg.enable_entity_colored_subicons=true;
+  cfg.enable_function_button_color=false;
+  hass.states["light.a"]=st("on",[11,22,33]);
+  hass.states["light.b"]=st("off");
+  run();
+  assert.equal(card.sub[0].style.getPropertyValue("color"),"rgb(150, 150, 150)");
+  assert.equal(card.sub[1].style.getPropertyValue("color"),"rgb(11, 22, 33)");
+  assert.equal(card.sub[2].style.getPropertyValue("color"),"rgb(11, 22, 33)");
+});
 test("sub-button without entity inherits parent light state",()=>{
   ctx.config.entity="light.a";
   ctx.config.sub_button={main:[{entity:null}]};
