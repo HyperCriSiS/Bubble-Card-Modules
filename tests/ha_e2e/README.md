@@ -1,44 +1,41 @@
 # Visual Styling Center – echte Home-Assistant-End-to-End-Tests
 
-## Nachweis
+## Stand und Nachweise
 
-Der erste vollständige **echte HA-Testlauf** ist erfolgreich:
-[GitHub Actions #38797293013](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38797293013)
-(15. Oktober 2026; alle sechs Tests bestanden).
+**9/9 E2E-Tests erfolgreich:** [GitHub Actions #38799165242](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38799165242), 15. Oktober 2026.
 
-Der Workflow startet einen isolierten Home-Assistant-Core-Container **2026.10.1**, lädt das unveränderte Release-Bundle **Bubble Card v3.4.2** und prüft dessen SHA-256-Hash
-`d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae`.
-Die Version des Visual Styling Center stammt direkt aus der Modul-Markdown-Datei des Pull Requests.
+[Browser-Screenshots (neun Fälle)](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38799165242/artifacts/12003956507)
+
+Der GitHub-Workflow startet Home Assistant Core **2026.10.1** als isolierten Docker-Container. Das offizielle, unveränderte Bubble-Card-Bundle **v3.4.2** wird anhand seines SHA-256-Hashes `d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae` geprüft. Der VSC-Code stammt aus dem aktuellen Pull Request, nicht aus einem separaten Mock.
 
 ## Sicherheitsgrenzen
 
-- Home Assistant ist ausschließlich über `127.0.0.1:8123` erreichbar.
-- Keine Verbindung oder Zugangsdaten zur produktiven HA-Instanz; ausschließlich virtuelle RGB-Lampen, `input_*`-Helfer und eine Gruppe.
-- Temporärer OAuth-Nutzer aus der offiziellen HA-Onboarding-API.
-- Token werden nur in einer Modus-0600-Datei des GitHub-Runners gespeichert, weder in Git-Commits noch in den Actions-Artefakten.
-- Nach jedem Lauf werden Container und Token entfernt.
-- Für den GitHub-Container benötigt das temporäre Konfigurationsverzeichnis Schreibrechte für die nichtprivilegierte HA-Prozessidentität; dieses Verzeichnis enthält keine Produktivdaten.
+- HTTP-Bindung ausschließlich an `127.0.0.1:8123`; kein Zugriff auf das produktive Home Assistant.
+- Nur temporäre `input_*`-Helfer, zwei virtuelle RGB-Lampen und eine Lampengruppe.
+- Einweg-OAuth-Testnutzer über die echte Onboarding-API. Authentifizierungsdaten nur als lokale temporäre Datei mit Modus 0600, niemals in Git oder Screenshot-Artefakten.
+- Das Docker-Konfigurationsverzeichnis enthält keine Produktivdaten; es ist für den nichtprivilegierten HA-Prozess beschreibbar.
+- Container und Authentifizierungsdatei werden nach jedem Testlauf gelöscht.
 
-## Aktuelle Tests
+## Getestete Fälle
 
-| Test | Was geprüft wird |
+| # | Prüfung |
 | --- | --- |
-| Rendering | Echte Bubble Card und VSC in authentifiziertem Lovelace, inklusive Hauptslider und permanent sichtbarem Sub-Button-Slider |
-| HA → Browser | Externes Abschalten/Einschalten der virtuellen Hauptlampe führt über echte HA-State/WebSocket-Updates zu einer geänderten VSC-Icon-Farbe |
-| Gruppen-Gradient | RGB-Änderung eines Kindlichts aktualisiert den VSC-Gradienten |
-| Browser → HA | Native Slider-Pointer-Geste ändert die Helligkeit des echten HA-Licht-Entities |
-| Baseline | Unveränderte Bubble Card ohne VSC bleibt funktionsfähig |
-| Navigation | Dashboard-Navigation und Rückkehr rendern das Modul erneut korrekt |
+| 01 | Echtes Lovelace-Rendering: VSC-Icon, Hauptslider, permanent sichtbarer Subslider und Gradient |
+| 02 | Externes Ausschalten/Einschalten einer virtuellen Lampe ändert die VSC-Icon-Farbe über HA-State/WebSocket |
+| 03 | RGB-Änderung eines einzelnen Kindlichts aktualisiert den gruppenbasierten VSC-Gradienten |
+| 04 | Native Slider-Pointer-Geste verändert den tatsächlichen Helligkeitswert im HA-Backend |
+| 05 | Unveränderte Bubble Card ohne VSC funktioniert parallel |
+| 06 | Dashboard-Navigation und Wiederaufbau aktualisieren die Karte korrekt |
+| 07 | Gemischte Main-/Bottom-/Gruppen-Sub-Buttons behalten korrekte Icon-Indizes und Farben bei Zustandsänderungen |
+| 08 | Pointer-Geste auf einem nativen Inline-Subslider verändert den Helligkeitswert des Kindlichts |
+| 09 | Nativer Card-Disconnect räumt VSC-eigene Inline-CSS-Variablen und Gradienten auf |
 
-Das ist eine echte **Browser-/Backend-Integration** mit HA und originaler Bubble Card, im Gegensatz zu den separat bestehenden Mock-/CSS-Tests.
+Diese Tests verwenden **echte HA-Backend-Entities, das authentifizierte Lovelace-Frontend und die originale Bubble Card**. Die ergänzenden Python-/Node-/Chromium-Simulationstests bleiben separat bestehen.
 
-## Nicht abgedeckt
+## Grenzen
 
-Alle 46 Optionen im visuellen Modul-Konfigurationseditor, sämtliche mobilen Touch-Gesten, alle Pop-up-/Sections-/Grid-Varianten, das Zusammenspiel mit fremden Modulen und längere Laufzeit-/Performance-Untersuchungen sind weiterhin offen. Die nachgewiesenen Testfälle können nicht ausschließen, dass in anderen Kombinationen Fehler bestehen. Siehe [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11).
+Nicht vollständig geprüft: alle 46 Optionen im visuellen Modul-Editor, mobile Touch-Drag-Gesten, sämtliche Pop-up-/Sections-/Grid-Varianten, Drittmodul-Kombinationen, lange Laufzeit- und Performance-Szenarien sowie das reine Deaktivieren eines Moduls, während die Karte verbunden bleibt. Siehe [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11).
 
-## Reproduktion
+## Ausführung
 
-Der Workflow liegt in `.github/workflows/test-vsc-ha-e2e.yml`.
-Die drei Python-Bausteine `generate_fixture.py`, `bootstrap.py` und `test_lovelace.py` befinden sich unter `tests/ha_e2e/`.
-Zum lokalen Start sind ein frischer Docker-fähiger Rechner, Python 3, Playwright/Chromium, PyYAML und Requests nötig.
-Ein Container wird niemals mit produktiven Geräten oder einem entfernten HA-Host verbunden.
+GitHub Actions: `.github/workflows/test-vsc-ha-e2e.yml`. Fixture- und Browsercode: `tests/ha_e2e/`. Lokal werden Docker, Python 3, Playwright/Chromium, PyYAML und Requests benötigt. Keine produktive HA-Instanz darf verwendet werden.

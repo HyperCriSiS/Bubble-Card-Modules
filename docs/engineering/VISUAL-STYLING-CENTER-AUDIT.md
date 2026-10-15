@@ -1,54 +1,43 @@
-# Visual Styling Center – Architektur-Audit und Testnachweise
+# Visual Styling Center – Bubble Card v3.4.2 Audit und Teststand
 
-Stand: **15. Oktober 2026** · PR [#7](https://github.com/HyperCriSiS/Bubble-Card-Modules/pull/7) · Bubble Card **v3.4.2** · VSC **v2026.10.15**
+**Stand:** 15. Oktober 2026 · [PR #7](https://github.com/HyperCriSiS/Bubble-Card-Modules/pull/7) · VSC v2026.10.15
 
-## Code-Audit und Kompatibilität
+## Behobene Fehler und Modernisierung
 
-- Veralteten Initial-Slider-Update-Stub entfernt. Haupt- und Sub-Button-Slider werden nativ durch Bubble Card aktualisiert.
-- Beschädigte YAML-/Markdown-Struktur, problematische Einheiten und alte Beschreibungen repariert.
-- Modul-ID `visual_styling_center` sowie alle **46 gespeicherten Editor-Optionsnamen** unverändert erhalten.
-- Numerische Nullwerte korrekt behandelt; keine direkte Mutation von `this.config`.
-- Entity-basierte Haupt- und Sub-Icon-Farben reagieren auf Zustandsänderungen. Sub-Buttons erben ohne eigenes Entity-Feld die Haupt-Entity.
-- Unterstützung für explizite und implizite `main`-/`bottom`-Gruppen anhand tatsächlicher Bubble-Card-Klassenindizes.
-- Fremde Inline-CSS-Variablen werden nicht überschrieben oder dauerhaft gelöscht. Für eigene CSS-Variablen, Icon-Farben und Klassen sind Rücksetzung und nativer `onTeardown`-Hook implementiert.
-- `hasChanged` verhindert unnötige Sortierung identischer Gradientendaten; `trackedHass` zeichnet Entity-Abhängigkeiten auf. Es werden keine zusätzlichen HA-WebSocket-Listener oder Polling-Intervalle benötigt.
-- Gradientengestaltung auf die Hauptkarte eingegrenzt; native Sub-Slider-Darstellung bleibt grundsätzlich Bubble Card überlassen.
-- `AGENTS.md` enthält direkte Verweise auf die synchronisierte, schreibgeschützte Upstream-Referenz.
+- Beschädigte Modul-Markdown-/YAML-Definition und Anzeigeeinheiten repariert.
+- Obsoleten eigenen Slider-Update-Stub entfernt; native Bubble Card verwaltet Haupt- und Subslider.
+- Kompatibilität: Modul-ID `visual_styling_center` und alle 46 Editor-Option-IDs erhalten.
+- Dynamische Icon-Farben, CSS-Overrides und Entity-Vererbung korrigiert; auch gemischte Main-/Bottom-Gruppen haben die tatsächliche upstream-konforme Nummerierung.
+- Numerische Nullwerte bleiben erhalten, keine Mutation der gespeicherten Konfiguration.
+- CSS-Eigentümerschaft verhindert Löschen fremder Inline-Werte einschließlich Priorität; native `onTeardown`-Bereinigung hinzugefügt.
+- `trackedHass` zur Erfassung genutzter Entities, `hasChanged` zur Vermeidung unnötiger Gradientenberechnungen; keine zusätzlichen HA-WebSocket-Abonnements/Polling-Intervalle.
+- Slider-bezogene CSS-Regeln auf native Bubble-Card-v3.4.2-Darstellung abgestimmt; Hauptkartengradienten beeinflussen native Subslider nicht pauschal.
+- `AGENTS.md` verweist auf die automatisch aktualisierte, schreibgeschützte Upstream-Referenz.
 
-## Automatische Tests
+## Automatisierte Nachweise
 
-| Stufe | Umfang | Stand |
-| --- | --- | --- |
-| Python + PyYAML | Vollständiger Modulimport, Kompatibilitätsnamen, Upstream-Quellcode-Verträge | Bestanden |
-| Node.js | Farben, Nullwerte, dynamische Gradienten, Gruppen, Konfiguration und Teardown | Bestanden |
-| Chromium (simuliertes DOM) | Berechnete CSS-Werte mit v3.4.2-Referenz-Stylesheets, Layout, responsive Verhalten und Style-Cleanup | Bestanden |
-| Original-Bundle-Smoke | SHA-256-verified Release-Bundle, tatsächliche `bubble-card`-Registrierung | Bestanden |
-| **Home Assistant + Lovelace E2E** | Echter HA-Backend-Container und originale Bubble-Card-Komponente; API/WebSocket-/Pointer-Interaktionen | **6 von 6 bestanden** |
+| Ebene | Nachweis |
+| --- | --- |
+| PyYAML/Node.js | Modulstruktur, Editor-Keys, Zustandswechsel, Konfigurationswerte, Farben, Gradienten, Teardown |
+| Chromium mit Referenz-CSS | Layouts, responsive Abstände, Gradient, Iconfarben, CSS-Kaskade und Rücksetzung |
+| Original-Bundle-Smoketest | SHA-256-prüft echtes Bubble-Card-v3.4.2-Bundle und registriertes Custom Element |
+| **Echtes Home Assistant** | **9/9 reale Lovelace-/Backend-/WebSocket-/Pointer-/Lifecycle-Tests bestanden** |
 
-**Echte HA-Nachweise:** [GitHub Actions Run #38797293013](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38797293013), Home Assistant Core **2026.10.1**, Original-Bubble-Card-Bundle **v3.4.2** mit SHA-256 `d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae`.
+**Beleg:** [GitHub Actions Run #38799165242](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38799165242), Home Assistant Core 2026.10.1 mit originalem Bubble Card v3.4.2. [Browser-Screenshots](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38799165242/artifacts/12003956507).
 
-Die sechs E2E-Prüfungen:
-1. Echte Lovelace-Karte mit VSC, Hauptslider, dauerhaft sichtbarem Sub-Button-Slider und dynamischem Gradienten.
-2. Externe API-Lichtzustände werden per echter HA-State/WebSocket-Kette bis zur Icon-Farbe übernommen.
-3. RGB-Änderungen eines einzelnen Kindlichts aktualisieren den gruppenbasierten VSC-Gradienten.
-4. Echte Pointer-Slider-Geste verändert die Helligkeit des HA-Backends.
-5. Unveränderte Bubble Card ohne VSC läuft parallel als native Baseline.
-6. Dashboard-Navigation und Neuerstellung der Karte funktionieren.
+Die neun E2E-Testfälle prüfen Rendering, externen Zustandswechsel, Child-RGB-Abhängigkeiten, nativen Hauptslider, native Baseline, Navigation/Reconnect, gemischte Gruppen-Farben, nativen Subslider und echten Card-Disconnect. Details: [tests/ha_e2e/README.md](../../tests/ha_e2e/README.md).
 
-Testdateien und Isolation: [tests/ha_e2e/README.md](../../tests/ha_e2e/README.md).
+## Historische Diagnose
 
-## Historischer Testaufbau und Fehlerdiagnose
+Ein früher Chromium-Versuch mit dem Original-Bundle scheiterte am unvollständigen künstlichen `hass`-Objekt bereits **ohne VSC**. Diese unbrauchbaren Render-Fälle bleiben ausdrücklich als `skipped` gekennzeichnet.
 
-Vor dieser vollständigen HA-E2E-Suite wurde das Original-Bubble-Card-Bundle bereits in Chromium geladen. Eine rein simulierte `hass`-Umgebung konnte jedoch nicht den kompletten Render-Lifecycle bereitstellen – selbst **ohne VSC**. Diese unvollständigen Original-Bundle-Render-Tests sind daher ausdrücklich übersprungen und nicht als erfolgreiche Tests gezählt.
+Beim Aufbau des echten HA-Containers wurden zuerst fehlende Schreibrechte für das temporäre `/config/deps` festgestellt und behoben. Anschließend scheiterte zunächst ein Test, weil `always_visible`-Subslider absichtlich kein separates Icon-Element haben. Der Test prüft jetzt die echte Klasse `.bubble-sub-button-slider`; alle neun tatsächlichen Tests bestehen.
 
-Der erste echte HA-Testlauf wurde durch fehlende Schreibrechte auf dem temporären Docker-Mount blockiert. Nach Korrektur startete die Instanz; fünf von sechs Tests liefen sofort erfolgreich. Die sechste Prüfung erwartete fälschlich ein Icon für einen `always_visible`-Subslider. Bubble Card verwendet dafür tatsächlich `.bubble-sub-button-slider` ohne Icon-Host. Nach Anpassung bestanden sechs von sechs Tests.
+## Noch nicht nachgewiesen
 
-## Verbleibende Grenzen und Risiken
+- Visueller Karten-/Moduleditor mit allen 46 Einstellungen, inklusive Speicherung und Live-Umschaltung ohne Card-Disconnect.
+- Vollständige mobile Touch-Gesten, Pop-up-, Sections-, Grid- und alternative Subslider-Layouts.
+- Konkrete Wechselwirkungen mit Drittmodulen, verschiedenen Themes, langen Laufzeiten und Performance.
+- Explizites Deaktivieren des Moduls bei weiterhin gemounteter Karte.
 
-- **Nicht getestet:** alle 46 Felder im *visuellen* Modul-Editor einschließlich Konfigurationspersistenz und Umschalten ohne Card-Disconnect.
-- Mobile Touch-Drags, weitere Slider-Typen, Pop-up-/Sections-/Grid-Varianten und sämtliche Gruppenanordnungen sind nicht vollständig durch echte HA-E2E-Tests abgedeckt.
-- Drittmodule, Themes, `!important`-Kaskaden und Langzeit-/Performance-Verhalten benötigen weitere Systemtests.
-- `onTeardown` bei Card-Disconnect ist im simulierten Browser getestet. Der vollständige reale Deaktivierungspfad ohne Disconnect ist noch nicht abgesichert.
-- Ein bestandener Testlauf garantiert nicht die Abwesenheit weiterer Fehler oder vollständige Ausschöpfung aller neuen Bubble-Card-Funktionen.
-
-Weitere Aufgaben stehen in [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11). PR #7 bleibt bis zur gesonderten Freigabe offen.
+Ein bestandener Testlauf bedeutet nicht, dass alle potentiellen Bugs behoben oder alle neuen Features genutzt werden. Folgeverifikation: [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11). **PR #7 bleibt offen**, bis die Freigabe separat bewertet ist.
