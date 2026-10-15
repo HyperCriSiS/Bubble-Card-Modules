@@ -2,6 +2,7 @@
 This uses a simulated HA object, NOT a running Home Assistant server.
 """
 import re
+import faulthandler
 from pathlib import Path
 import unittest
 import yaml
@@ -34,6 +35,8 @@ class OfficialBubbleCard(unittest.TestCase):
         cls.playwright.stop()
 
     def setUp(self):
+        faulthandler.dump_traceback_later(18, repeat=True)
+        print("starting upstream runtime browser",flush=True)
         self.page=self.browser.new_page(viewport={"width":1280,"height":800})
         self.errors=[]
         self.page.on("pageerror",lambda e:self.errors.append(str(e)))
@@ -66,16 +69,21 @@ class OfficialBubbleCard(unittest.TestCase):
               window.card.hass=window.hass;
             };
         }""")
+        print("loading verified upstream bundle",flush=True)
         self.page.add_script_tag(path=str(BUNDLE),type="module")
+        print("script tag added; checking component registration",flush=True)
         self.page.wait_for_function("Boolean(customElements.get('bubble-card'))",timeout=15000)
+        print("upstream bubble-card element registered",flush=True)
 
     def tearDown(self):
         try:
             self.page.screenshot(path=str(OUT/(self._testMethodName+".png")),full_page=True)
         finally:
             self.page.close()
+            faulthandler.cancel_dump_traceback_later()
 
     def mount(self,options):
+        print("mounting real bubble-card",flush=True)
         self.page.evaluate("""input => {
             window.card=document.createElement('bubble-card');
             window.card.setConfig({
@@ -87,6 +95,7 @@ class OfficialBubbleCard(unittest.TestCase):
             window.card.hass=window.hass;
         }""",{"styles":read_styles(),"options":options})
         self.page.wait_for_timeout(700)
+        print("real bubble-card mount completed",flush=True)
 
     def test_actual_renderer_and_state_dependencies(self):
         self.mount({"enable_entity_colored_main_icon":True,"enable_gradient":True,
