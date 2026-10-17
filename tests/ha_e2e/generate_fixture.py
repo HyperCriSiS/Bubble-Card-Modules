@@ -94,6 +94,12 @@ def main():
     dest=args.config_dir.resolve()
     dest.mkdir(parents=True,exist_ok=True)
     (dest/"www").mkdir(exist_ok=True)
+    # BCT's source of truth is an on-disk YAML module in this throwaway HA.
+    modules_dir=dest/"bubble_card"/"modules"
+    modules_dir.mkdir(parents=True,exist_ok=True)
+    (modules_dir/"visual_styling_center.yaml").write_text(
+        yaml.safe_dump({MODULE_ID:module},sort_keys=False,allow_unicode=True,width=120),
+        encoding="utf-8")
     (dest/"configuration.yaml").write_text(yaml.safe_dump(make_config(),sort_keys=False,allow_unicode=True),encoding="utf-8")
     (dest/"ui-lovelace-vsc-e2e.yaml").write_text(
         yaml.safe_dump(make_dashboard(module["code"]),sort_keys=False,allow_unicode=True,width=120),encoding="utf-8")

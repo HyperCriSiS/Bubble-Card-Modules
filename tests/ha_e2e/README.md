@@ -45,3 +45,9 @@ GitHub Actions: `.github/workflows/test-vsc-ha-e2e.yml`. Fixture- und Browsercod
 - Desktop-Pointer-Tests warten vor Drag-Events auf ein stabil positioniertes, sichtbar gerendertes natives Slider-Element. Ein fehlgeschlagener Drag wird **nicht** automatisch wiederholt oder ignoriert.
 - Die echten Bubble-Card-Editor-Custom-Elements werden in HA Chromium erzeugt und auf unveränderte Übernahme aller 46 bestehenden Modul-Options-IDs sowie Wert- und Nullwert-Erhalt bei erneuter `setConfig`-Konfiguration geprüft.
 - **Abgrenzung:** Dieser Editor-Smoke-Test prüft den nativen Editor-Konfigurations-Lebenszyklus. Er belegt **noch nicht** das tatsächliche Anzeigen, Verändern oder Speichern sämtlicher 46 Felder über den Bubble Card Tools (BCT) Modul-Editor; BCT wird in der isolierten Fixture bislang nicht installiert.
+
+## Isolierter BCT-Backend-Test
+
+Der CI-Container erhält zusätzlich **Bubble Card Tools v1.1.1**, auf Git-Commit `2708319696513f5916f062723847c6cd80715dcc` fixiert. Der VSC-Modulquelltext wird als eigene YAML-Datei nach `/config/bubble_card/modules/visual_styling_center.yaml` übertragen. Ein eigener Browser-Test aktiviert BCT über die echten HA-Konfigurationsflows und prüft dessen WebSocket-API für Lesen, Schreiben und Löschen der Module. Die produktive Home-Assistant-Installation wird nicht berührt.
+
+Das ist unabhängig von der vollständigen manuellen Feldbedienung im BCT-Moduleditor. Dieser UI-Teil bleibt gesondert zu verifizieren.

@@ -38,6 +38,13 @@ jobs:
             --output "$HA_CONFIG/www/bubble-card.js" \
             https://github.com/Clooos/Bubble-Card/releases/download/v3.4.2/bubble-card.js
           echo "d526dfd815af6a022b8f7355874fc96f2df859aa213cff7b374f7d913a6436ae  $HA_CONFIG/www/bubble-card.js" | sha256sum --check
+      - name: Install pinned official Bubble Card Tools v1.1.1 into isolated HA
+        run: |
+          git clone --depth 1 --branch v1.1.1 https://github.com/Clooos/Bubble-Card-Tools.git /tmp/vsc-bct-upstream
+          test "$(git -C /tmp/vsc-bct-upstream rev-parse HEAD)" = "2708319696513f5916f062723847c6cd80715dcc"
+          mkdir -p "$HA_CONFIG/custom_components"
+          cp -R /tmp/vsc-bct-upstream/custom_components/bubble_card_tools "$HA_CONFIG/custom_components/"
+          test -f "$HA_CONFIG/custom_components/bubble_card_tools/manifest.json"
       - name: Start isolated Home Assistant Core 2026.10.1
         run: |
           # The image runs HA as an unprivileged user. This directory contains

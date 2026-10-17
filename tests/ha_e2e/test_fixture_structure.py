@@ -30,6 +30,15 @@ class HAContracts(unittest.TestCase):
                         ["{{ r | int(0) }}","{{ g | int(0) }}","{{ b | int(0) }}"])
         self.assertEqual(yaml.safe_load(yaml.safe_dump(cfg))["template"][0]["light"][0]["rgb"],v["rgb"])
 
+    def test_bct_fixture_contains_real_module(self):
+        cfg=make_config()
+        self.assertIn("lovelace",cfg)
+        source=extract_module((ROOT/"Visual-Styling-Center/Visual-Styling-Center.md").read_text(encoding="utf-8"))
+        self.assertEqual(len([item for section in source["editor"] for item in section.get("schema",[]) if "name" in item]),46)
+        workflow=(ROOT/".github/workflows/test-vsc-ha-e2e.yml").read_text(encoding="utf-8")
+        self.assertIn("2708319696513f5916f062723847c6cd80715dcc",workflow)
+        self.assertIn("custom_components/bubble_card_tools",workflow)
+
     def test_lovelace_and_native_baseline(self):
         cards=make_dashboard(".bubble-icon { color:red }")["views"][0]["cards"]
         self.assertEqual(len(cards),3)
