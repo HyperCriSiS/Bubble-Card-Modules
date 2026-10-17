@@ -28,8 +28,7 @@ class RealEditorSmoke(base.RealLovelace):
         self.assertEqual(len(names), 46, names)
         self.assertEqual(len(set(names)), 46, names)
         defaults = {field["name"]: field.get("default") for field in fields}
-        result = self.page.evaluate("""options => {
-            const host = document.querySelector('bubble-card');
+        result = self.page.locator("bubble-card").first.evaluate("""(host, options) => {
             const ctor = customElements.get('bubble-card');
             const editor = ctor.getConfigElement();
             const original = {...host.config,
@@ -50,9 +49,9 @@ class RealEditorSmoke(base.RealLovelace):
         self.assertEqual(result["config"], defaults, result)
 
     def test_14_real_editor_reload_preserves_nested_module_values(self):
-        result = self.page.evaluate("""() => {
+        result = self.page.locator("bubble-card").first.evaluate("""host => {
             const editor=customElements.get('bubble-card').getConfigElement();
-            const config={...document.querySelector('bubble-card').config,
+            const config={...host.config,
                 visual_styling_center:{
                     height_multiplier:1.8,enable_gradient:true,
                     gradient_target:'background',custom_icon_color:[12,34,56],
