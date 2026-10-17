@@ -6,6 +6,8 @@ on:
       - 'Badgy-Conditions/**'
       - 'tests/test_badgy_schema.py'
       - 'tests/test_badgy_browser.py'
+      - 'tests/test_badgy_upstream_layout.py'
+      - 'docs/upstream/bubble-card/stable/src/components/base-card/styles.css'
       - 'tests/badgy_runtime.cjs'
       - '.github/workflows/test-badgy.yml'
 
@@ -37,4 +39,6 @@ jobs:
       - name: Install Chromium
         run: python3 -m playwright install --with-deps chromium
       - name: Chromium badge and CSS regression tests
-        run: python3 tests/test_badgy_browser.py
+        run: |
+          python3 tests/test_badgy_browser.py
+          python3 tests/test_badgy_upstream_layout.py
