@@ -50,7 +50,9 @@ jobs:
           # The image runs HA as an unprivileged user. This directory contains
           # only disposable virtual devices and no credentials.
           mkdir -p "$HA_CONFIG/deps"
-          chmod 0777 "$HA_CONFIG" "$HA_CONFIG/deps"
+          # The isolated HA process is unprivileged; only throwaway fixture
+          # directories are made writable, not the host or any real HA config.
+          chmod 0777 "$HA_CONFIG" "$HA_CONFIG/deps" "$HA_CONFIG/bubble_card" "$HA_CONFIG/bubble_card/modules"
           docker pull ghcr.io/home-assistant/home-assistant:2026.10.1
           docker run -d --name vsc-isolated-ha --restart=no \
             --cap-drop=ALL --security-opt=no-new-privileges \
