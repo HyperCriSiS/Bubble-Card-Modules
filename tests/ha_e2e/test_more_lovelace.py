@@ -30,8 +30,7 @@ class ExtendedRealLovelace(base.RealLovelace):
     def test_08_native_inline_sub_slider_updates_child_light(self):
         card=self.page.locator("bubble-card").first
         slider=card.locator(".bubble-sub-button-slider .bubble-range-slider").first
-        expect(slider).to_be_attached(timeout=15000)
-        bounds=slider.bounding_box()
+        bounds=self.wait_slider_layout(slider)
         self.assertIsNotNone(bounds,"Native inline slider must have a bounding box")
         self.assertGreater(bounds["width"],15)
         y=bounds["y"]+bounds["height"]*0.5

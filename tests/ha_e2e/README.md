@@ -39,3 +39,9 @@ Nicht vollständig geprüft: alle 46 Optionen im visuellen Modul-Editor, mobile 
 ## Ausführung
 
 GitHub Actions: `.github/workflows/test-vsc-ha-e2e.yml`. Fixture- und Browsercode: `tests/ha_e2e/`. Lokal werden Docker, Python 3, Playwright/Chromium, PyYAML und Requests benötigt. Keine produktive HA-Instanz darf verwendet werden.
+
+## 17. Oktober 2026 – zusätzliche Testabdeckung
+
+- Desktop-Pointer-Tests warten vor Drag-Events auf ein stabil positioniertes, sichtbar gerendertes natives Slider-Element. Ein fehlgeschlagener Drag wird **nicht** automatisch wiederholt oder ignoriert.
+- Die echten Bubble-Card-Editor-Custom-Elements werden in HA Chromium erzeugt und auf unveränderte Übernahme aller 46 bestehenden Modul-Options-IDs sowie Wert- und Nullwert-Erhalt bei erneuter `setConfig`-Konfiguration geprüft.
+- **Abgrenzung:** Dieser Editor-Smoke-Test prüft den nativen Editor-Konfigurations-Lebenszyklus. Er belegt **noch nicht** das tatsächliche Anzeigen, Verändern oder Speichern sämtlicher 46 Felder über den Bubble Card Tools (BCT) Modul-Editor; BCT wird in der isolierten Fixture bislang nicht installiert.

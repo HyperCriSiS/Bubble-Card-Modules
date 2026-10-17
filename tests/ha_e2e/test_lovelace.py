@@ -139,10 +139,30 @@ class RealLovelace(unittest.TestCase):
         self.wait_entity("light.vsc_child",lambda e:e["attributes"].get("rgb_color",[None]*3)[2]==230)
         self.wait_value(lambda:self.card_data()["gradient"],lambda v:bool(v) and v!=before)
 
+    def wait_slider_layout(self, slider):
+        """Wait until the actual rendered native control stops shifting.
+
+        A non-zero box alone can be a transitional frame (card load/animation).
+        We do not retry a failed drag or suppress a failed HA service assertion.
+        """
+        expect(slider).to_be_visible(timeout=15000)
+        def box():
+            return slider.bounding_box()
+        previous=box()
+        end=time.monotonic()+5
+        while time.monotonic()<end:
+            self.page.wait_for_timeout(160)
+            current=box()
+            if previous and current and all(
+                abs(current[key]-previous[key])<1 for key in ("x","y","width","height")
+            ) and current["width"]>15 and current["height"]>2:
+                return current
+            previous=current
+        raise AssertionError(f"Native slider layout is not stable: {previous}")
+
     def test_04_native_slider_pointer_drives_ha_service(self):
         slider=self.page.locator("bubble-card").first.locator(".bubble-range-slider").first
-        expect(slider).to_be_attached(timeout=15000)
-        box=slider.bounding_box()
+        box=self.wait_slider_layout(slider)
         self.assertIsNotNone(box,"Native slider is not laid out")
         y=box["y"]+box["height"]/2
         self.page.mouse.move(box["x"]+box["width"]*0.32,y)
