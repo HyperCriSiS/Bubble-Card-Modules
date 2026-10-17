@@ -46,7 +46,7 @@ class BubbleCardToolsStorage(base.RealLovelace):
                 return {error:JSON.stringify(error),message:String(error),stage};
             }
         }""")
-        self.assertEqual(installed["result"],"create_entry",installed)
+        self.assertEqual(installed.get("result"),"create_entry",installed)
 
         def fetch():
             try:
