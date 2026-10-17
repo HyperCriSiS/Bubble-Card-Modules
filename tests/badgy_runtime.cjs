@@ -267,6 +267,14 @@ assert.ok(sub.querySelector(".badgy-owned-badge.icon-badge"),
   "fallback NOT shows badge when no nested condition matches");
 forceFallback = false;
 
+// An inactive grouped badge must not leave a static container positioned.
+delete cfg.entity_badges["1"];
+run();
+assert.equal(groupedSub.querySelector('.badgy-owned-badge'), null,
+  "grouped badge removed when no longer configured");
+assert.equal(groupedSub.style.getPropertyValue('position'), '',
+  "temporary positioning restored immediately without tearing down card");
+
 assert.equal(typeof teardown, "function", "onTeardown registered");
 teardown();
 assert.equal(main.querySelector(".badgy-owned-badge.entity-badge"), null, "main badge removed on teardown");

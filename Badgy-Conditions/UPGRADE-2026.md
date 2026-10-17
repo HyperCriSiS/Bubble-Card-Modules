@@ -188,6 +188,7 @@ color configuration. Colors from dynamic sources are not JavaScript-evaluated.
 - Badge CSS and runtime selectors are scoped to `badgy-owned-badge`; other modules' entity/icon badges are never reused, animated or deleted.
 - Legacy class cleanup no longer strips third-party `opacity` values.
 - Changes to a static sub-button container's CSS position are registered and undone via onTeardown.
+- Temporary badge anchor positioning is now restored as soon as the last owned badge becomes inactive, even if the card remains mounted.
 - Fallback `not` conditions now negate all nested conditions (equivalent to Home Assistant's NOT), not only the first.
 - Automated tests include foreign badge coexistence, legacy-opacity ownership, position restoration and the fallback NOT truth table.
 
@@ -217,6 +218,9 @@ The Badgy CI workflow:
   Card DOM: real computed CSS, color-mix alpha, scaled badges, animation
   start/stop, foreign badge isolation, repeated sensor updates, replacement of
   a lost badge node and onTeardown cleanup.
+- A second browser suite uses the mirrored **actual Bubble Card v3.4.2 base-card CSS**
+  and its DOM nesting for real clip-margin, badge overlap, normal/large layout,
+  native click handling and immediate position restoration checks.
 - These browser tests run in CI but **do not replace** a live Home Assistant
   acceptance test or visual review of actual Bubble Card layouts.
 

@@ -917,6 +917,13 @@ badgy-condition-helper:
         processMainIconBackground();
         processIconsAndColors();
         processMainBadges();
+        // The badge anchor must return to its original positioning as soon
+        // as the last Badgy-owned badge disappears; do not wait for teardown.
+        for (const node of cardEl.querySelectorAll('.badgy-managed-style')) {
+          if (node.__badgyOwnedStyles?.position &&
+              !node.querySelector('.badgy-owned-badge'))
+            updateManagedStyle(node, 'position', null, '');
+        }
         processCardGlow();
 
       } catch (err) {

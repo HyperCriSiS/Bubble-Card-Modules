@@ -7,7 +7,9 @@ must not be modified during the tests.
 This is a **manual** release gate. The Node tests and the headless Chromium
 Playwright smoke tests now run automatically in GitHub Actions. Chromium tests
 exercise real CSS on a **synthetic card DOM**, not the real Home Assistant editor.
-None of the checkboxes below are considered complete based on those tests.
+The expanded browser suite also checks real upstream base-card CSS and DOM nesting,
+including clipping and temporary positioning. It still cannot reproduce the
+full Home Assistant frontend. None of the checkboxes below are considered complete based on those tests.
 
 ## Installation and editor
 
