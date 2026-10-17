@@ -102,7 +102,10 @@ class LiveConfigurationAndTouch(base.RealLovelace):
             page.goto(base.BASE + "/lovelace-vsc-e2e/vsc", wait_until="domcontentloaded", timeout=65000)
             slider = page.locator("bubble-card").first.locator(".bubble-range-slider").first
             expect(slider).to_be_visible(timeout=45000)
-            bounds = slider.bounding_box()
+            # Wait for the real HA state pass to position the native slider
+            # before sending CDP touch events. Avoid automatic gesture retries.
+            expect(page.locator("bubble-card").first.locator(".bubble-range-fill").first).to_be_attached(timeout=45000)
+            bounds = self.wait_slider_layout(slider, page=page)
             self.assertIsNotNone(bounds)
             self.assertGreater(bounds["width"], 20)
             y = bounds["y"] + bounds["height"] * 0.5
@@ -112,6 +115,7 @@ class LiveConfigurationAndTouch(base.RealLovelace):
             client.send("Input.dispatchTouchEvent", {
                 "type": "touchStart", "touchPoints": [{"x":x0, "y":y, "id":1, "force":1}]
             })
+            page.wait_for_timeout(110)
             for step in range(1, 10):
                 x = x0 + (x1 - x0) * step / 9
                 client.send("Input.dispatchTouchEvent", {
