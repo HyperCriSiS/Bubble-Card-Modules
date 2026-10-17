@@ -49,3 +49,18 @@ Neue Tests `test_10`–`test_12` prüfen CSS-Isolation zur unmodifizierten Karte
 Im Folgelauf [#38818020327](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/38818020327) bestanden Cleanup- und Touch-Tests, aber zwei ältere Desktop-Pointer-Drag-Tests schlugen einmalig fehl. Der **Wiederholungslauf desselben Commits** bestand mit **12/12 Tests** (20,237 s). Die Desktop-Drag-Tests sind daher als potenziell flüchtig zu beobachten; ein einzelner erfolgreicher Wiederholungslauf beweist noch keine vollständige Zuverlässigkeit. Bei erneutem Auftreten die Ursache diagnostizieren, nicht stillschweigend Tests deaktivieren.
 
 Weiterhin offen: visueller Editor/Speichern aller 46 Optionen, die vollständige Layout-/Theme-/Drittmodulmatrix, Performancemessungen und Langzeitstabilität.
+
+## BCT-Moduleditor-Integration, 17. Oktober 2026
+
+Der isolierte HA-Core-2026.10.1-Container installiert jetzt offiziell veröffentlichtes **Bubble Card Tools v1.1.1** von fest gepinntem Git-Commit `2708319696513f5916f062723847c6cd80715dcc`. Aus der VSC-Definition wird die tatsächliche YAML-Datei `bubble_card/modules/visual_styling_center.yaml` in einem ausschließlich temporären Verzeichnis erzeugt. Die BCT-Integration wird nach der HA-Ersteinrichtung per offiziellem REST-Konfigurationsflow aktiviert; die BCT-Dateioperationen laufen ausschließlich über die echte authentifizierte Home-Assistant-WebSocket-API.
+
+Die eigentliche VSC-UI wird jetzt mit der offiziellen `bubble-card-editor`-Komponente von Bubble Card v3.4.2 in authentifiziertem Lovelace gerendert. Abgedeckt:
+
+- BCT-Konfigurationsflow und `read_module`, `write_module`, `delete_module` mit exakter Speicher-Rücklesung.
+- Aus BCT geladene YAML-Module enthalten exakt die 46 bisherigen VSC-Editor-Feldnamen, ohne Umbenennung oder Dubletten.
+- Echtes Module-Panel des Editors enthält ein gerendertes `ha-form` mit exakt 46 Optionen.
+- Ein an dieses tatsächlich gerenderte `ha-form` gesendetes `value-changed`-Ereignis löst `config-changed` aus; `inner_padding: 7` und `enable_entity_colored_subicons: false` werden in die Editor-Konfiguration übertragen und nach erneutem `setConfig` erhalten.
+- **CI-Nachweis: [17 von 17 echte HA-E2E-Tests bestanden, Run #39000966123](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/39000966123)**. CI nutzt nur virtuelle HA-Entities, keine Produktivinstanz.
+
+**Noch nicht belegt:** Manuelle Maus-/Touch-Interaktion mit sämtlichen 46 einzelnen Formularfeldern, die echte Lovelace-Dashboard-Speicher-API samt erneutem Öffnen des Dashboards, Speichern/Ändern des **Modulquelltexts** über den BCT-UI-Speichern-Button sowie umfangreiche Layout-/Theme-/Drittmodul- und Langzeittests. Der synthetische `value-changed`-Event prüft den *realen* Editor-Eventhandler, ersetzt aber keine physische UI-Interaktion. Issue #11 bleibt deshalb offen.
+
