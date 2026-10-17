@@ -252,6 +252,22 @@ assert.equal(mainIcon.getAttribute("icon"), "mdi:ceiling-light",
 assert.equal(mainIcon.style.getPropertyValue("color"), "#445566",
   "external color restored after override ends");
 
+// An explicitly supplied display_text must override formatting and units.
+const oldMainCfg = cfg.entity_badges.main;
+cfg.entity_badges["0"].display_text = "STANDBY";
+cfg.entity_badges.main = {entity: "sensor.power", display_text: "0007", decimals: 2};
+run();
+assert.equal(subBadge.textContent, "STANDBY", "custom sub-button label must not add units");
+assert.equal(mainBadge.textContent, "0007", "main custom label must not round or add units");
+delete cfg.entity_badges["0"].display_text;
+cfg.entity_badges.main = oldMainCfg;
+hass.states["sensor.power"].state = "unavailable";
+run();
+assert.equal(subBadge.textContent, "unavailable", "unavailable sensor must not display numeric unit");
+hass.states["sensor.power"].state = "26";
+run();
+assert.equal(subBadge.textContent, "26W", "numeric sensor still has unit");
+
 // Fallback NOT must negate all nested conditions, not just the first one.
 forceFallback = true;
 cfg.icon_badges["0"] = {icon: "mdi:alert", condition: {condition: "not", conditions: [

@@ -1,6 +1,6 @@
 # Badgy Condition Helper
 
-**Version:** v2026.10.15-beta.3
+**Version:** v2026.10.17-beta.4
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT]
@@ -71,73 +71,74 @@ sub_buttons:
     icon: mdi:power-socket-eu
     name: Plug
 modules:
-  - name: badgy-condition-helper
-    entity_badges:
-      0:  # Sub-Button 1
-        entity: sensor.living_room_temperature
-        color: red
-        show_unit: true
-        decimals: 1
-        h_pos: -8
-        v_pos: -8
-        scale: 1.2
-        condition:
-          condition: numeric_state
-          entity: sensor.living_room_temperature
-          above: 25
-      1:  # Sub-Button 2
-        entity: sensor.living_room_humidity
-        color: blue
-        show_unit: true
-        decimals: 0
-    icon_badges:
-      0:  # Sub-Button 1
-        icon: mdi:alert
-        color: yellow
-        condition:
-          condition: state
-          entity: binary_sensor.living_room_motion
-          state: "on"
-    sub_buttons_background:
-      0:  # Sub-Button 1
-        type: solid
-        color: red
-        opacity: 0.5
-        condition:
-          condition: state
-          entity: light.living_room
-          state: "on"
-      1:  # Sub-Button 2
-        type: two-color
-        color1: blue
-        color2: green
-        opacity: 0.6
-        condition:
-          condition: state
-          entity: fan.living_room
-          state: "on"
-    icon_effects:
-      main_icon:
-        effect: heartbeat
-        color: yellow
-        condition:
-          condition: state
-          entity: light.living_room
-          state: "on"
-      sub_button_icon:
-        0:  # Sub-Button 1
-          effect: spin-360
-          condition:
-            condition: state
-            entity: binary_sensor.living_room_motion
-            state: "on"
-    main_icon_background:
-      color: green
-      opacity: 0.7
+  - badgy-condition-helper
+badgy-condition-helper:
+  entity_badges:
+    0:  # Sub-Button 1
+      entity: sensor.living_room_temperature
+      color: red
+      show_unit: true
+      decimals: 1
+      h_pos: -8
+      v_pos: -8
+      scale: 1.2
+      condition:
+        condition: numeric_state
+        entity_id: sensor.living_room_temperature
+        above: 25
+    1:  # Sub-Button 2
+      entity: sensor.living_room_humidity
+      color: blue
+      show_unit: true
+      decimals: 0
+  icon_badges:
+    0:  # Sub-Button 1
+      icon: mdi:alert
+      color: yellow
       condition:
         condition: state
-        entity: light.living_room
+        entity_id: binary_sensor.living_room_motion
         state: "on"
+  sub_buttons_background:
+    0:  # Sub-Button 1
+      type: solid
+      color: red
+      opacity: 0.5
+      condition:
+        condition: state
+        entity_id: light.living_room
+        state: "on"
+    1:  # Sub-Button 2
+      type: two-color
+      color1: blue
+      color2: green
+      opacity: 0.6
+      condition:
+        condition: state
+        entity_id: fan.living_room
+        state: "on"
+  icon_effects:
+    main_icon:
+      effect: heartbeat
+      color: yellow
+      condition:
+        condition: state
+        entity_id: light.living_room
+        state: "on"
+    sub_button_icon:
+      0:  # Sub-Button 1
+        effect: spin-360
+        condition:
+          condition: state
+          entity_id: binary_sensor.living_room_motion
+          state: "on"
+  main_icon_background:
+    color: green
+    opacity: 0.7
+    condition:
+      condition: state
+      entity_id: light.living_room
+      state: "on"
 ```
 
 ---
@@ -153,13 +154,13 @@ modules:
 ```yaml
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2026.10.15-beta.3"
+  version: "v2026.10.17-beta.4"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   description: |
     Advanced badge and effect helper module with conditional logic.
 
-    Patched fork (v2026.06.19-mod) — tested against Home Assistant 2026.6.x:
+    Badgy 2026 beta — validated in automated Bubble Card 3.4.2 tests (full HA UI pending):
     - Fixed: sub-button & icon effects now stop when their condition turns false
       (previously the animation kept running until a full page reload).
     - Improved: effects are applied idempotently, so animations are no longer
@@ -561,6 +562,25 @@ badgy-condition-helper:
           return value;
         }
 
+        // Custom text takes precedence over rounding and units. Unit suffixes
+        // only belong on numeric sensor readings, never text or unavailable.
+        function formatBadgeContent(stObj, cfg) {
+          if (cfg.display_text !== undefined && cfg.display_text !== "")
+            return String(cfg.display_text);
+          const attr = cfg.attribute ? stObj.attributes?.[cfg.attribute] : undefined;
+          let value = attr !== undefined ? attr : formatBadgeState(stObj, cfg);
+          const numeric = (typeof value === 'number' && Number.isFinite(value)) ||
+            (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)));
+          if (numeric && cfg.decimals !== undefined) {
+            const places = Number(cfg.decimals);
+            if (Number.isInteger(places) && places >= 0 && places <= 20)
+              value = Number(value).toFixed(places);
+          }
+          if (numeric && cfg.show_unit !== false && stObj.attributes?.unit_of_measurement)
+            return String(value) + stObj.attributes.unit_of_measurement;
+          return value;
+        }
+
         function chooseRule(cfg) {
           if (!cfg) return null;
           if (Array.isArray(cfg.rules) && cfg.rules.length) {
@@ -608,12 +628,8 @@ badgy-condition-helper:
             const showBadge = conditionMet && !(bc.show_if_off === false && hass.states[bc.entity].state === 'off');
             if (showBadge) {
               current.add(sbNum);
-              let dispVal;
               const stObj = hass.states[bc.entity];
-              if (bc.attribute && stObj.attributes[bc.attribute] !== undefined) dispVal = stObj.attributes[bc.attribute];
-              else dispVal = formatBadgeState(stObj, bc);
-              if (bc.decimals !== undefined && !isNaN(parseFloat(dispVal))) dispVal = parseFloat(dispVal).toFixed(parseInt(bc.decimals));
-              if (bc.show_unit !== false && stObj.attributes.unit_of_measurement) dispVal += stObj.attributes.unit_of_measurement;
+              const dispVal = formatBadgeContent(stObj, bc);
               createBadge({
                 subButtonNumber: sbNum, content: dispVal, badgeColor: bc.color, textColor: bc.text_color,
                 hPos: bc.h_pos ?? config.global_defaults?.badge_h_pos ?? -8, vPos: bc.v_pos ?? config.global_defaults?.badge_v_pos ?? -8, scale: bc.scale ?? config.global_defaults?.badge_scale ?? 1,
@@ -787,16 +803,7 @@ badgy-condition-helper:
               if (old) old.remove();
               continue;
             }
-            let content;
-            if (isEntity) {
-              if (cfg.attribute && state.attributes?.[cfg.attribute] !== undefined)
-                content = state.attributes[cfg.attribute];
-              else content = formatBadgeState(state, cfg);
-              if (cfg.decimals !== undefined && content !== "" && !isNaN(Number(content)))
-                content = Number(content).toFixed(Number(cfg.decimals));
-              if (cfg.show_unit !== false && state.attributes?.unit_of_measurement)
-                content = String(content) + state.attributes.unit_of_measurement;
-            }
+            const content = isEntity ? formatBadgeContent(state, cfg) : undefined;
             createBadge({
               subButtonNumber: 0, badgeType: cls, content,
               icon: !isEntity ? cfg.icon : undefined,

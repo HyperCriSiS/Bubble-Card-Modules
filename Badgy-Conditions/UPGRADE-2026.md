@@ -20,7 +20,7 @@ paths are preserved**. Existing cards should not require migration.
 
 ## Bubble Card v3.4.2 hardening (2026-10-15)
 
-The isolated import artifact is currently `v2026.10.15-beta.3`.
+The isolated import artifact is currently `v2026.10.17-beta.4`.
 
 - All Badgy animation CSS class names, keyframes, and effect color variables
   are namespaced. The effect cleanup no longer removes unowned classes.
@@ -44,6 +44,15 @@ The isolated import artifact is currently `v2026.10.15-beta.3`.
 The native Card Picker and visual editor still require testing in a real HA
 frontend; neither the Node mock nor the standalone Chromium smoke test reproduces
 Home Assistant's real editor, entity subscriptions or shadow DOM.
+
+## Beta.4 quality fixes (2026-10-17)
+
+- An explicit `display_text` always overrides rounding and unit suffixes, for
+  main-icon and sub-button entity badges.
+- Units are appended only to numeric readings, not `unavailable` or text.
+- The README card example now has a module-ID string in `modules:` and a
+  separate `badgy-condition-helper:` configuration block.
+- Automated tests verify custom text and correct example YAML.
 
 ## Bug fixes
 

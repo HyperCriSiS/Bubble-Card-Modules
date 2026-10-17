@@ -1,12 +1,12 @@
 badgy-condition-helper-beta:
   name: "Badgy Condition Helper (Beta)"
-  version: "v2026.10.15-beta.3"
+  version: "v2026.10.17-beta.4"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   description: |
     Advanced badge and effect helper module with conditional logic.
 
-    Patched fork (v2026.06.19-mod) — tested against Home Assistant 2026.6.x:
+    Badgy 2026 beta — validated in automated Bubble Card 3.4.2 tests (full HA UI pending):
     - Fixed: sub-button & icon effects now stop when their condition turns false
       (previously the animation kept running until a full page reload).
     - Improved: effects are applied idempotently, so animations are no longer
@@ -408,6 +408,25 @@ badgy-condition-helper-beta:
           return value;
         }
 
+        // Custom text takes precedence over rounding and units. Unit suffixes
+        // only belong on numeric sensor readings, never text or unavailable.
+        function formatBadgeContent(stObj, cfg) {
+          if (cfg.display_text !== undefined && cfg.display_text !== "")
+            return String(cfg.display_text);
+          const attr = cfg.attribute ? stObj.attributes?.[cfg.attribute] : undefined;
+          let value = attr !== undefined ? attr : formatBadgeState(stObj, cfg);
+          const numeric = (typeof value === 'number' && Number.isFinite(value)) ||
+            (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)));
+          if (numeric && cfg.decimals !== undefined) {
+            const places = Number(cfg.decimals);
+            if (Number.isInteger(places) && places >= 0 && places <= 20)
+              value = Number(value).toFixed(places);
+          }
+          if (numeric && cfg.show_unit !== false && stObj.attributes?.unit_of_measurement)
+            return String(value) + stObj.attributes.unit_of_measurement;
+          return value;
+        }
+
         function chooseRule(cfg) {
           if (!cfg) return null;
           if (Array.isArray(cfg.rules) && cfg.rules.length) {
@@ -455,12 +474,8 @@ badgy-condition-helper-beta:
             const showBadge = conditionMet && !(bc.show_if_off === false && hass.states[bc.entity].state === 'off');
             if (showBadge) {
               current.add(sbNum);
-              let dispVal;
               const stObj = hass.states[bc.entity];
-              if (bc.attribute && stObj.attributes[bc.attribute] !== undefined) dispVal = stObj.attributes[bc.attribute];
-              else dispVal = formatBadgeState(stObj, bc);
-              if (bc.decimals !== undefined && !isNaN(parseFloat(dispVal))) dispVal = parseFloat(dispVal).toFixed(parseInt(bc.decimals));
-              if (bc.show_unit !== false && stObj.attributes.unit_of_measurement) dispVal += stObj.attributes.unit_of_measurement;
+              const dispVal = formatBadgeContent(stObj, bc);
               createBadge({
                 subButtonNumber: sbNum, content: dispVal, badgeColor: bc.color, textColor: bc.text_color,
                 hPos: bc.h_pos ?? config.global_defaults?.badge_h_pos ?? -8, vPos: bc.v_pos ?? config.global_defaults?.badge_v_pos ?? -8, scale: bc.scale ?? config.global_defaults?.badge_scale ?? 1,
@@ -634,16 +649,7 @@ badgy-condition-helper-beta:
               if (old) old.remove();
               continue;
             }
-            let content;
-            if (isEntity) {
-              if (cfg.attribute && state.attributes?.[cfg.attribute] !== undefined)
-                content = state.attributes[cfg.attribute];
-              else content = formatBadgeState(state, cfg);
-              if (cfg.decimals !== undefined && content !== "" && !isNaN(Number(content)))
-                content = Number(content).toFixed(Number(cfg.decimals));
-              if (cfg.show_unit !== false && state.attributes?.unit_of_measurement)
-                content = String(content) + state.attributes.unit_of_measurement;
-            }
+            const content = isEntity ? formatBadgeContent(state, cfg) : undefined;
             createBadge({
               subButtonNumber: 0, badgeType: cls, content,
               icon: !isEntity ? cfg.icon : undefined,

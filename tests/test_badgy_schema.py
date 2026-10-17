@@ -40,6 +40,15 @@ def paths(fields, prefix=()):
 
 def main():
     md = (ROOT / PATH).read_text(encoding="utf-8")
+    # Validate that our public YAML uses Bubble Card's module ID + sibling configuration API.
+    fence = chr(96) * 3
+    example_match = re.search(re.escape(fence) + r"yaml\s*\n([\s\S]*?)\n" + re.escape(fence), md)
+    assert example_match, "Public example missing"
+    example = yaml.safe_load(example_match.group(1))
+    assert example["modules"] == [MODULE], "modules must contain a module ID string"
+    assert isinstance(example.get(MODULE), dict), "Module config must be in a sibling ID key"
+    assert "entity_badges" in example[MODULE]
+    assert example[MODULE]["entity_badges"][0]["condition"]["entity_id"] == "sensor.living_room_temperature"
     new = read_module(md)
     # Parallel install must have a distinct ID but exactly the same runtime/editor.
     beta_id = "badgy-condition-helper-beta"
