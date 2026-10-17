@@ -22,6 +22,8 @@ class BubbleCardToolsStorage(base.RealLovelace):
             const ha=document.querySelector('home-assistant');
             const hass=ha?.hass;
             if (!hass?.callWS) throw Error("Real Home Assistant websocket unavailable");
+            let stage="flow/init";
+            try {
             const init=await hass.callWS({
                 type:'config_entries/flow/init',
                 handler:'bubble_card_tools',
@@ -30,6 +32,7 @@ class BubbleCardToolsStorage(base.RealLovelace):
             if (init.type !== 'form' || !init.flow_id) {
                 throw Error("BCT config-flow init failed: "+JSON.stringify(init));
             }
+            stage="flow/configure";
             const result=await hass.callWS({
                 type:'config_entries/flow/configure',
                 flow_id:init.flow_id,
@@ -39,6 +42,9 @@ class BubbleCardToolsStorage(base.RealLovelace):
                 throw Error("BCT config-entry setup failed: "+JSON.stringify(result));
             }
             return {result:result.type,entry:result.result?.entry_id ?? null};
+            } catch (error) {
+                return {error:JSON.stringify(error),message:String(error),stage};
+            }
         }""")
         self.assertEqual(installed["result"],"create_entry",installed)
 
