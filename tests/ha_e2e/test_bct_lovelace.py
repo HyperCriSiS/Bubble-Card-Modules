@@ -82,3 +82,48 @@ class BubbleCardToolsStorage(base.RealLovelace):
             });
         }""",scratch)
         self.assertEqual(removed.get("status"),"deleted",removed)
+
+    def test_16_bct_real_editor_renders_module_form(self):
+        """The v3.4.2 Bubble Card editor must render the VSC form from BCT YAML."""
+        card=self.page.locator("bubble-card").first
+        editor=card.evaluate("""host => {
+            const ctor=customElements.get('bubble-card');
+            const element=ctor.getConfigElement();
+            document.body.appendChild(element);
+            element.setConfig({...host.config,modules:['visual_styling_center']});
+            const ha=document.querySelector('home-assistant');
+            element.hass=ha.hass;
+            element._expandedPanelStates={
+                modules_editor_panel:true,visual_styling_center:true
+            };
+            element.requestUpdate();
+            window.__vscRealBctEditor=element;
+            return element.tagName.toLowerCase();
+        }""")
+        self.assertEqual(editor,"bubble-card-editor")
+        def inspect():
+            return card.evaluate("""host => {
+                const editor=window.__vscRealBctEditor;
+                if (!editor) return {loaded:false};
+                const root=editor.shadowRoot;
+                const module=root?.querySelector(
+                    'ha-expansion-panel[data-module-id="visual_styling_center"]');
+                const forms=module ? Array.from(module.querySelectorAll('ha-form')) : [];
+                const flatten=(items) => (items||[]).flatMap(item =>
+                    item?.name ? [item.name] : flatten(item?.schema)
+                );
+                return {
+                    loaded:!!editor._modulesLoaded,
+                    panel:!!module,
+                    forms:forms.length,
+                    names:forms.flatMap(f=>flatten(f.schema)),
+                    bctWarning:root?.textContent?.includes('Bubble Card Tools')||false
+                };
+            }""")
+        visible=self.wait_value(inspect,lambda data:data.get("loaded") and data.get("panel"),timeout=30)
+        self.assertTrue(visible["panel"],visible)
+        self.assertGreaterEqual(visible["forms"],1,visible)
+        # The schema is drawn from BCT's installed YAML, not a fixture mock.
+        self.assertEqual(len(set(visible["names"])),46,visible)
+        self.assertEqual(len(visible["names"]),46,visible)
+        card.evaluate("host => window.__vscRealBctEditor.remove()")
