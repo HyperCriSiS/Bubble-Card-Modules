@@ -127,3 +127,56 @@ class BubbleCardToolsStorage(base.RealLovelace):
         self.assertEqual(len(set(visible["names"])),46,visible)
         self.assertEqual(len(visible["names"]),46,visible)
         card.evaluate("host => window.__vscRealBctEditor.remove()")
+
+    def test_17_bct_real_form_emits_and_reloads_config_change(self):
+        """Real BCT ha-form event updates VSC card config with zero/false intact."""
+        card=self.page.locator("bubble-card").first
+        card.evaluate("""host => {
+            const element=customElements.get('bubble-card').getConfigElement();
+            document.body.appendChild(element);
+            element.setConfig({...host.config,modules:['visual_styling_center']});
+            element.hass=document.querySelector('home-assistant').hass;
+            element._expandedPanelStates={
+                modules_editor_panel:true,visual_styling_center:true
+            };
+            element.addEventListener('config-changed', ev => {
+                window.__vscBctChanged=ev.detail.config;
+            });
+            element.requestUpdate();
+            window.__vscBctChangeEditor=element;
+        }""")
+        def form_ready():
+            return card.evaluate("""host => {
+                const editor=window.__vscBctChangeEditor;
+                const panel=editor?.shadowRoot?.querySelector(
+                    'ha-expansion-panel[data-module-id="visual_styling_center"]');
+                const form=panel?.querySelector('ha-form');
+                return {exists:!!form,loaded:!!editor?._modulesLoaded,
+                    data:form?.data ? {...form.data} : null,
+                    fields:form?.schema?.length||0};
+            }""")
+        state=self.wait_value(form_ready,
+                lambda x:x["loaded"] and x["exists"] and x["fields"]>0,
+                timeout=30)
+        data=card.evaluate("""host => {
+            const editor=window.__vscBctChangeEditor;
+            const panel=editor.shadowRoot.querySelector(
+                'ha-expansion-panel[data-module-id="visual_styling_center"]');
+            const form=panel.querySelector('ha-form');
+            const changed={...(form.data||{}),inner_padding:7,
+                enable_entity_colored_subicons:false};
+            form.dispatchEvent(new CustomEvent('value-changed',{
+                detail:{value:changed},bubbles:true,composed:true
+            }));
+            const stored=window.__vscBctChanged;
+            if (stored) editor.setConfig(stored);
+            return {eventEmitted:!!stored,
+                changed:stored?.visual_styling_center,
+                reloaded:editor._config?.visual_styling_center};
+        }""")
+        self.assertTrue(data["eventEmitted"],data)
+        self.assertEqual(data["changed"]["inner_padding"],7,data)
+        self.assertIs(data["changed"]["enable_entity_colored_subicons"],False,data)
+        self.assertEqual(data["reloaded"]["inner_padding"],7,data)
+        self.assertIs(data["reloaded"]["enable_entity_colored_subicons"],False,data)
+        card.evaluate("host => window.__vscBctChangeEditor.remove()")
