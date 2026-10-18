@@ -20,7 +20,7 @@ paths are preserved**. Existing cards should not require migration.
 
 ## Bubble Card v3.4.2 hardening (2026-10-15)
 
-The isolated import artifact is currently `v2026.10.17-beta.4`.
+The isolated import artifact is currently `v2026.10.19-beta.5`.
 
 - All Badgy animation CSS class names, keyframes, and effect color variables
   are namespaced. The effect cleanup no longer removes unowned classes.
@@ -54,7 +54,32 @@ Home Assistant's real editor, entity subscriptions or shadow DOM.
   separate `badgy-condition-helper:` configuration block.
 - Automated tests verify custom text and correct example YAML.
 
-## Bug fixes
+## Beta.5 fixes (2026-10-19)
+
+- Badge gate: Bubble Card's `hasChanged()` compares values as text, so a DOM
+  element passed to it always reads `[object HTMLDivElement]`. A badge that
+  Bubble Card rebuilt (or that was removed) was therefore recreated empty and
+  unpositioned. Each managed node now carries its own token for the gate.
+- Rule colors: a matching rule's `color`/`color1-3` now wins over a
+  `color_template`, `color_entity` or `color_attribute` set on the parent entry.
+  A rule without its own color still inherits the parent's dynamic color.
+- Three-color gradients without `color2` use green again (as in v2025), not blue.
+- The module declares `unsupported:` (cover, horizontal buttons stack, media
+  player, pop-up, separator), so Bubble Card disables it there by default.
+- The test mocks now use Bubble Card 3.4.2's string-based `hasChanged()`
+  semantics; regression tests cover all three fixes.
+
+## Visible changes for existing configurations
+
+No configuration is lost or needs migration, but two things look different:
+
+- `opacity` on `sub_buttons_background` and `main_icon_background` now fades
+  only the background color. In v2025 it set CSS `opacity` on the whole
+  element, which also faded the icon, the name and the badges.
+- Conditions use Bubble Card's native evaluator. Condition types the old
+  built-in evaluator did not know (`time`, `screen`, `user`, `template`,
+  `state_not`, ...) were always false before and now apply.
+
 
 - Stop sub-button icon/container animations as soon as their conditions turn false.
 - Update animation classes only when they change (no unrelated-state restarts).

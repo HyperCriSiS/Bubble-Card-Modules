@@ -39,9 +39,10 @@ BOOT = '''([code,id]) => {
  const template=new Function('hass','entity','state','card','checkConditionsMet',
  'renderTemplate','hasChanged','onTeardown','return '+String.fromCharCode(96)+code+String.fromCharCode(96)+';');
  const check=a=>a.every(c=>c.condition==='state' && hass.states[c.entity_id]?.state===c.state);
+ // Same string signature as Bubble Card 3.4.2 module-gate.js.
  const changed=(name,...values)=>{
-  const last=memo.get(name);if(last?.length===values.length && last.every((x,i)=>Object.is(x,values[i])))return false;
-  memo.set(name,values);return true;};
+  const sig=values.map(v=>Array.isArray(v)?v.join(','):(v==null?'':String(v))).join('\u0001');
+  if(memo.get(name)===sig)return false;memo.set(name,sig);return true;};
  const styles=document.createElement('style');document.head.append(styles);
  const run=()=>{styles.textContent=template.call(ctx,hass,'sensor.power',hass.states['sensor.power'].state,
   card,check,x=>x,changed,fn=>cleanup=fn)};

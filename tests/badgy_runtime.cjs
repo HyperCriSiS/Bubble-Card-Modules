@@ -148,13 +148,20 @@ function renderTemplate(t) {
 }
 const fingerprints = new Map();
 let gateSkips = 0;
+// Mirrors Bubble Card 3.4.2 src/tools/module-gate.js: values are compared by
+// String(value), so a DOM element never carries its identity into the gate.
 function hasChanged(key, ...values) {
-  const old = fingerprints.get(key);
-  if (old && old.length === values.length && old.every((x, i) => Object.is(x, values[i]))) {
+  let signature = "";
+  for (const value of values) {
+    if (Array.isArray(value)) signature += value.join(",");
+    else if (value !== null && value !== undefined) signature += String(value);
+    signature += "";
+  }
+  if (fingerprints.get(key) === signature) {
     gateSkips++;
     return false;
   }
-  fingerprints.set(key, values);
+  fingerprints.set(key, signature);
   return true;
 }
 let teardown = null;
@@ -267,6 +274,45 @@ assert.equal(subBadge.textContent, "unavailable", "unavailable sensor must not d
 hass.states["sensor.power"].state = "26";
 run();
 assert.equal(subBadge.textContent, "26W", "numeric sensor still has unit");
+
+// A badge node removed by a Bubble Card rebuild must be filled again, even
+// though Bubble Card's hasChanged() cannot tell two elements apart.
+subBadge.remove();
+run();
+const rebuiltBadge = sub.querySelector(".badgy-owned-badge.entity-badge");
+assert.ok(rebuiltBadge && rebuiltBadge !== subBadge, "lost badge is recreated");
+assert.equal(rebuiltBadge.textContent, "26W", "recreated badge is filled despite string gate");
+assert.equal(rebuiltBadge.style.top, "-8px", "recreated badge is positioned");
+rebuiltBadge.remove();
+sub.appendChild(subBadge);
+run();
+
+// A matching rule's own color wins over a dynamic color on the parent entry.
+hass.states["sensor.flag"].state = "on";
+cfg.sub_buttons_background["0"] = {
+  type: "solid", color_template: "{{ state_attr('sensor.palette','hex') }}",
+  rules: [{condition: check, color: "#ff0000"}]
+};
+run();
+assert.equal(sub.style.getPropertyValue("background"), "#ff0000",
+  "rule color is not overridden by the parent color_template");
+cfg.sub_buttons_background["0"].rules = [{condition: check, type: "solid"}];
+run();
+assert.equal(sub.style.getPropertyValue("background"), "#c02200",
+  "a rule without its own color still inherits the parent template");
+
+// Unset gradient colors keep the v2025 fallbacks (three-color middle is green).
+cfg.sub_buttons_background["0"] = {type: "three-color"};
+run();
+assert.equal(sub.style.getPropertyValue("background"),
+  "linear-gradient(135deg, #ff0000 0%, #00ff00 50%, #0000ff 100%)");
+cfg.sub_buttons_background["0"] = {type: "two-color"};
+run();
+assert.equal(sub.style.getPropertyValue("background"),
+  "linear-gradient(135deg, #ff0000 0%, #0000ff 100%)");
+delete cfg.sub_buttons_background["0"];
+hass.states["sensor.flag"].state = "off";
+run();
 
 // Fallback NOT must negate all nested conditions, not just the first one.
 forceFallback = true;

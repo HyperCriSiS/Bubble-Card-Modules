@@ -1,6 +1,6 @@
 # Badgy Condition Helper
 
-**Version:** v2026.10.17-beta.4
+**Version:** v2026.10.19-beta.5
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT]
@@ -12,27 +12,37 @@
 >  - Separator
 
 
---> Large layout is recommended!
+--> Large layout is recommended! Bubble Card clips everything outside the card's rounded edge, so sub-button badges with negative offsets have more room in the large layout.
 
 Badgy Condition Helper adds dynamic visual elements to your Bubble Card - display entity values or icons as badges, apply condition-based backgrounds and animations, and enhance your UI with reactive effects that respond to state changes in your Home Assistant environment.
 
 ## Feature Overview
 
-### Badge System for Sub-Buttons
-- **Entity Badges**: Displays states or attribute values from entities
+### Badge System for Sub-Buttons and the Main Icon
+- **Entity Badges**: Displays states or attribute values from entities (translated states, custom text)
 - **Icon Badges**: Shows icons instead of values
 - Color customization, positioning, and size adjustment
+- Main icon badges are opt-in (`main` key)
 
 ### Conditional Backgrounds
 - For sub-buttons with various options:
   - Solid color backgrounds
   - Two-color gradients
   - Three-color gradients
-- Adjustable opacity
+- Adjustable background opacity (icon and text stay fully visible)
+- Rule lists: several conditions in priority order, first match wins
+- Dynamic colors from a Jinja template or an entity/attribute
 
 ### Main Icon Background
 - Condition-based color change for the main icon
-- Adjustable opacity
+- Adjustable background opacity, rule lists and dynamic colors
+
+### Icon Colors and Icons
+- Conditional colors and icon replacement for the main icon and sub-button icons
+
+### Card Glow and Global Defaults
+- Conditional glow around the whole card
+- Defaults for badge colors, size, position and sub-button styling
 
 ### Icon Effects
 - For main icon and sub-button icons
@@ -48,6 +58,16 @@ Badgy Condition Helper adds dynamic visual elements to your Bubble Card - displa
 
 ### Supported Animation Types
 - Standard: Pulse, Rotation, Glow, Shake, Float, Zoom, Heartbeat, Spin-360, Flip, Vibrate
+
+### Upgrading from v2025.03.16
+No migration is needed: the module ID and every existing setting keep working.
+Two things look different on purpose:
+- `opacity` on sub-button and main icon backgrounds now only fades the background.
+  Previously it also faded the icon, the text and the badges.
+- Conditions now use Bubble Card's own evaluator, so conditions such as `time`,
+  `screen`, `user` or `template` work. Before, they were silently never true.
+
+See [UPGRADE-2026.md](./UPGRADE-2026.md) for all changes.
 
 
 Configure this module via the editor or in YAML, for example: 
@@ -145,7 +165,7 @@ badgy-condition-helper:
 
 <details>
 
-<summary><b>?? Get this Module</b></summary>
+<summary><b>🧩 Get this Module</b></summary>
 
 <br>
 
@@ -154,13 +174,22 @@ badgy-condition-helper:
 ```yaml
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2026.10.17-beta.4"
+  version: "v2026.10.19-beta.5"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
+  unsupported:
+    - cover
+    - horizontal-buttons-stack
+    - media-player
+    - pop-up
+    - separator
   description: |
     Advanced badge and effect helper module with conditional logic.
 
     Badgy 2026 beta — validated in automated Bubble Card 3.4.2 tests (full HA UI pending):
+    - Fixed (beta.5): badges rebuilt by Bubble Card are filled again instead of staying empty;
+      a rule's own color wins over a dynamic color of its parent entry.
+    - Changed: background opacity only fades the background, not the icon or text.
     - Fixed: sub-button & icon effects now stop when their condition turns false
       (previously the animation kept running until a full page reload).
     - Improved: effects are applied idempotently, so animations are no longer
@@ -181,6 +210,8 @@ badgy-condition-helper:
     - Badge effects: Apply animations to badges
     - Main icon background: Change the main icon background conditionally
     - Sub-button effects: Apply animations (including color for glow) to the entire sub-button container
+    - Main icon badges, icon colors, icon replacement, card glow and global defaults
+    - Rule lists (first match wins) and dynamic colors from templates or entities
 
     All features support Home Assistant-style conditions for state-based logic.
   suggestions_code: |-
@@ -462,10 +493,23 @@ badgy-condition-helper:
             (fraction * 100).toFixed(2) + "%, transparent)";
         }
 
+        // Bubble Card's hasChanged() compares String(value), so every element
+        // would read "[object HTMLDivElement]". Give each node a token instead.
+        const gateOwner = this;
+        function nodeToken(value) {
+          if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+          if (!value.__badgyNodeToken) {
+            gateOwner.__badgyNodeSeq = (gateOwner.__badgyNodeSeq || 0) + 1;
+            value.__badgyNodeToken = "badgy-node-" + gateOwner.__badgyNodeSeq;
+          }
+          return value.__badgyNodeToken;
+        }
+
         function changeGate(label, ...values) {
           // Gate by both the live element and the computed values, never by
           // an entity ID alone: newly created DOM must still be initialized.
-          return typeof hasChanged !== "function" || hasChanged("badgy:" + label, ...values);
+          return typeof hasChanged !== "function" ||
+            hasChanged("badgy:" + label, ...values.map(nodeToken));
         }
 
         const ALL_EFFECT_CLASSES = [
@@ -585,8 +629,15 @@ badgy-condition-helper:
           if (!cfg) return null;
           if (Array.isArray(cfg.rules) && cfg.rules.length) {
             const selected = cfg.rules.find(rule => rule && checkAllConditions(rule.condition, hass));
-            if (selected) return { ...cfg, ...selected, rules: null };
-            return null;
+            if (!selected) return null;
+            const merged = { ...cfg, ...selected, rules: null };
+            // A rule's own color wins over dynamic sources set on the parent.
+            for (const name of ["color", "color1", "color2", "color3"]) {
+              if (selected[name] === undefined) continue;
+              for (const suffix of ["_template", "_entity", "_attribute"])
+                if (selected[name + suffix] === undefined) delete merged[name + suffix];
+            }
+            return merged;
           }
           return checkAllConditions(cfg.condition, hass) ? cfg : null;
         }
@@ -683,7 +734,9 @@ badgy-condition-helper:
                 background = backgroundWithOpacity(resolvedColor(bg, "color"), opacity);
               } else if (type === "two-color" || type === "three-color") {
                 const a = backgroundWithOpacity(resolvedColor(bg, "color1") || "#ff0000", opacity);
-                const b = backgroundWithOpacity(resolvedColor(bg, "color2") || "#0000ff", opacity);
+                // Same fallbacks as v2025: two-color ends blue, three-color has a green middle.
+                const b = backgroundWithOpacity(resolvedColor(bg, "color2") ||
+                  (type === "three-color" ? "#00ff00" : "#0000ff"), opacity);
                 if (type === "two-color") {
                   background = "linear-gradient(135deg, " + a + " 0%, " + b + " 100%)";
                 } else {
