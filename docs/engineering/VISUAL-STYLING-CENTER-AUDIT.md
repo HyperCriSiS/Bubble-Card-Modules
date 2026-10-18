@@ -64,3 +64,33 @@ Die eigentliche VSC-UI wird jetzt mit der offiziellen `bubble-card-editor`-Kompo
 
 **Noch nicht belegt:** Manuelle Maus-/Touch-Interaktion mit sämtlichen 46 einzelnen Formularfeldern, die echte Lovelace-Dashboard-Speicher-API samt erneutem Öffnen des Dashboards, Speichern/Ändern des **Modulquelltexts** über den BCT-UI-Speichern-Button sowie umfangreiche Layout-/Theme-/Drittmodul- und Langzeittests. Der synthetische `value-changed`-Event prüft den *realen* Editor-Eventhandler, ersetzt aber keine physische UI-Interaktion. Issue #11 bleibt deshalb offen.
 
+
+## Nachprüfung und Menü-Umbau, 19. Oktober 2026 (VSC v2026.10.19)
+
+**Kompatibilität:** Alle 46 bisherigen Options-IDs sind unverändert. Die Editor-Abschnitte (`expandable`) haben weiterhin kein `name`, deshalb bleiben die Werte flach unter `visual_styling_center` gespeichert. Eine Migration ist nicht nötig. Bewusst wurde kein namenloses `grid` eingesetzt, weil nicht belegt ist, dass Bubble Card es flach speichert.
+
+Behoben:
+
+- **Cleanup beim Entfernen über `modules:`**: Der `setConfig`-Cleanup erkannte VSC bisher nur, wenn der Quelltext in `styles` eingebettet war (so wie im E2E-Fixture). Wird das Modul auf dem normalen Weg aus der `modules:`-Liste entfernt (auch per `!visual_styling_center`), räumt es jetzt ebenfalls auf. Der neue Runtime-Test schlägt auf dem vorherigen Stand fehl. Ein globales Modul (`is_global`) taucht in keiner der beiden Stellen auf, seine Entfernung bleibt hier unerkannt.
+- **Editor-Defaults widersprachen dem Verhalten**: `enable_helper_fade` und `enable_slider_helper_fade` zeigten `true`, der Code wendet den Fade aber nur bei explizitem `true` an. Die Defaults sind jetzt `false`. Die Anzeige stimmt damit, und keine bestehende Karte sieht anders aus.
+- **Abstände in Sub-Button-Gruppen**: Seit v3 können Buttons in `.bubble-sub-button-group` liegen, dort griffen die Abstands-Optionen nicht. Sie gelten jetzt auch in Gruppen. Ohne gesetzten Wert bleibt der native 8px-Abstand.
+
+Neu und rückwärtskompatibel:
+
+- `enable_interaction_effects` (Standard `true`): Hover-Aufhellung, aufgehelltes aktives Icon und Sub-Icon-Deckkraft 0,9 waren bisher fest aktiv und lassen sich jetzt abschalten.
+
+Menü:
+
+- Neue Reihenfolge: Karte, Haupt-Icon, Sub-Buttons, Zustandsfarben, Icon-Kontrast, Verlauf, Slider-Kontrast (direkt nach dem Verlauf, weil nur mit Hintergrundverlauf wirksam), Interaktionseffekte.
+- Felder, die gerade nichts bewirken, werden per `visible:` ausgeblendet (HA ab 2026.9, ältere Versionen zeigen alle Felder).
+- Die Labels beschreiben das tatsächliche Verhalten (Abstand auf allen Seiten, manuelle Farbe hat Vorrang, Regenbogen-Fallback).
+
+Bewusst **nicht** geändert, weil sich sonst die Optik bestehender Karten ändern würde. Das ist offen und braucht eine Entscheidung:
+
+- `.bubble-icon-container { background-color: … !important }` überschreibt möglicherweise den nativen, zustandsabhängigen Icon-Hintergrund. Das ist nicht in HA nachgeprüft.
+- Die feste Sub-Button-Höhe von 32px × Faktor gilt auch für Sub-Button-Slider, Dropdowns und die untere Reihe und ignoriert `--bubble-sub-button-height` (nativ 36px).
+- `margin-right` am Sub-Button-Container kommt zum nativen `inset-inline-end: 8px` hinzu und berücksichtigt kein RTL.
+- Die Zustandsfarben sind fest (Grün/Grau) statt der Theme-Farben `--state-*-color`.
+- `unsupported` enthält die neuen Kartentypen `sub-buttons` und `calendar` nicht.
+
+Lokal geprüft: `test_visual_styling_center.py` (inkl. Node-Runtime), 13/13 Chromium-Tests in `test_vsc_browser.py`, `test_fixture_structure.py`. Nicht lokal ausführbar: der Test mit dem offiziellen Bundle (`test_vsc_upstream_runtime.py`) und die echten HA-E2E-Tests. Beide laufen in CI.
