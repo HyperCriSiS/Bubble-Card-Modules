@@ -1,0 +1,51 @@
+name: Test Visual Styling Center
+
+on:
+  pull_request:
+    paths:
+      - 'Visual-Styling-Center/**'
+      - 'docs/upstream/bubble-card/**'
+      - 'tests/test_visual_styling_center.py'
+      - 'tests/vsc_runtime_test.cjs'
+      - 'tests/test_vsc_browser.py'
+      - '.github/workflows/test-visual-styling-center.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install PyYAML
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install PyYAML==6.0.3
+      - name: Run YAML and JavaScript regression tests
+        run: .venv/bin/python -m unittest discover -s tests -p 'test_visual_styling_center.py' -v
+
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install browser testing tools
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install PyYAML==6.0.3 playwright==1.57.0
+          .venv/bin/python -m playwright install --with-deps chromium
+      - name: Test computed CSS and state transitions in Chromium
+        run: .venv/bin/python -m unittest discover -s tests -p 'test_vsc_browser.py' -v
+      - name: Preserve browser screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: visual-styling-center-browser-screenshots
+          path: artifacts/vsc-browser/
+          if-no-files-found: ignore
+          retention-days: 7
