@@ -194,3 +194,31 @@ test("native teardown restores VSC owned variables, classes and icon colors",()=
   assert.equal(card.style.getPropertyValue("--icon-background-color"),"");
   assert.equal(card.style.getPropertyValue("--icon-color"),"rgb(1, 2, 3)");
 });
+// A card that applies VSC through `modules:` the way the Bubble Card editor
+// stores it, with a real setConfig for the cleanup wrapper to hook into.
+const moduleCard=makeCard();
+const moduleCtx={
+  config:{entity:"light.a",modules:["visual_styling_center"],visual_styling_center:{inner_padding:5}},
+  setConfig(next){this.config=next;}
+};
+const runModule=()=>runner.call(moduleCtx,moduleCard,hass,nativeHasChanged,()=>{});
+test("interaction effects stay on unless explicitly disabled",()=>{
+  runModule();
+  assert.equal(moduleCard.classList.contains("vsc-interaction-effects"),true);
+  moduleCtx.config.visual_styling_center.enable_interaction_effects=false;
+  runModule();
+  assert.equal(moduleCard.classList.contains("vsc-interaction-effects"),false);
+  delete moduleCtx.config.visual_styling_center.enable_interaction_effects;
+  runModule();
+  assert.equal(moduleCard.classList.contains("vsc-interaction-effects"),true);
+});
+test("editing a card that keeps VSC in modules does not clean up",()=>{
+  moduleCtx.setConfig({...moduleCtx.config,name:"Renamed"});
+  assert.equal(moduleCard.style.getPropertyValue("--inner-padding"),"5px");
+});
+test("removing VSC from the modules list cleans up a mounted card",()=>{
+  runModule();
+  moduleCtx.setConfig({...moduleCtx.config,modules:["!visual_styling_center"]});
+  assert.equal(moduleCard.style.getPropertyValue("--inner-padding"),"");
+  assert.equal(moduleCard.classList.contains("vsc-interaction-effects"),false);
+});

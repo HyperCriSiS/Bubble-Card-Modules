@@ -1,6 +1,6 @@
 # Visual Styling Center
 
-**Version:** v2026.10.15
+**Version:** v2026.10.19
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
@@ -36,36 +36,34 @@ So generally, if something does not work out as expected, try out a different bu
 - **Icon Contrast Helper** for better readability with radial background effects
 - **Dynamic gradient effects** based on light entities
 - **Slider Contrast Helper** for improved visibility with background gradients
-- **Hover effects** for improved user experience
+- **Hover effects** for improved user experience (switchable)
 - **Automatic adjustments** for optimal display
 - **Custom Slider** to see more of the visuals 
 
 ## Detailed Feature Description
 
-### Card Size Adjustments
-- **Card Height Multiplier**: Scale the overall height of your Bubble Card 
+The editor sections follow this order. All option keys are unchanged from earlier
+versions, so existing configurations keep working without migration.
 
-### Margin & Spacing Adjustments
-- **Main Icon Vertical Margin**: Adjust vertical spacing for the main icon 
-- **Sub-button Container Right Margin**: Control the right margin of the sub-button container 
-- **Sub-button Row Spacing**: Set the spacing between rows of sub-buttons 
-- **Sub-button Column Spacing**: Set the spacing between columns of sub-buttons 
+### Card
+- **Card Height Multiplier**: Scale the overall height of your Bubble Card (not in the sections layout)
 - **Inner Card Padding**: Add padding inside the card for more spacing
 
-### Icon Size Adjustments
-- **Main Icon Size Multiplier**: Scale the size of the main icon 
-- **Icon Background Ratio**: Adjust the size ratio of the icon background 
-- **Sub-icon Size Multiplier**: Scale the size of sub-button icons 
-- **Sub-button Background Ratio**: Adjust the size ratio of sub-button backgrounds 
-
-### Visual Enhancements
+### Main Icon
+- **Main Icon Size Multiplier** and **Icon Background Ratio**
+- **Main Icon Margin**: Spacing around the main icon (applies to all sides)
+- **Icon Color** and **Icon Background Color** (RGB picker or manual CSS value, the manual value wins)
 - **Hide Icon Background**: Remove the background from the main icon
-- **Hide Sub-button Backgrounds**: Remove backgrounds from all sub-buttons
-- **Custom Icon Colors**: Set custom colors for main icon and sub-icons
-- **Custom Background Colors**: Set custom colors for icon and sub-button backgrounds
-- **Entity-Colored Main Icon**: Automatically color the main icon based on its entity state
-- **Entity-Colored Sub-Icons**: Automatically color sub-buttons based on their entity state
-- **Custom Offline/Function Button Color**: Apply a custom color to icons for inactive states, functional entities (scenes, scripts, automations), or entities without states
+
+### Sub-buttons
+- **Sub-icon Size Multiplier** and **Sub-button Background Ratio**
+- **Sub-button Container Right Margin**, **Row Spacing** and **Column Spacing** (also inside sub-button groups)
+- **Sub-button Icon Color** and **Sub-button Background Color**
+- **Hide Sub-button Backgrounds**
+
+### State Colors
+- **Color Main Icon / Sub-button Icons by Entity State**: Light color when on, otherwise a color per state
+- **Custom Off/Offline/Function Color**: Apply a custom color to icons for inactive states, functional entities (scenes, scripts, automations), or entities without states
 
 ### Icon Contrast Helper
 The Icon Contrast Helper adds circular background behind icons to improve visibility and contrast regardless of the card's background color.
@@ -74,24 +72,27 @@ The Icon Contrast Helper adds circular background behind icons to improve visibi
 - **Helper Color**: Select the background color for the helper
 - **Helper Opacity**: Control the transparency of the helper background 
 - **Helper Size Ratio**: Adjust how much of the icon the background covers 
-- **Radial Fade Effect**: Enable a smooth fade from color to transparent
+- **Radial Fade Effect**: Enable a smooth fade from color to transparent (off unless enabled)
 - **Fade Strength**: Control how gradual the fade effect is 
 
 ### Gradient Effects
 - **Enable Gradient Effects**: Toggle dynamic gradients on/off
 - **Apply Gradient to**: Choose between slider fill or card background
-- **Gradient Entity**: Select a light group or single light to base the gradient on
-- **Hide Gradient When All Lights Off**: Option to show/hide gradient when no lights are active
+- **Gradient Entity**: Select a light group or single light to base the gradient on (empty uses the card's light)
+- **Hide Rainbow Fallback**: Without it, a rainbow gradient is shown while no colored light is on
+- **Slider Brightness**: Adjust the opacity of the slider when using background gradients
 
 ### Slider Contrast Helper
-When using background gradients, this feature improves the visibility of the slider element.
+Only active together with a card background gradient, it improves the visibility of the slider element.
 - **Enable Slider Contrast Helper**: Toggle the helper for slider with background gradients
 - **Slider Helper Color**: Select the background/glow color for the slider
 - **Slider Helper Opacity**: Control the transparency of the helper effect
 - **Slider Helper Size Ratio**: Adjust the size of the helper effect
-- **Enable Radial Fade Effect**: Add a smooth fade to the slider glow
+- **Enable Radial Fade Effect**: Add a smooth fade to the slider glow (off unless enabled)
 - **Slider Fade Strength**: Control the intensity of the fade effect
-- **Slider Brightness**: Adjust the opacity of the slider when using background gradients
+
+### Interaction Effects
+- **Hover Highlight, Brighter Active Icon and Sub-icon Opacity**: On by default as in earlier versions, set `enable_interaction_effects: false` to use Bubble Card's native look
 
 ### Compatibility
 - Works with all button layouts (normal, large, multi-row)
@@ -148,7 +149,7 @@ visual_styling_center:
 ```yaml
 visual_styling_center:
   name: "Visual Styling Center"
-  version: "v2026.10.15"
+  version: "v2026.10.19"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
   description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
@@ -161,12 +162,14 @@ visual_styling_center:
     - select
     - separator
   editor:
+    # Sections have no `name` on purpose: values stay flat under
+    # visual_styling_center, so existing configurations keep working.
     - type: expandable
-      title: "Card Size Adjustments"
-      icon: "mdi:resize"
+      title: "Card"
+      icon: "mdi:card-outline"
       schema:
         - name: height_multiplier
-          label: "Card Height Multiplier"
+          label: "Card Height Multiplier (not in sections layout)"
           default: 1
           selector:
             number:
@@ -175,10 +178,6 @@ visual_styling_center:
               step: 0.1
               mode: slider
               unit_of_measurement: "×"
-    - type: expandable
-      title: "Margin & Spacing Adjustments"
-      icon: "mdi:arrow-expand"
-      schema:
         - name: inner_padding
           label: "Inner Card Padding"
           default: 0
@@ -189,8 +188,32 @@ visual_styling_center:
               step: 1
               mode: slider
               unit_of_measurement: "px"
+    - type: expandable
+      title: "Main Icon"
+      icon: "mdi:circle-outline"
+      schema:
+        - name: icon_size_multiplier
+          label: "Main Icon Size Multiplier"
+          default: 1
+          selector:
+            number:
+              min: 0.8
+              max: 3.0
+              step: 0.1
+              mode: slider
+              unit_of_measurement: "×"
+        - name: icon_background_ratio
+          label: "Icon Background Ratio"
+          default: 1
+          selector:
+            number:
+              min: 0.6
+              max: 1.4
+              step: 0.05
+              mode: slider
+              unit_of_measurement: "×"
         - name: icon_vertical_margin
-          label: "Main Icon Vertical Margin"
+          label: "Main Icon Margin (all sides)"
           default: 6
           selector:
             number:
@@ -199,6 +222,59 @@ visual_styling_center:
               step: 1
               mode: slider
               unit_of_measurement: "px"
+        - name: custom_icon_color
+          label: "Icon Color (RGB)"
+          selector:
+            color_rgb: {}
+        - name: manual_icon_color
+          label: "Icon Color, manual (overrides RGB, e.g. #FFFFFF or rgba(255,255,255,0.8))"
+          selector:
+            text: {}
+        - name: hide_icon_background
+          label: "Hide Icon Background"
+          default: false
+          selector:
+            boolean: {}
+        - name: custom_icon_background_color
+          label: "Icon Background Color (RGB)"
+          visible:
+            - field: hide_icon_background
+              operator: not_eq
+              value: true
+          selector:
+            color_rgb: {}
+        - name: manual_icon_background_color
+          label: "Icon Background Color, manual (overrides RGB)"
+          visible:
+            - field: hide_icon_background
+              operator: not_eq
+              value: true
+          selector:
+            text: {}
+    - type: expandable
+      title: "Sub-buttons"
+      icon: "mdi:dots-horizontal-circle-outline"
+      schema:
+        - name: subicon_size_multiplier
+          label: "Sub-icon Size Multiplier"
+          default: 1
+          selector:
+            number:
+              min: 0.8
+              max: 3.0
+              step: 0.1
+              mode: slider
+              unit_of_measurement: "×"
+        - name: subbutton_background_ratio
+          label: "Sub-button Background Ratio"
+          default: 1
+          selector:
+            number:
+              min: 0.6
+              max: 1.4
+              step: 0.05
+              mode: slider
+              unit_of_measurement: "×"
         - name: subbutton_horizontal_margin
           label: "Sub-button Container Right Margin"
           default: 8
@@ -229,80 +305,120 @@ visual_styling_center:
               step: 1
               mode: slider
               unit_of_measurement: "px"
+        - name: custom_subicon_color
+          label: "Sub-button Icon Color (RGB)"
+          selector:
+            color_rgb: {}
+        - name: manual_subicon_color
+          label: "Sub-button Icon Color, manual (overrides RGB)"
+          selector:
+            text: {}
+        - name: hide_subbutton_background
+          label: "Hide Sub-button Backgrounds (also hidden by Icon Contrast Helper)"
+          default: false
+          selector:
+            boolean: {}
+        - name: custom_subbutton_background_color
+          label: "Sub-button Background Color (RGB)"
+          visible:
+            - field: hide_subbutton_background
+              operator: not_eq
+              value: true
+          selector:
+            color_rgb: {}
+        - name: manual_subbutton_background_color
+          label: "Sub-button Background Color, manual (overrides RGB)"
+          visible:
+            - field: hide_subbutton_background
+              operator: not_eq
+              value: true
+          selector:
+            text: {}
     - type: expandable
-      title: "Icon Size Adjustments"
-      icon: "mdi:shape"
+      title: "State Colors"
+      icon: "mdi:palette"
       schema:
-        - name: icon_size_multiplier
-          label: "Main Icon Size Multiplier"
-          default: 1
+        - name: enable_entity_colored_main_icon
+          label: "Color Main Icon by Entity State"
+          default: false
           selector:
-            number:
-              min: 0.8
-              max: 3.0
-              step: 0.1
-              mode: slider
-              unit_of_measurement: "×"
-        - name: icon_background_ratio
-          label: "Icon Background Ratio"
-          default: 1
+            boolean: {}
+        - name: enable_entity_colored_subicons
+          label: "Color Sub-button Icons by Entity State"
+          default: false
           selector:
-            number:
-              min: 0.6
-              max: 1.4
-              step: 0.05
-              mode: slider
-              unit_of_measurement: "×"
-        - name: subicon_size_multiplier
-          label: "Sub-icon Size Multiplier"
-          default: 1
+            boolean: {}
+        - name: enable_function_button_color
+          label: "Custom Color for Off/Offline/Scene/Script/Automation Icons"
+          default: false
           selector:
-            number:
-              min: 0.8
-              max: 3.0
-              step: 0.1
-              mode: slider
-              unit_of_measurement: "×"
-        - name: subbutton_background_ratio
-          label: "Sub-button Background Ratio"
-          default: 1
+            boolean: {}
+        - name: function_button_color
+          label: "Off/Offline/Function Color (RGB)"
+          visible:
+            - field: enable_function_button_color
+              operator: eq
+              value: true
           selector:
-            number:
-              min: 0.6
-              max: 1.4
-              step: 0.05
-              mode: slider
-              unit_of_measurement: "×"
+            color_rgb: {}
+        - name: manual_function_button_color
+          label: "Off/Offline/Function Color, manual (overrides RGB)"
+          visible:
+            - field: enable_function_button_color
+              operator: eq
+              value: true
+          selector:
+            text: {}
     - type: expandable
       title: "Icon Contrast Helper"
       icon: "mdi:contrast-circle"
       schema:
         - name: enable_icon_helper
-          label: "Enable Icon Contrast Helper"
+          label: "Enable Icon Contrast Helper (hides sub-button backgrounds)"
           default: false
           selector:
             boolean: {}
         - name: apply_to_main_icon
           label: "Apply Helper to Main Icon"
           default: true
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             boolean: {}
         - name: apply_to_sub_icons
           label: "Apply Helper to Sub-Icons"
           default: true
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             boolean: {}
         - name: helper_color
           label: "Helper Background Color (RGB)"
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             color_rgb: {}
         - name: manual_helper_color
-          label: "Manual Helper Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
+          label: "Helper Color, manual (overrides RGB and opacity)"
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             text: {}
         - name: helper_opacity
           label: "Helper Background Opacity"
           default: 0.7
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             number:
               min: 0.1
@@ -312,6 +428,10 @@ visual_styling_center:
         - name: helper_size_ratio
           label: "Helper Size Ratio"
           default: 0.7
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             number:
               min: 0.3
@@ -321,137 +441,29 @@ visual_styling_center:
               unit_of_measurement: "×"
         - name: enable_helper_fade
           label: "Enable Radial Fade Effect"
-          default: true
+          default: false
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             boolean: {}
         - name: fade_strength
           label: "Fade Strength"
           default: 1.0
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
+            - field: enable_helper_fade
+              operator: eq
+              value: true
           selector:
             number:
               min: 0.5
               max: 2.0
               step: 0.1
               mode: slider
-    - type: expandable
-      title: "Slider Contrast Helper"
-      icon: "mdi:contrast-box"
-      schema:
-        - name: enable_slider_helper
-          label: "Enable Slider Contrast Helper"
-          default: false
-          selector:
-            boolean: {}
-        - name: slider_helper_color
-          label: "Slider Helper Background Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_slider_helper_color
-          label: "Manual Slider Helper Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: slider_helper_opacity
-          label: "Slider Helper Background Opacity"
-          default: 0.7
-          selector:
-            number:
-              min: 0.1
-              max: 1.0
-              step: 0.05
-              mode: slider
-        - name: slider_helper_size_ratio
-          label: "Slider Helper Size Ratio"
-          default: 0.7
-          selector:
-            number:
-              min: 0.3
-              max: 4.0
-              step: 0.1
-              mode: slider
-              unit_of_measurement: "×"
-        - name: enable_slider_helper_fade
-          label: "Enable Radial Fade Effect"
-          default: true
-          selector:
-            boolean: {}
-        - name: slider_fade_strength
-          label: "Slider Fade Strength"
-          default: 1.0
-          selector:
-            number:
-              min: 0.5
-              max: 2.0
-              step: 0.1
-              mode: slider
-    - type: expandable
-      title: "Visual Enhancements"
-      icon: "mdi:palette"
-      schema:
-        - name: hide_icon_background
-          label: "Hide Icon Background"
-          default: false
-          selector:
-            boolean: {}
-        - name: hide_subbutton_background
-          label: "Hide Sub-button Backgrounds"
-          default: false
-          selector:
-            boolean: {}
-        - name: custom_icon_color
-          label: "Icon Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_icon_color
-          label: "Manual Icon Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: custom_subicon_color
-          label: "Sub-Button Icon Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_subicon_color
-          label: "Manual Sub-Button Icon Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: custom_icon_background_color
-          label: "Icon Background Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_icon_background_color
-          label: "Manual Icon Background Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: custom_subbutton_background_color
-          label: "Sub-Button Background Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_subbutton_background_color
-          label: "Manual Sub-Button Background Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: enable_entity_colored_main_icon
-          label: "Color Main Icon by Entity State"
-          default: false
-          selector:
-            boolean: {}
-        - name: enable_entity_colored_subicons
-          label: "Color Sub-Button Icons by Entity State"
-          default: false
-          selector:
-            boolean: {}
-        - name: enable_function_button_color
-          label: "Custom Offline/Function Button Color"
-          default: false
-          selector:
-            boolean: {}
-        - name: function_button_color
-          label: "Offline/Function Button Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_function_button_color
-          label: "Manual Offline/Function Button Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
     - type: expandable
       title: "Gradient Effects"
       icon: "mdi:gradient-horizontal"
@@ -464,6 +476,10 @@ visual_styling_center:
         - name: gradient_target
           label: "Apply Gradient to"
           default: "slider"
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
           selector:
             select:
               options:
@@ -472,24 +488,125 @@ visual_styling_center:
                 - value: "background"
                   label: "Card Background"
         - name: gradient_entity
-          label: "Gradient Entity (Light Group or Single Light)"
+          label: "Gradient Entity (light or light group, empty = card light)"
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
           selector:
             entity:
               domain: light
         - name: disable_default_gradient
-          label: "Hide Gradient When All Lights Off"
+          label: "Hide Rainbow Fallback When No Colored Light Is On"
           default: false
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
           selector:
             boolean: {}
         - name: slider_bg_opacity
-          label: "Slider Brightness with Background Gradient"
+          label: "Slider Brightness on Background Gradient"
           default: 0.6
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
+            - field: gradient_target
+              operator: eq
+              value: background
           selector:
             number:
               min: 0.1
               max: 1.0
               step: 0.05
               mode: slider
+    - type: expandable
+      title: "Slider Contrast Helper (Background Gradient only)"
+      icon: "mdi:contrast-box"
+      schema:
+        - name: enable_slider_helper
+          label: "Enable Slider Contrast Helper"
+          default: false
+          selector:
+            boolean: {}
+        - name: slider_helper_color
+          label: "Slider Helper Color (RGB)"
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            color_rgb: {}
+        - name: manual_slider_helper_color
+          label: "Slider Helper Color, manual (overrides RGB and opacity)"
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            text: {}
+        - name: slider_helper_opacity
+          label: "Slider Helper Opacity"
+          default: 0.7
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            number:
+              min: 0.1
+              max: 1.0
+              step: 0.05
+              mode: slider
+        - name: slider_helper_size_ratio
+          label: "Slider Helper Size Ratio"
+          default: 0.7
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            number:
+              min: 0.3
+              max: 4.0
+              step: 0.1
+              mode: slider
+              unit_of_measurement: "×"
+        - name: enable_slider_helper_fade
+          label: "Enable Radial Fade Effect"
+          default: false
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            boolean: {}
+        - name: slider_fade_strength
+          label: "Slider Fade Strength"
+          default: 1.0
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+            - field: enable_slider_helper_fade
+              operator: eq
+              value: true
+          selector:
+            number:
+              min: 0.5
+              max: 2.0
+              step: 0.1
+              mode: slider
+    - type: expandable
+      title: "Interaction Effects"
+      icon: "mdi:gesture-tap"
+      schema:
+        - name: enable_interaction_effects
+          label: "Hover Highlight, Brighter Active Icon and Sub-icon Opacity"
+          default: true
+          selector:
+            boolean: {}
   code: |
    ${(() => {
       const config = this.config.visual_styling_center || {};
@@ -529,7 +646,8 @@ visual_styling_center:
         'hide-subbutton-background', 'icon-helper-enabled',
         'helper-fade-enabled', 'helper-main-icon', 'helper-sub-icons',
         'slider-helper-enabled', 'slider-helper-fade-enabled',
-        'use-gradient-background', 'use-gradient-slider'
+        'use-gradient-background', 'use-gradient-slider',
+        'vsc-interaction-effects'
       ];
       const initialClasses = card._vscInitialClasses ?? (card._vscInitialClasses =
         new Map(vscClassNames.map(name => [name, card.classList.contains(name)])));
@@ -582,6 +700,10 @@ visual_styling_center:
         : null;
       setCardVariable('--function-button-color', functionButtonColor);
       card.classList.toggle('use-function-button-color', functionButtonColor != null);
+
+      // Hover/active polish was always on before it got a switch, so only an
+      // explicit false turns it off.
+      card.classList.toggle('vsc-interaction-effects', config.enable_interaction_effects !== false);
 
       // Apply background visibility toggling
       card.classList.toggle('hide-icon-background', config.hide_icon_background === true);
@@ -890,13 +1012,20 @@ visual_styling_center:
       if (typeof this.setConfig === 'function' && !this._vscSetConfigWrapper) {
         const host = this;
         const originalSetConfig = this.setConfig;
+        // VSC is applied either through the card's `modules:` list (the normal
+        // way, "!id" excludes it) or embedded in `styles`. A global module is
+        // in neither, so its removal cannot be seen here and is left alone.
+        const usesVSC = (cfg) => {
+          const modules = Array.isArray(cfg?.modules) ? cfg.modules
+            : (typeof cfg?.modules === 'string' ? [cfg.modules] : []);
+          return (modules.includes('visual_styling_center') &&
+              !modules.includes('!visual_styling_center')) ||
+            String(cfg?.styles ?? '').includes('this.config.visual_styling_center');
+        };
         const wrappedSetConfig = function(nextConfig) {
-          const previousCode = String(host.config?.styles ?? '');
-          const incomingCode = String(nextConfig?.styles ?? '');
-          // Only react to removing the inline VSC source: other cards/modules
-          // may legitimately use styles without embedding VSC source.
-          if (previousCode.includes('this.config.visual_styling_center') &&
-              !incomingCode.includes('this.config.visual_styling_center')) {
+          // Only react to removing VSC: a still-active VSC rewrites its own
+          // state on the next style pass anyway.
+          if (usesVSC(host.config) && !usesVSC(nextConfig)) {
             host._vscCleanupCurrent?.();
           }
           return originalSetConfig.call(this, nextConfig);
@@ -986,6 +1115,15 @@ visual_styling_center:
       margin-right: var(--subbutton-horizontal-margin, 8px) !important;
       row-gap: var(--subbutton-row-spacing, 10px) !important;
       column-gap: var(--subbutton-column-spacing, 10px) !important;
+    }
+    /* Since v3 the buttons can sit inside groups (rows layout, explicit or
+       bottom groups), where the container gap no longer reaches them. The
+       8px fallback is Bubble Card's own group gap, so unset options change
+       nothing. */
+    .bubble-sub-button-container .bubble-sub-button-group,
+    .bubble-sub-button-bottom-container .bubble-sub-button-group {
+      row-gap: var(--subbutton-row-spacing, 8px);
+      column-gap: var(--subbutton-column-spacing, 8px);
     }
     /* Make sub-buttons size independent from main icon margin */
     .bubble-sub-button {
@@ -1124,22 +1262,24 @@ visual_styling_center:
       background: radial-gradient(circle, var(--helper-color, rgba(255, 255, 255, 0.7)) 0%, transparent calc(100% * var(--fade-strength, 1.0))) !important;
     }
 
+    /* Interaction effects (enable_interaction_effects, on unless set to false) */
     /* Make sub-button icons brighter and more visible */
-    .bubble-sub-button ha-icon {
+    .vsc-interaction-effects .bubble-sub-button ha-icon {
       opacity: 0.9 !important;
     }
 
     /* Enhance icons in active states for better visibility */
-    .is-on .bubble-icon {
+    .vsc-interaction-effects .is-on .bubble-icon,
+    .vsc-interaction-effects.is-on .bubble-icon {
       opacity: 1 !important;
       filter: brightness(1.1) !important;
     }
 
     /* Highlight elements on hover/focus for better interaction cues */
-    .bubble-sub-button:hover ha-icon,
-    .bubble-sub-button:focus ha-icon,
-    .bubble-icon-container:hover .bubble-icon,
-    .bubble-icon-container:focus .bubble-icon {
+    .vsc-interaction-effects .bubble-sub-button:hover ha-icon,
+    .vsc-interaction-effects .bubble-sub-button:focus ha-icon,
+    .vsc-interaction-effects .bubble-icon-container:hover .bubble-icon,
+    .vsc-interaction-effects .bubble-icon-container:focus .bubble-icon {
       filter: brightness(1.2) !important;
     }
 ```

@@ -8,7 +8,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 MODULE = ROOT / "Visual-Styling-Center" / "Visual-Styling-Center.md"
-REQUIRED = """height_multiplier inner_padding icon_vertical_margin subbutton_horizontal_margin subbutton_row_spacing subbutton_column_spacing icon_size_multiplier icon_background_ratio subicon_size_multiplier subbutton_background_ratio enable_icon_helper apply_to_main_icon apply_to_sub_icons helper_color manual_helper_color helper_opacity helper_size_ratio enable_helper_fade fade_strength enable_slider_helper slider_helper_color manual_slider_helper_color slider_helper_opacity slider_helper_size_ratio enable_slider_helper_fade slider_fade_strength hide_icon_background hide_subbutton_background custom_icon_color manual_icon_color custom_subicon_color manual_subicon_color custom_icon_background_color manual_icon_background_color custom_subbutton_background_color manual_subbutton_background_color enable_entity_colored_main_icon enable_entity_colored_subicons enable_function_button_color function_button_color manual_function_button_color enable_gradient gradient_target gradient_entity disable_default_gradient slider_bg_opacity""".split()
+REQUIRED = """height_multiplier inner_padding icon_vertical_margin subbutton_horizontal_margin subbutton_row_spacing subbutton_column_spacing icon_size_multiplier icon_background_ratio subicon_size_multiplier subbutton_background_ratio enable_icon_helper apply_to_main_icon apply_to_sub_icons helper_color manual_helper_color helper_opacity helper_size_ratio enable_helper_fade fade_strength enable_slider_helper slider_helper_color manual_slider_helper_color slider_helper_opacity slider_helper_size_ratio enable_slider_helper_fade slider_fade_strength hide_icon_background hide_subbutton_background custom_icon_color manual_icon_color custom_subicon_color manual_subicon_color custom_icon_background_color manual_icon_background_color custom_subbutton_background_color manual_subbutton_background_color enable_entity_colored_main_icon enable_entity_colored_subicons enable_function_button_color function_button_color manual_function_button_color enable_gradient gradient_target gradient_entity disable_default_gradient slider_bg_opacity enable_interaction_effects""".split()
 
 def fields(schema):
     result = []
@@ -34,7 +34,7 @@ class VisualStylingCenterTests(unittest.TestCase):
         self.assertEqual(self.module["name"], "Visual Styling Center")
         self.assertGreater(len(self.module["code"]), 15000)
         self.assertNotIn("\x97", self.text)
-        self.assertEqual(self.module["version"], "v2026.10.15")
+        self.assertEqual(self.module["version"], "v2026.10.19")
         self.assertNotIn("Ã", self.text)
 
     def test_config_id_and_all_editor_keys_unchanged(self):

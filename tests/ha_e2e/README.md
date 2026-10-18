@@ -51,3 +51,7 @@ GitHub Actions: `.github/workflows/test-vsc-ha-e2e.yml`. Fixture- und Browsercod
 Der CI-Container erhält zusätzlich **Bubble Card Tools v1.1.1**, auf Git-Commit `2708319696513f5916f062723847c6cd80715dcc` fixiert. Der VSC-Modulquelltext wird als eigene YAML-Datei nach `/config/bubble_card/modules/visual_styling_center.yaml` übertragen. Ein eigener Browser-Test aktiviert BCT über die echten HA-Konfigurationsflows und prüft dessen WebSocket-API für Lesen, Schreiben und Löschen der Module. Die produktive Home-Assistant-Installation wird nicht berührt.
 
 Das ist unabhängig von der vollständigen manuellen Feldbedienung im BCT-Moduleditor. Dieser UI-Teil bleibt gesondert zu verifizieren.
+
+## 19. Oktober 2026 – 47 Optionen
+
+Mit VSC v2026.10.19 kommt die Option `enable_interaction_effects` hinzu (Standard `true`, also das bisherige Verhalten). Die Feldzählungen der E2E-Tests erwarten deshalb 47 statt 46 Optionen. Die 46 bestehenden Options-IDs bleiben unverändert. Die Editor-Abschnitte haben weiterhin kein `name`, die Werte liegen also weiter flach unter `visual_styling_center`.

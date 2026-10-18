@@ -170,6 +170,28 @@ class VSCBrowser(unittest.TestCase):
         self.change(cfg={'subbutton_column_spacing':12})
         self.assertEqual(self.cssval('.bubble-sub-button-container','column-gap'),'12px')
 
+    def test_sub_button_group_spacing_keeps_native_default(self):
+        # Bubble Card v3 wraps buttons in groups, the container gap misses them.
+        self.page.evaluate("""()=>{
+            const group=document.createElement('div');
+            group.className='bubble-sub-button-group';
+            group.id='group';
+            document.querySelector('.bubble-sub-button-container').appendChild(group);
+        }""")
+        self.change()
+        self.assertEqual(self.cssval('#group','column-gap'),'8px')
+        self.change(cfg={'subbutton_column_spacing':14,'subbutton_row_spacing':3})
+        self.assertEqual(self.cssval('#group','column-gap'),'14px')
+        self.assertEqual(self.cssval('#group','row-gap'),'3px')
+
+    def test_interaction_effects_switch(self):
+        self.change(classes={'is-on':True})
+        self.assertIn('brightness',self.cssval('#main','filter'))
+        self.change(cfg={'enable_interaction_effects':False})
+        self.assertEqual(self.cssval('#main','filter'),'none')
+        self.change(cfg={'enable_interaction_effects':True})
+        self.assertIn('brightness',self.cssval('#main','filter'))
+
     def test_mixed_group_icon_indices_match_upstream(self):
         self.page.evaluate("""() => {
             window.cfg.sub_button={

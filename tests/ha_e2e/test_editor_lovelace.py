@@ -25,8 +25,8 @@ class RealEditorSmoke(base.RealLovelace):
         fields = [field for section in schema for field in section.get("schema", [])
                   if isinstance(field, dict) and "name" in field]
         names = [field["name"] for field in fields]
-        self.assertEqual(len(names), 46, names)
-        self.assertEqual(len(set(names)), 46, names)
+        self.assertEqual(len(names), 47, names)
+        self.assertEqual(len(set(names)), 47, names)
         defaults = {field["name"]: field.get("default") for field in fields}
         result = self.page.locator("bubble-card").first.evaluate("""(host, options) => {
             const ctor = customElements.get('bubble-card');

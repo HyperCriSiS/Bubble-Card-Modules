@@ -34,7 +34,7 @@ class HAContracts(unittest.TestCase):
         cfg=make_config()
         self.assertIn("lovelace",cfg)
         source=extract_module((ROOT/"Visual-Styling-Center/Visual-Styling-Center.md").read_text(encoding="utf-8"))
-        self.assertEqual(len([item for section in source["editor"] for item in section.get("schema",[]) if "name" in item]),46)
+        self.assertEqual(len([item for section in source["editor"] for item in section.get("schema",[]) if "name" in item]),47)
         workflow=(ROOT/".github/workflows/test-vsc-ha-e2e.yml").read_text(encoding="utf-8")
         self.assertIn("2708319696513f5916f062723847c6cd80715dcc",workflow)
         self.assertIn("custom_components/bubble_card_tools",workflow)
