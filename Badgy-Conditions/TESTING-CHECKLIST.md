@@ -19,6 +19,18 @@ full Home Assistant frontend. None of the checkboxes below are considered comple
       Icon Badges, Effects, Global Defaults); confirm nested fields appear.
 - [ ] Save a list of 2+ condition rules, reorder them, reopen the card and
       confirm rule order, values and valid condition editors survive.
+- [ ] Sub-button background: switch the type between Solid, Two-color and
+      Three-color; only the matching color fields are shown (HA 2026.9+).
+      Inside a rule, the gradient colors follow the rule's type the same way.
+- [ ] Entity and icon badge rules: a matching rule changes color, text/icon
+      and effect; with no match the badge disappears, and with "Use the static
+      settings above when no rule matches" on it shows the static badge.
+- [ ] Effect rules on main icon, sub-button icon and sub-button: the effect
+      switches with the rule and stops when no rule matches.
+- [ ] Badge effect set on the badge overrides the entry under Effects; clearing
+      it brings the separate effect back.
+- [ ] Global defaults: sub-button badge offsets do not move main icon badges;
+      the main icon badge offsets do.
 - [ ] Test the new Card Picker suggestion on a `sensor` and `binary_sensor`.
       It should use the beta module and not appear for an unrelated `light`.
 

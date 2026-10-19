@@ -98,6 +98,13 @@ def main():
         ("global_defaults", "badge_scale"),
         ("sub_buttons_background", "0", "rules"),
         ("icon_colors", "sub_button_icon", "0", "color"),
+        ("entity_badges", "0", "rules"),
+        ("entity_badges", "0", "effect"),
+        ("icon_badges", "main", "rules"),
+        ("sub_button_effects", "0", "rules"),
+        ("icon_effects", "sub_button_icon", "0", "rules"),
+        ("sub_buttons_background", "0", "fallback_to_static"),
+        ("global_defaults", "main_badge_h_pos"),
     }
     assert required <= updated, "New fields missing: " + repr(sorted(required - updated))
     code = new["code"]

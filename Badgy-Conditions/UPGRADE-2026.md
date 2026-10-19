@@ -20,7 +20,7 @@ paths are preserved**. Existing cards should not require migration.
 
 ## Bubble Card v3.4.2 hardening (2026-10-15)
 
-The isolated import artifact is currently `v2026.10.19-beta.5`.
+The isolated import artifact is currently `v2026.10.19-beta.6`.
 
 - All Badgy animation CSS class names, keyframes, and effect color variables
   are namespaced. The effect cleanup no longer removes unowned classes.
@@ -53,6 +53,35 @@ Home Assistant's real editor, entity subscriptions or shadow DOM.
 - The README card example now has a module-ID string in `modules:` and a
   separate `badgy-condition-helper:` configuration block.
 - Automated tests verify custom text and correct example YAML.
+
+## Beta.6 editor and rule changes (2026-10-19)
+
+All existing configuration paths are unchanged; new keys are optional.
+
+- **Rules everywhere:** entity badges, icon badges and every effect entry
+  (main icon, sub-button icons, sub-buttons, entity and icon badge effects)
+  accept a `rules` list, like colors, icons and backgrounds already did.
+  The first matching rule wins and its fields override the entry's own.
+  A badge rule can change color, text color, display text / icon and effect.
+- **Fallback (`fallback_to_static`):** off by default. When it is on and no
+  rule matches, the entry's static settings apply, still gated by the entry's
+  own `condition`. When it is off, nothing is shown, as before.
+- **Effect on the badge:** badges have `effect` and `effect_color`. They win
+  over the separate `entity_badge_effects` / `icon_badge_effects` entry, which
+  keeps working when the badge has no effect of its own.
+- **Main icon badge offsets:** new `global_defaults.main_badge_h_pos` and
+  `main_badge_v_pos` (default 0). The sub-button `badge_h_pos`/`badge_v_pos`
+  no longer move main icon badges, which sit inside the card.
+- **Editor:** labels state the priority (rules > color template > color
+  entity > static color) and every default value, because Bubble Card does not
+  display defaults inside named sections. Rules and the fallback switch sit
+  after the static settings. Sub-button background color fields are shown
+  only for the chosen type (needs Home Assistant 2026.9; older versions show
+  all fields). Rule items hide gradient colors the same way.
+- The main icon background only supports a solid color, so its rules no
+  longer offer gradient fields.
+- Badge position labels say which edge they measure from (entity badges:
+  right edge, icon badges: left edge).
 
 ## Beta.5 fixes (2026-10-19)
 

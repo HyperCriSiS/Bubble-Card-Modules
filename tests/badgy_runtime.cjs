@@ -314,6 +314,68 @@ delete cfg.sub_buttons_background["0"];
 hass.states["sensor.flag"].state = "off";
 run();
 
+// beta.6: rules on badges and effects, badge-attached effects, fallback and
+// separate global offsets for main icon badges.
+hass.states["sensor.flag"].state = "on";
+cfg.entity_badges["0"].rules = [
+  {label: "Hot", condition: {condition: "state", entity_id: "sensor.flag", state: "off"}, color: "#ff0000"},
+  {label: "Flag", condition: check, color: "#0000ff", display_text: "FLAG"}
+];
+run();
+assert.equal(subBadge.textContent, "FLAG", "first matching badge rule overrides text");
+assert.equal(subBadge.style.getPropertyValue("--badge-color"), "#0000ff", "matching badge rule overrides color");
+hass.states["sensor.flag"].state = "off";
+cfg.entity_badges["0"].rules[0].condition = {condition: "state", entity_id: "sensor.flag", state: "never"};
+run();
+assert.equal(sub.querySelector(".badgy-owned-badge.entity-badge"), null, "no matching badge rule hides the badge");
+cfg.entity_badges["0"].fallback_to_static = true;
+run();
+const fallbackBadge = sub.querySelector(".badgy-owned-badge.entity-badge");
+assert.ok(fallbackBadge, "fallback_to_static shows the static badge when no rule matches");
+assert.equal(fallbackBadge.textContent, "26W", "fallback uses the static badge settings");
+delete cfg.entity_badges["0"].rules;
+delete cfg.entity_badges["0"].fallback_to_static;
+run();
+
+// An effect set on the badge wins over the separate entity_badge_effects entry.
+const liveBadge = sub.querySelector(".badgy-owned-badge.entity-badge");
+assert.ok(liveBadge.classList.contains("badgy-effect-spin-360"), "separate badge effect still applies");
+cfg.entity_badges["0"].effect = "pulse";
+run();
+assert.ok(liveBadge.classList.contains("badgy-effect-pulse"), "badge-attached effect applies");
+assert.ok(!liveBadge.classList.contains("badgy-effect-spin-360"), "badge-attached effect has precedence");
+delete cfg.entity_badges["0"].effect;
+run();
+assert.ok(liveBadge.classList.contains("badgy-effect-spin-360"), "separate effect returns without inline effect");
+
+// Effect rules: first match wins, none matching stops the effect.
+cfg.sub_button_effects["0"] = {rules: [
+  {condition: {condition: "state", entity_id: "sensor.flag", state: "on"}, effect: "pulse"},
+  {condition: {condition: "state", entity_id: "sensor.flag", state: "off"}, effect: "shake"}
+]};
+run();
+assert.ok(sub.classList.contains("badgy-effect-shake"), "matching effect rule applies");
+hass.states["sensor.flag"].state = "on";
+run();
+assert.ok(sub.classList.contains("badgy-effect-pulse") && !sub.classList.contains("badgy-effect-shake"),
+  "effect rule switches with the condition");
+cfg.sub_button_effects["0"].rules = [{condition: {condition: "state", entity_id: "sensor.flag", state: "never"}, effect: "pulse"}];
+run();
+assert.ok(!sub.classList.contains("badgy-has-effect"), "no matching effect rule stops the effect");
+delete cfg.sub_button_effects["0"];
+
+// Global sub-button offsets no longer move main icon badges.
+cfg.global_defaults.badge_h_pos = -8;
+run();
+assert.equal(mainBadge.style.right, "0px", "sub-button global offset does not move main badges");
+cfg.global_defaults.main_badge_h_pos = 4;
+run();
+assert.equal(mainBadge.style.right, "4px", "main badges use their own global offset");
+delete cfg.global_defaults.badge_h_pos;
+delete cfg.global_defaults.main_badge_h_pos;
+hass.states["sensor.flag"].state = "off";
+run();
+
 // Fallback NOT must negate all nested conditions, not just the first one.
 forceFallback = true;
 cfg.icon_badges["0"] = {icon: "mdi:alert", condition: {condition: "not", conditions: [
