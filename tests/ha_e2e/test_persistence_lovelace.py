@@ -180,6 +180,28 @@ class PersistenceAndEditor(base.RealLovelace):
                 summary.scroll_into_view_if_needed()
                 summary.click()
 
+    def dump(self,name):
+        """Compact element tree of one field, for diagnosing selector changes."""
+        return self.page.evaluate("""n => {
+            const root=document.querySelector('#vsc-editor-frame') && (function find(r){
+                for (const el of r.querySelectorAll('*')) {
+                    if (el.dataset?.vscField===n) return el;
+                    if (el.shadowRoot) { const f=find(el.shadowRoot); if (f) return f; }
+                }
+            })(window.__vscEditor.shadowRoot);
+            if (!root) return 'missing';
+            const out=[];
+            const walk=(el,depth)=>{
+                if (depth>7 || out.length>60) return;
+                const box=el.getBoundingClientRect();
+                out.push('  '.repeat(depth)+el.localName+(el.getAttribute('role')?'[role='+el.getAttribute('role')+']':'')
+                    +(el.type?'[type='+el.type+']':'')+' '+Math.round(box.width)+'x'+Math.round(box.height));
+                for (const c of [...(el.shadowRoot?.children||[]),...el.children]) walk(c,depth+1);
+            };
+            walk(root,0);
+            return out.join('\\n');
+        }""",name)
+
     def operate(self,field):
         name=field["name"]
         kind,options=next(iter(field["selector"].items()))
@@ -262,7 +284,7 @@ class PersistenceAndEditor(base.RealLovelace):
                                 lambda v,e=expected:v==e or (isinstance(e,(int,float))
                                     and isinstance(v,(int,float)) and abs(v-e)<1e-6),timeout=6)
             except Exception as exc:
-                failures[name]=f"{next(iter(field['selector']))}: {str(exc)[:160]}"
+                failures[name]=f"{next(iter(field['selector']))}: {str(exc)[:160]} DOM={self.dump(name)}"
             del pending[name]
         for _ in range(6):
             if not pending: break
