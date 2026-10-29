@@ -94,3 +94,24 @@ Bewusst **nicht** geändert, weil sich sonst die Optik bestehender Karten änder
 - `unsupported` enthält die neuen Kartentypen `sub-buttons` und `calendar` nicht.
 
 Lokal geprüft: `test_visual_styling_center.py` (inkl. Node-Runtime), 13/13 Chromium-Tests in `test_vsc_browser.py`, `test_fixture_structure.py`. Nicht lokal ausführbar: der Test mit dem offiziellen Bundle (`test_vsc_upstream_runtime.py`) und die echten HA-E2E-Tests. Beide laufen in CI.
+
+## Messungen und Erweiterung, 29. Oktober 2026 (VSC v2026.10.29)
+
+Geprüft am SHA-verifizierten Original-Bundle `bubble-card.js` v3.4.2 (`d526dfd8…`), nicht nur an der Quellspiegelung:
+
+- **Lichtfarbe am Haupt-Icon:** Bubble Card färbt bei eingeschaltetem Licht nur das Icon selbst (Inline-`color` am Icon-Container), nicht den Kreis dahinter. Das Modul erbt diese Farbe korrekt. Die frühere Vermutung, der Kreis verliere seine Lichtfarbe, ist damit widerlegt.
+- **Icon-Hintergrund ohne Bubble-Theme:** Der Modul-Fallback endete bei `--bubble-secondary-background-color`, die nur Bubble-Themes definieren. In Chromium mit dem nativen CSS gemessen: ohne Modul `rgb(40, 40, 40)` (Kartenfarbe), mit Modul und leeren Einstellungen `rgba(0, 0, 0, 0)` (durchsichtig). Mit Bubble-Theme sind beide gleich. Das Modul überschreibt den Kreis jetzt nur noch bei eigener Farbe oder „Hide Icon Background“, analog zur Sub-Button-Regel aus PR #7. **Sichtbare Änderung:** Ohne Bubble-Theme erscheint der Icon-Kreis wieder. Wer ihn unsichtbar haben will, nutzt „Hide Icon Background“.
+- **Sub-Button-Höhe:** Bubble Card schreibt die Sub-Button-Option `custom_height` als `--bubble-sub-button-height` an den einzelnen Button. Die feste Modul-Höhe hat diese Option bisher per `!important` überschrieben. Jetzt gewinnt `custom_height`, ohne sie bleibt die bisherige Modul-Höhe (32px × Faktoren). Für bestehende Karten ohne `custom_height` ändert sich nichts.
+- **Kartentypen `sub-buttons` und `calendar`:** Beide haben Sub-Buttons, aber kein Haupt-Icon, keinen Namen und keinen Slider. Das Modul läuft dort fehlerfrei, und die Sub-Button-Optionen wirken. Sie bleiben deshalb unterstützt, statt in `unsupported` zu wandern (das hätte bestehenden Nutzern die Wirkung genommen). Ein echter HA-E2E-Test prüft die `sub-buttons`-Karte. Für `calendar` gibt es in der Fixture keine Kalender-Entity, der Kalender ist daher nur über den gleichen Sub-Button-Codepfad abgedeckt.
+
+Neu (alle optional, ohne Wert gilt das Theme bzw. das bisherige Verhalten), damit 61 Optionen:
+
+- Name/Status: `custom_name_color`, `manual_name_color`, `name_font_size`, `custom_state_color`, `manual_state_color`, `state_font_size`
+- Radien über Bubble Cards eigene Variablen: `card_border_radius` → `--bubble-button-border-radius`, `icon_border_radius` → `--bubble-button-icon-border-radius`, `subbutton_border_radius` → `--bubble-sub-button-border-radius`
+- Hintergrund: `custom_card_background_color`, `manual_card_background_color`, `card_background_opacity` → `--bubble-button-main-background-color` (Deckkraft per `color-mix`)
+- `gradient_angle` (Standard 90° = bisher „to right“)
+- `use_theme_state_colors` (Standard aus): `--state-<domain>-active-color`, `--state-active-color` usw., mit den bisherigen festen Farben als Fallback
+
+Weiterhin offen: `margin-right` am Sub-Button-Container addiert sich zum nativen `inset-inline-end: 8px` und berücksichtigt kein RTL. Eine Korrektur würde bestehende Layouts verschieben.
+
+Lokal geprüft: Node-Runtime (23 Fälle), Chromium mit nativem CSS (16 Fälle), Fixture-Struktur. Die neuen echten HA-Tests `test_18` (rote Lampe, Icon-Hintergrund mit und ohne Modul) und `test_19` (`sub-buttons`-Karte, `custom_height`) laufen in CI, weil lokal kein Docker läuft.
