@@ -1,4 +1,7 @@
-# Badgy Condition Helper — 2026 upgrade (beta)
+# Badgy Condition Helper — 2026 upgrade
+
+Released as **v2026.10.29** (module ID `badgy-condition-helper`). The beta
+sections below document how the release was developed and tested.
 
 ## Test the beta alongside the stable version
 
@@ -20,7 +23,7 @@ paths are preserved**. Existing cards should not require migration.
 
 ## Bubble Card v3.4.2 hardening (2026-10-15)
 
-The isolated import artifact is currently `v2026.10.29-beta.8`.
+The isolated import artifact matches release `v2026.10.29`.
 
 - All Badgy animation CSS class names, keyframes, and effect color variables
   are namespaced. The effect cleanup no longer removes unowned classes.

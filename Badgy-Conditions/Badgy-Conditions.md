@@ -1,6 +1,6 @@
 # Badgy Condition Helper
 
-**Version:** v2026.10.29-beta.8
+**Version:** v2026.10.29
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT]
@@ -73,7 +73,42 @@ Two things look different on purpose:
 - Conditions now use Bubble Card's own evaluator, so conditions such as `time`,
   `screen`, `user` or `template` work. Before, they were silently never true.
 
-See [UPGRADE-2026.md](./UPGRADE-2026.md) for all changes.
+See [UPGRADE-2026.md](https://github.com/HyperCriSiS/Bubble-Card-Modules/blob/main/Badgy-Conditions/UPGRADE-2026.md) for all changes.
+
+## Changelog
+
+### v2026.10.29
+
+No migration needed: the module ID and every existing setting keep working.
+
+**Fixed**
+- Effects on sub-buttons and sub-button icons stop when their condition turns false
+  (before, they kept running until the page was reloaded).
+- Animations no longer restart on every Home Assistant state change.
+- Badges are updated in place instead of being recreated, so they no longer flicker.
+- Conditions use Bubble Card's own evaluator: `time`, `screen`, `user`, `template`,
+  `state_not` and nested `not` now work (before, they were silently never true).
+- Background opacity only fades the background; icon, name and badges stay fully visible.
+- Units are only added to numeric values, never to `unavailable` or text.
+- Unknown or invalid colors no longer break the whole module.
+- Removed a non-working state listener and lifecycle patch; cleanup now uses Bubble Card's teardown hook.
+
+**New**
+- Entity and icon badges on the main icon.
+- Rule lists for colors, backgrounds, icons, badges and effects (first match wins),
+  with an optional fallback to the static settings.
+- Effects set directly on a badge.
+- Conditional icon colors and icon replacement for the main icon and sub-button icons.
+- Dynamic colors from a Jinja template or an entity attribute.
+- Card glow and global defaults (badge colors, size, offsets, sub-button styling).
+- Translated states for binary sensors (Open/Closed …) and a custom badge text.
+- Unsupported card types are declared, so Bubble Card disables the module there.
+
+**Changed**
+- `opacity` on backgrounds now fades only the background color.
+- Effect dropdowns list the effect values (`pulse`, `spin-360`, …).
+
+Full details: [UPGRADE-2026.md](https://github.com/HyperCriSiS/Bubble-Card-Modules/blob/main/Badgy-Conditions/UPGRADE-2026.md)
 
 
 Configure this module via the editor or in YAML, for example: 
@@ -175,12 +210,12 @@ badgy-condition-helper:
 
 <br>
 
-> To use this module, simply copy and paste the following configuration into your `/www/bubble/bubble-modules.yaml` file.
+> Install it from the Module Store in the Bubble Card editor, or copy the configuration below and use **Modules → My Modules → Import from YAML** (requires Bubble Card Tools).
 
 ```yaml
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2026.10.29-beta.8"
+  version: "v2026.10.29"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   unsupported:
@@ -200,7 +235,7 @@ badgy-condition-helper:
     • Dynamic colors from a template or an entity attribute<br>
     • Global defaults<br><br>
     Large layout recommended for badges on sub-buttons.
-    Changelog and upgrade notes: UPGRADE-2026.md in the GitHub repository.
+    Changelog and upgrade notes: <a href="https://github.com/HyperCriSiS/Bubble-Card-Modules/blob/main/Badgy-Conditions/UPGRADE-2026.md">UPGRADE-2026.md</a>
   code: |
     /* =============================
        CSS for the badge visuals
@@ -600,7 +635,7 @@ badgy-condition-helper:
             const selected = cfg.rules.find(rule => rule && checkAllConditions(rule.condition, hass));
             if (!selected) {
               // Optional "else": the static settings of the entry, still gated
-              // by its own condition. Off by default (documented beta behavior).
+              // by its own condition. Off by default (keeps rule-only behavior).
               if (cfg.fallback_to_static === true && checkAllConditions(cfg.condition, hass))
                 return { ...cfg, rules: null };
               return null;
@@ -972,13 +1007,10 @@ badgy-condition-helper:
           schema:
             - name: color
               label: Icon color
-              selector:
-                ui_color:
-                  include_none: true
+              selector: {ui_color: {include_none: true}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -986,22 +1018,12 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Icon color
-                      selector:
-                        ui_color: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Icon color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Buttons Icon
           name: sub_button_icon
@@ -1012,13 +1034,10 @@ badgy-condition-helper:
               schema:
                 - name: color
                   label: Icon color
-                  selector:
-                    ui_color:
-                      include_none: true
+                  selector: {ui_color: {include_none: true}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1026,35 +1045,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        color:
-                          label: Icon color
-                          selector:
-                            ui_color: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        color: {label: Icon color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 2
               name: '1'
               schema:
                 - name: color
                   label: Icon color
-                  selector:
-                    ui_color:
-                      include_none: true
+                  selector: {ui_color: {include_none: true}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1062,35 +1068,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        color:
-                          label: Icon color
-                          selector:
-                            ui_color: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        color: {label: Icon color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 3
               name: '2'
               schema:
                 - name: color
                   label: Icon color
-                  selector:
-                    ui_color:
-                      include_none: true
+                  selector: {ui_color: {include_none: true}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1098,35 +1091,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        color:
-                          label: Icon color
-                          selector:
-                            ui_color: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        color: {label: Icon color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 4
               name: '3'
               schema:
                 - name: color
                   label: Icon color
-                  selector:
-                    ui_color:
-                      include_none: true
+                  selector: {ui_color: {include_none: true}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1134,35 +1114,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        color:
-                          label: Icon color
-                          selector:
-                            ui_color: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        color: {label: Icon color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 5
               name: '4'
               schema:
                 - name: color
                   label: Icon color
-                  selector:
-                    ui_color:
-                      include_none: true
+                  selector: {ui_color: {include_none: true}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1170,35 +1137,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        color:
-                          label: Icon color
-                          selector:
-                            ui_color: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        color: {label: Icon color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 6
               name: '5'
               schema:
                 - name: color
                   label: Icon color
-                  selector:
-                    ui_color:
-                      include_none: true
+                  selector: {ui_color: {include_none: true}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1206,22 +1160,12 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        color:
-                          label: Icon color
-                          selector:
-                            ui_color: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        color: {label: Icon color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
     - type: expandable
       title: Backgrounds
       icon: mdi:format-color-fill
@@ -1233,33 +1177,23 @@ badgy-condition-helper:
           schema:
             - name: color_template
               label: Color template (Jinja) — overrides the color entity and the static color
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: color_entity
               label: Color entity — overrides the static color
-              selector:
-                entity: {}
+              selector: {entity: {}}
             - name: color_attribute
               label: Attribute of the color entity that holds the color (empty = state)
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: color
               label: Background Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: opacity
               label: 'Opacity (default: 1.0)'
               default: 1.0
-              selector:
-                number:
-                  min: 0
-                  max: 1
-                  step: 0.05
-                  mode: slider
+              selector: {number: {min: 0, max: 1, step: 0.05, mode: slider}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -1267,29 +1201,13 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Color
-                      selector:
-                        ui_color: {}
-                    opacity:
-                      label: Opacity
-                      selector:
-                        number:
-                          min: 0
-                          max: 1
-                          step: 0.05
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Color, selector: {ui_color: {}}}
+                    opacity: {label: Opacity, selector: {number: {min: 0, max: 1, step: 0.05}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Buttons Background
           icon: mdi:format-color-fill
@@ -1304,77 +1222,42 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Solid
-                          value: solid
-                        - label: Two-Color Gradient
-                          value: two-color
-                        - label: Three-Color Gradient
-                          value: three-color
+                        - {label: Solid, value: solid}
+                        - {label: Two-Color Gradient, value: two-color}
+                        - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
                   label: Color template (Jinja) — overrides the color entity and the static color
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color_entity
                   label: Color entity — overrides the static color
-                  selector:
-                    entity: {}
+                  selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color
                   label: Solid Color
-                  selector:
-                    ui_color:
-                      include_none: true
-                  visible:
-                    - field: type
-                      operator: not_in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {include_none: true}}
+                  visible: [{field: type, operator: not_in, value: [two-color, three-color]}]
                 - name: color1
                   label: Gradient Color 1
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color2
                   label: Gradient Color 2
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color3
                   label: Gradient Color 3
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: eq
-                      value: three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: eq, value: three-color}]
                 - name: opacity
                   label: 'Background Opacity (default: 1.0)'
                   default: 1.0
-                  selector:
-                    number:
-                      min: 0
-                      max: 1
-                      step: 0.05
-                      mode: slider
+                  selector: {number: {min: 0, max: 1, step: 0.05, mode: slider}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1382,56 +1265,30 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         type:
                           label: Background type
                           selector:
                             select:
                               options:
-                                - label: Solid
-                                  value: solid
-                                - label: Two-color gradient
-                                  value: two-color
-                                - label: Three-color gradient
-                                  value: three-color
-                        color:
-                          label: Color
-                          selector:
-                            ui_color: {}
-                          visible_if: '!item.type || item.type === ''solid'''
+                                - {label: Solid, value: solid}
+                                - {label: Two-color gradient, value: two-color}
+                                - {label: Three-color gradient, value: three-color}
+                        color: {label: Color, selector: {ui_color: {}}, visible_if: '!item.type || item.type === ''solid'''}
                         color1:
                           label: Gradient Color 1
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
                         color2:
                           label: Gradient Color 2
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
-                        color3:
-                          label: Gradient Color 3
-                          selector:
-                            ui_color: {}
-                          visible_if: item.type === 'three-color'
-                        opacity:
-                          label: Opacity
-                          selector:
-                            number:
-                              min: 0
-                              max: 1
-                              step: 0.05
+                        color3: {label: Gradient Color 3, selector: {ui_color: {}}, visible_if: item.type === 'three-color'}
+                        opacity: {label: Opacity, selector: {number: {min: 0, max: 1, step: 0.05}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 2
               name: '1'
@@ -1441,77 +1298,42 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Solid
-                          value: solid
-                        - label: Two-Color Gradient
-                          value: two-color
-                        - label: Three-Color Gradient
-                          value: three-color
+                        - {label: Solid, value: solid}
+                        - {label: Two-Color Gradient, value: two-color}
+                        - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
                   label: Color template (Jinja) — overrides the color entity and the static color
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color_entity
                   label: Color entity — overrides the static color
-                  selector:
-                    entity: {}
+                  selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color
                   label: Solid Color
-                  selector:
-                    ui_color:
-                      include_none: true
-                  visible:
-                    - field: type
-                      operator: not_in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {include_none: true}}
+                  visible: [{field: type, operator: not_in, value: [two-color, three-color]}]
                 - name: color1
                   label: Gradient Color 1
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color2
                   label: Gradient Color 2
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color3
                   label: Gradient Color 3
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: eq
-                      value: three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: eq, value: three-color}]
                 - name: opacity
                   label: 'Background Opacity (default: 1.0)'
                   default: 1.0
-                  selector:
-                    number:
-                      min: 0
-                      max: 1
-                      step: 0.05
-                      mode: slider
+                  selector: {number: {min: 0, max: 1, step: 0.05, mode: slider}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1519,56 +1341,30 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         type:
                           label: Background type
                           selector:
                             select:
                               options:
-                                - label: Solid
-                                  value: solid
-                                - label: Two-color gradient
-                                  value: two-color
-                                - label: Three-color gradient
-                                  value: three-color
-                        color:
-                          label: Color
-                          selector:
-                            ui_color: {}
-                          visible_if: '!item.type || item.type === ''solid'''
+                                - {label: Solid, value: solid}
+                                - {label: Two-color gradient, value: two-color}
+                                - {label: Three-color gradient, value: three-color}
+                        color: {label: Color, selector: {ui_color: {}}, visible_if: '!item.type || item.type === ''solid'''}
                         color1:
                           label: Gradient Color 1
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
                         color2:
                           label: Gradient Color 2
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
-                        color3:
-                          label: Gradient Color 3
-                          selector:
-                            ui_color: {}
-                          visible_if: item.type === 'three-color'
-                        opacity:
-                          label: Opacity
-                          selector:
-                            number:
-                              min: 0
-                              max: 1
-                              step: 0.05
+                        color3: {label: Gradient Color 3, selector: {ui_color: {}}, visible_if: item.type === 'three-color'}
+                        opacity: {label: Opacity, selector: {number: {min: 0, max: 1, step: 0.05}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 3
               name: '2'
@@ -1578,77 +1374,42 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Solid
-                          value: solid
-                        - label: Two-Color Gradient
-                          value: two-color
-                        - label: Three-Color Gradient
-                          value: three-color
+                        - {label: Solid, value: solid}
+                        - {label: Two-Color Gradient, value: two-color}
+                        - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
                   label: Color template (Jinja) — overrides the color entity and the static color
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color_entity
                   label: Color entity — overrides the static color
-                  selector:
-                    entity: {}
+                  selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color
                   label: Solid Color
-                  selector:
-                    ui_color:
-                      include_none: true
-                  visible:
-                    - field: type
-                      operator: not_in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {include_none: true}}
+                  visible: [{field: type, operator: not_in, value: [two-color, three-color]}]
                 - name: color1
                   label: Gradient Color 1
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color2
                   label: Gradient Color 2
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color3
                   label: Gradient Color 3
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: eq
-                      value: three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: eq, value: three-color}]
                 - name: opacity
                   label: 'Background Opacity (default: 1.0)'
                   default: 1.0
-                  selector:
-                    number:
-                      min: 0
-                      max: 1
-                      step: 0.05
-                      mode: slider
+                  selector: {number: {min: 0, max: 1, step: 0.05, mode: slider}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1656,56 +1417,30 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         type:
                           label: Background type
                           selector:
                             select:
                               options:
-                                - label: Solid
-                                  value: solid
-                                - label: Two-color gradient
-                                  value: two-color
-                                - label: Three-color gradient
-                                  value: three-color
-                        color:
-                          label: Color
-                          selector:
-                            ui_color: {}
-                          visible_if: '!item.type || item.type === ''solid'''
+                                - {label: Solid, value: solid}
+                                - {label: Two-color gradient, value: two-color}
+                                - {label: Three-color gradient, value: three-color}
+                        color: {label: Color, selector: {ui_color: {}}, visible_if: '!item.type || item.type === ''solid'''}
                         color1:
                           label: Gradient Color 1
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
                         color2:
                           label: Gradient Color 2
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
-                        color3:
-                          label: Gradient Color 3
-                          selector:
-                            ui_color: {}
-                          visible_if: item.type === 'three-color'
-                        opacity:
-                          label: Opacity
-                          selector:
-                            number:
-                              min: 0
-                              max: 1
-                              step: 0.05
+                        color3: {label: Gradient Color 3, selector: {ui_color: {}}, visible_if: item.type === 'three-color'}
+                        opacity: {label: Opacity, selector: {number: {min: 0, max: 1, step: 0.05}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 4
               name: '3'
@@ -1715,77 +1450,42 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Solid
-                          value: solid
-                        - label: Two-Color Gradient
-                          value: two-color
-                        - label: Three-Color Gradient
-                          value: three-color
+                        - {label: Solid, value: solid}
+                        - {label: Two-Color Gradient, value: two-color}
+                        - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
                   label: Color template (Jinja) — overrides the color entity and the static color
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color_entity
                   label: Color entity — overrides the static color
-                  selector:
-                    entity: {}
+                  selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color
                   label: Solid Color
-                  selector:
-                    ui_color:
-                      include_none: true
-                  visible:
-                    - field: type
-                      operator: not_in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {include_none: true}}
+                  visible: [{field: type, operator: not_in, value: [two-color, three-color]}]
                 - name: color1
                   label: Gradient Color 1
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color2
                   label: Gradient Color 2
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color3
                   label: Gradient Color 3
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: eq
-                      value: three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: eq, value: three-color}]
                 - name: opacity
                   label: 'Background Opacity (default: 1.0)'
                   default: 1.0
-                  selector:
-                    number:
-                      min: 0
-                      max: 1
-                      step: 0.05
-                      mode: slider
+                  selector: {number: {min: 0, max: 1, step: 0.05, mode: slider}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1793,56 +1493,30 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         type:
                           label: Background type
                           selector:
                             select:
                               options:
-                                - label: Solid
-                                  value: solid
-                                - label: Two-color gradient
-                                  value: two-color
-                                - label: Three-color gradient
-                                  value: three-color
-                        color:
-                          label: Color
-                          selector:
-                            ui_color: {}
-                          visible_if: '!item.type || item.type === ''solid'''
+                                - {label: Solid, value: solid}
+                                - {label: Two-color gradient, value: two-color}
+                                - {label: Three-color gradient, value: three-color}
+                        color: {label: Color, selector: {ui_color: {}}, visible_if: '!item.type || item.type === ''solid'''}
                         color1:
                           label: Gradient Color 1
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
                         color2:
                           label: Gradient Color 2
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
-                        color3:
-                          label: Gradient Color 3
-                          selector:
-                            ui_color: {}
-                          visible_if: item.type === 'three-color'
-                        opacity:
-                          label: Opacity
-                          selector:
-                            number:
-                              min: 0
-                              max: 1
-                              step: 0.05
+                        color3: {label: Gradient Color 3, selector: {ui_color: {}}, visible_if: item.type === 'three-color'}
+                        opacity: {label: Opacity, selector: {number: {min: 0, max: 1, step: 0.05}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 5
               name: '4'
@@ -1852,77 +1526,42 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Solid
-                          value: solid
-                        - label: Two-Color Gradient
-                          value: two-color
-                        - label: Three-Color Gradient
-                          value: three-color
+                        - {label: Solid, value: solid}
+                        - {label: Two-Color Gradient, value: two-color}
+                        - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
                   label: Color template (Jinja) — overrides the color entity and the static color
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color_entity
                   label: Color entity — overrides the static color
-                  selector:
-                    entity: {}
+                  selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color
                   label: Solid Color
-                  selector:
-                    ui_color:
-                      include_none: true
-                  visible:
-                    - field: type
-                      operator: not_in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {include_none: true}}
+                  visible: [{field: type, operator: not_in, value: [two-color, three-color]}]
                 - name: color1
                   label: Gradient Color 1
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color2
                   label: Gradient Color 2
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color3
                   label: Gradient Color 3
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: eq
-                      value: three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: eq, value: three-color}]
                 - name: opacity
                   label: 'Background Opacity (default: 1.0)'
                   default: 1.0
-                  selector:
-                    number:
-                      min: 0
-                      max: 1
-                      step: 0.05
-                      mode: slider
+                  selector: {number: {min: 0, max: 1, step: 0.05, mode: slider}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -1930,56 +1569,30 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         type:
                           label: Background type
                           selector:
                             select:
                               options:
-                                - label: Solid
-                                  value: solid
-                                - label: Two-color gradient
-                                  value: two-color
-                                - label: Three-color gradient
-                                  value: three-color
-                        color:
-                          label: Color
-                          selector:
-                            ui_color: {}
-                          visible_if: '!item.type || item.type === ''solid'''
+                                - {label: Solid, value: solid}
+                                - {label: Two-color gradient, value: two-color}
+                                - {label: Three-color gradient, value: three-color}
+                        color: {label: Color, selector: {ui_color: {}}, visible_if: '!item.type || item.type === ''solid'''}
                         color1:
                           label: Gradient Color 1
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
                         color2:
                           label: Gradient Color 2
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
-                        color3:
-                          label: Gradient Color 3
-                          selector:
-                            ui_color: {}
-                          visible_if: item.type === 'three-color'
-                        opacity:
-                          label: Opacity
-                          selector:
-                            number:
-                              min: 0
-                              max: 1
-                              step: 0.05
+                        color3: {label: Gradient Color 3, selector: {ui_color: {}}, visible_if: item.type === 'three-color'}
+                        opacity: {label: Opacity, selector: {number: {min: 0, max: 1, step: 0.05}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 6
               name: '5'
@@ -1989,77 +1602,42 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Solid
-                          value: solid
-                        - label: Two-Color Gradient
-                          value: two-color
-                        - label: Three-Color Gradient
-                          value: three-color
+                        - {label: Solid, value: solid}
+                        - {label: Two-Color Gradient, value: two-color}
+                        - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
                   label: Color template (Jinja) — overrides the color entity and the static color
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color_entity
                   label: Color entity — overrides the static color
-                  selector:
-                    entity: {}
+                  selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
-                  selector:
-                    text: {}
+                  selector: {text: {}}
                 - name: color
                   label: Solid Color
-                  selector:
-                    ui_color:
-                      include_none: true
-                  visible:
-                    - field: type
-                      operator: not_in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {include_none: true}}
+                  visible: [{field: type, operator: not_in, value: [two-color, three-color]}]
                 - name: color1
                   label: Gradient Color 1
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color2
                   label: Gradient Color 2
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: in
-                      value:
-                        - two-color
-                        - three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: in, value: [two-color, three-color]}]
                 - name: color3
                   label: Gradient Color 3
-                  selector:
-                    ui_color: {}
-                  visible:
-                    - field: type
-                      operator: eq
-                      value: three-color
+                  selector: {ui_color: {}}
+                  visible: [{field: type, operator: eq, value: three-color}]
                 - name: opacity
                   label: 'Background Opacity (default: 1.0)'
                   default: 1.0
-                  selector:
-                    number:
-                      min: 0
-                      max: 1
-                      step: 0.05
-                      mode: slider
+                  selector: {number: {min: 0, max: 1, step: 0.05, mode: slider}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -2067,56 +1645,30 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         type:
                           label: Background type
                           selector:
                             select:
                               options:
-                                - label: Solid
-                                  value: solid
-                                - label: Two-color gradient
-                                  value: two-color
-                                - label: Three-color gradient
-                                  value: three-color
-                        color:
-                          label: Color
-                          selector:
-                            ui_color: {}
-                          visible_if: '!item.type || item.type === ''solid'''
+                                - {label: Solid, value: solid}
+                                - {label: Two-color gradient, value: two-color}
+                                - {label: Three-color gradient, value: three-color}
+                        color: {label: Color, selector: {ui_color: {}}, visible_if: '!item.type || item.type === ''solid'''}
                         color1:
                           label: Gradient Color 1
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
                         color2:
                           label: Gradient Color 2
-                          selector:
-                            ui_color: {}
+                          selector: {ui_color: {}}
                           visible_if: item.type === 'two-color' || item.type === 'three-color'
-                        color3:
-                          label: Gradient Color 3
-                          selector:
-                            ui_color: {}
-                          visible_if: item.type === 'three-color'
-                        opacity:
-                          label: Opacity
-                          selector:
-                            number:
-                              min: 0
-                              max: 1
-                              step: 0.05
+                        color3: {label: Gradient Color 3, selector: {ui_color: {}}, visible_if: item.type === 'three-color'}
+                        opacity: {label: Opacity, selector: {number: {min: 0, max: 1, step: 0.05}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
         - type: expandable
           title: Card Glow
           icon: mdi:brightness-6
@@ -2125,35 +1677,21 @@ badgy-condition-helper:
             - name: effect
               label: 'Card effect (default: none)'
               default: none
-              selector:
-                select:
-                  options:
-                    - label: None
-                      value: none
-                    - label: Glow
-                      value: glow
+              selector: {select: {options: [{label: None, value: none}, {label: Glow, value: glow}]}}
             - name: color
               label: Glow color
-              selector:
-                ui_color:
-                  include_none: true
+              selector: {ui_color: {include_none: true}}
             - name: intensity
               label: 'Glow radius in pixels (default: 14)'
               default: 14
-              selector:
-                number:
-                  min: 2
-                  max: 40
-                  step: 1
+              selector: {number: {min: 2, max: 40, step: 1}}
             - name: animate
               label: 'Pulse glow (default: off)'
               default: false
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: condition
               label: Condition
-              selector:
-                condition: {}
+              selector: {condition: {}}
     - type: expandable
       title: Icons
       icon: mdi:shape
@@ -2165,12 +1703,10 @@ badgy-condition-helper:
           schema:
             - name: icon
               label: Replacement icon
-              selector:
-                icon: {}
+              selector: {icon: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -2178,22 +1714,12 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: Icon
-                      selector:
-                        icon: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    icon: {label: Icon, selector: {icon: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Buttons Icon
           name: sub_button_icon
@@ -2204,12 +1730,10 @@ badgy-condition-helper:
               schema:
                 - name: icon
                   label: Replacement icon
-                  selector:
-                    icon: {}
+                  selector: {icon: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -2217,34 +1741,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        icon:
-                          label: Icon
-                          selector:
-                            icon: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        icon: {label: Icon, selector: {icon: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 2
               name: '1'
               schema:
                 - name: icon
                   label: Replacement icon
-                  selector:
-                    icon: {}
+                  selector: {icon: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -2252,34 +1764,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        icon:
-                          label: Icon
-                          selector:
-                            icon: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        icon: {label: Icon, selector: {icon: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 3
               name: '2'
               schema:
                 - name: icon
                   label: Replacement icon
-                  selector:
-                    icon: {}
+                  selector: {icon: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -2287,34 +1787,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        icon:
-                          label: Icon
-                          selector:
-                            icon: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        icon: {label: Icon, selector: {icon: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 4
               name: '3'
               schema:
                 - name: icon
                   label: Replacement icon
-                  selector:
-                    icon: {}
+                  selector: {icon: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -2322,34 +1810,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        icon:
-                          label: Icon
-                          selector:
-                            icon: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        icon: {label: Icon, selector: {icon: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 5
               name: '4'
               schema:
                 - name: icon
                   label: Replacement icon
-                  selector:
-                    icon: {}
+                  selector: {icon: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -2357,34 +1833,22 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        icon:
-                          label: Icon
-                          selector:
-                            icon: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        icon: {label: Icon, selector: {icon: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 6
               name: '5'
               schema:
                 - name: icon
                   label: Replacement icon
-                  selector:
-                    icon: {}
+                  selector: {icon: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -2392,22 +1856,12 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        icon:
-                          label: Icon
-                          selector:
-                            icon: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
+                        icon: {label: Icon, selector: {icon: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
     - type: expandable
       title: Entity Badges
       icon: mdi:tag-text
@@ -2419,102 +1873,58 @@ badgy-condition-helper:
           schema:
             - name: entity
               label: Entity
-              selector:
-                entity: {}
+              selector: {entity: {}}
             - name: attribute
               label: Attribute
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: display_text
               label: Custom display text
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: translated_state
               label: Translate the entity state (e.g. Open/Closed)
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: color
               label: Badge color
-              selector:
-                ui_color:
-                  include_none: true
+              selector: {ui_color: {include_none: true}}
             - name: text_color
               label: Text color
-              selector:
-                ui_color:
-                  include_none: true
+              selector: {ui_color: {include_none: true}}
             - name: show_background
               label: 'Show background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: decimals
               label: Decimal places
-              selector:
-                number:
-                  min: 0
-                  max: 5
-                  step: 1
+              selector: {number: {min: 0, max: 5, step: 1}}
             - name: show_unit
               label: 'Show unit (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: show_if_off
               label: 'Show when off (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge size (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  step: 0.1
-                  mode: slider
+              selector: {number: {min: 0.5, max: 3, step: 0.1, mode: slider}}
             - name: h_pos
               label: 'Horizontal offset from the right edge (px) (default: 0)'
               default: 0
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  step: 1
-                  mode: slider
+              selector: {number: {min: -100, max: 100, step: 1, mode: slider}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: 0)'
               default: 0
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  step: 1
-                  mode: slider
+              selector: {number: {min: -100, max: 100, step: 1, mode: slider}}
             - name: effect
               label: Badge effect (overrides Effects → Entity Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -2522,150 +1932,76 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Text color
-                      selector:
-                        ui_color: {}
-                    display_text:
-                      label: Custom display text
-                      selector:
-                        text: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Text color, selector: {ui_color: {}}}
+                    display_text: {label: Custom display text, selector: {text: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 1
           name: '0'
           schema:
             - name: entity
               label: Entity
-              selector:
-                entity: {}
+              selector: {entity: {}}
             - name: attribute
               label: Attribute (optional)
-              selector:
-                attribute: {}
+              selector: {attribute: {}}
             - name: display_text
               label: Custom display text
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: translated_state
               label: Translate state (default for binary sensors)
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: decimals
               label: Decimal Places (for numbers)
-              selector:
-                number:
-                  min: 0
-                  max: 5
-                  mode: slider
-                  step: 1
+              selector: {number: {min: 0, max: 5, mode: slider, step: 1}}
             - name: show_unit
               label: 'Show Unit (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: show_if_off
               label: 'Show When ''off'' (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the right edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Entity Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -2673,150 +2009,76 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Text color
-                      selector:
-                        ui_color: {}
-                    display_text:
-                      label: Custom display text
-                      selector:
-                        text: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Text color, selector: {ui_color: {}}}
+                    display_text: {label: Custom display text, selector: {text: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 2
           name: '1'
           schema:
             - name: entity
               label: Entity
-              selector:
-                entity: {}
+              selector: {entity: {}}
             - name: attribute
               label: Attribute (optional)
-              selector:
-                attribute: {}
+              selector: {attribute: {}}
             - name: display_text
               label: Custom display text
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: translated_state
               label: Translate state (default for binary sensors)
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: decimals
               label: Decimal Places (for numbers)
-              selector:
-                number:
-                  min: 0
-                  max: 5
-                  mode: slider
-                  step: 1
+              selector: {number: {min: 0, max: 5, mode: slider, step: 1}}
             - name: show_unit
               label: 'Show Unit (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: show_if_off
               label: 'Show When ''off'' (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the right edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Entity Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -2824,150 +2086,76 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Text color
-                      selector:
-                        ui_color: {}
-                    display_text:
-                      label: Custom display text
-                      selector:
-                        text: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Text color, selector: {ui_color: {}}}
+                    display_text: {label: Custom display text, selector: {text: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 3
           name: '2'
           schema:
             - name: entity
               label: Entity
-              selector:
-                entity: {}
+              selector: {entity: {}}
             - name: attribute
               label: Attribute (optional)
-              selector:
-                attribute: {}
+              selector: {attribute: {}}
             - name: display_text
               label: Custom display text
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: translated_state
               label: Translate state (default for binary sensors)
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: decimals
               label: Decimal Places (for numbers)
-              selector:
-                number:
-                  min: 0
-                  max: 5
-                  mode: slider
-                  step: 1
+              selector: {number: {min: 0, max: 5, mode: slider, step: 1}}
             - name: show_unit
               label: 'Show Unit (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: show_if_off
               label: 'Show When ''off'' (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the right edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Entity Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -2975,150 +2163,76 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Text color
-                      selector:
-                        ui_color: {}
-                    display_text:
-                      label: Custom display text
-                      selector:
-                        text: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Text color, selector: {ui_color: {}}}
+                    display_text: {label: Custom display text, selector: {text: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 4
           name: '3'
           schema:
             - name: entity
               label: Entity
-              selector:
-                entity: {}
+              selector: {entity: {}}
             - name: attribute
               label: Attribute (optional)
-              selector:
-                attribute: {}
+              selector: {attribute: {}}
             - name: display_text
               label: Custom display text
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: translated_state
               label: Translate state (default for binary sensors)
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: decimals
               label: Decimal Places (for numbers)
-              selector:
-                number:
-                  min: 0
-                  max: 5
-                  mode: slider
-                  step: 1
+              selector: {number: {min: 0, max: 5, mode: slider, step: 1}}
             - name: show_unit
               label: 'Show Unit (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: show_if_off
               label: 'Show When ''off'' (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the right edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Entity Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -3126,150 +2240,76 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Text color
-                      selector:
-                        ui_color: {}
-                    display_text:
-                      label: Custom display text
-                      selector:
-                        text: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Text color, selector: {ui_color: {}}}
+                    display_text: {label: Custom display text, selector: {text: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 5
           name: '4'
           schema:
             - name: entity
               label: Entity
-              selector:
-                entity: {}
+              selector: {entity: {}}
             - name: attribute
               label: Attribute (optional)
-              selector:
-                attribute: {}
+              selector: {attribute: {}}
             - name: display_text
               label: Custom display text
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: translated_state
               label: Translate state (default for binary sensors)
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: decimals
               label: Decimal Places (for numbers)
-              selector:
-                number:
-                  min: 0
-                  max: 5
-                  mode: slider
-                  step: 1
+              selector: {number: {min: 0, max: 5, mode: slider, step: 1}}
             - name: show_unit
               label: 'Show Unit (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: show_if_off
               label: 'Show When ''off'' (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the right edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Entity Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -3277,150 +2317,76 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Text color
-                      selector:
-                        ui_color: {}
-                    display_text:
-                      label: Custom display text
-                      selector:
-                        text: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Text color, selector: {ui_color: {}}}
+                    display_text: {label: Custom display text, selector: {text: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 6
           name: '5'
           schema:
             - name: entity
               label: Entity
-              selector:
-                entity: {}
+              selector: {entity: {}}
             - name: attribute
               label: Attribute (optional)
-              selector:
-                attribute: {}
+              selector: {attribute: {}}
             - name: display_text
               label: Custom display text
-              selector:
-                text: {}
+              selector: {text: {}}
             - name: translated_state
               label: Translate state (default for binary sensors)
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: decimals
               label: Decimal Places (for numbers)
-              selector:
-                number:
-                  min: 0
-                  max: 5
-                  mode: slider
-                  step: 1
+              selector: {number: {min: 0, max: 5, mode: slider, step: 1}}
             - name: show_unit
               label: 'Show Unit (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: show_if_off
               label: 'Show When ''off'' (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the right edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Entity Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -3428,49 +2394,18 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Text color
-                      selector:
-                        ui_color: {}
-                    display_text:
-                      label: Custom display text
-                      selector:
-                        text: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Text color, selector: {ui_color: {}}}
+                    display_text: {label: Custom display text, selector: {text: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
     - type: expandable
       title: Icon Badges
       icon: mdi:tag-outline
@@ -3482,73 +2417,38 @@ badgy-condition-helper:
           schema:
             - name: icon
               label: Icon
-              selector:
-                icon: {}
+              selector: {icon: {}}
             - name: color
               label: Badge color
-              selector:
-                ui_color:
-                  include_none: true
+              selector: {ui_color: {include_none: true}}
             - name: text_color
               label: Text color
-              selector:
-                ui_color:
-                  include_none: true
+              selector: {ui_color: {include_none: true}}
             - name: show_background
               label: 'Show background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge size (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  step: 0.1
-                  mode: slider
+              selector: {number: {min: 0.5, max: 3, step: 0.1, mode: slider}}
             - name: h_pos
               label: 'Horizontal offset from the left edge (px) (default: 0)'
               default: 0
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  step: 1
-                  mode: slider
+              selector: {number: {min: -100, max: 100, step: 1, mode: slider}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: 0)'
               default: 0
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  step: 1
-                  mode: slider
+              selector: {number: {min: -100, max: 100, step: 1, mode: slider}}
             - name: effect
               label: Badge effect (overrides Effects → Icon Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -3556,120 +2456,56 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: Icon
-                      selector:
-                        icon: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Icon color
-                      selector:
-                        ui_color: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    icon: {label: Icon, selector: {icon: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Icon color, selector: {ui_color: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 1
           name: '0'
           schema:
             - name: icon
               label: Icon
-              selector:
-                icon: {}
+              selector: {icon: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the left edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Icon Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -3677,120 +2513,56 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: Icon
-                      selector:
-                        icon: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Icon color
-                      selector:
-                        ui_color: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    icon: {label: Icon, selector: {icon: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Icon color, selector: {ui_color: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 2
           name: '1'
           schema:
             - name: icon
               label: Icon
-              selector:
-                icon: {}
+              selector: {icon: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the left edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Icon Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -3798,120 +2570,56 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: Icon
-                      selector:
-                        icon: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Icon color
-                      selector:
-                        ui_color: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    icon: {label: Icon, selector: {icon: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Icon color, selector: {ui_color: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 3
           name: '2'
           schema:
             - name: icon
               label: Icon
-              selector:
-                icon: {}
+              selector: {icon: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the left edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Icon Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -3919,120 +2627,56 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: Icon
-                      selector:
-                        icon: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Icon color
-                      selector:
-                        ui_color: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    icon: {label: Icon, selector: {icon: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Icon color, selector: {ui_color: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 4
           name: '3'
           schema:
             - name: icon
               label: Icon
-              selector:
-                icon: {}
+              selector: {icon: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the left edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Icon Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -4040,120 +2684,56 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: Icon
-                      selector:
-                        icon: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Icon color
-                      selector:
-                        ui_color: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    icon: {label: Icon, selector: {icon: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Icon color, selector: {ui_color: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 5
           name: '4'
           schema:
             - name: icon
               label: Icon
-              selector:
-                icon: {}
+              selector: {icon: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the left edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Icon Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -4161,120 +2741,56 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: Icon
-                      selector:
-                        icon: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Icon color
-                      selector:
-                        ui_color: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    icon: {label: Icon, selector: {icon: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Icon color, selector: {ui_color: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
         - type: expandable
           title: Sub-Button 6
           name: '5'
           schema:
             - name: icon
               label: Icon
-              selector:
-                icon: {}
+              selector: {icon: {}}
             - name: color
               label: Badge Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: text_color
               label: Text Color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: show_background
               label: 'Show Background (default: on)'
               default: true
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
             - name: scale
               label: 'Badge Size (scale) (default: 1)'
               default: 1
-              selector:
-                number:
-                  min: 0.5
-                  max: 3
-                  mode: slider
-                  step: 0.1
+              selector: {number: {min: 0.5, max: 3, mode: slider, step: 0.1}}
             - name: h_pos
               label: 'Horizontal offset from the left edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -500
-                  max: 500
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -500, max: 500, mode: slider, step: 1}}
             - name: v_pos
               label: 'Vertical offset from the top edge (px) (default: -8)'
               default: -8
-              selector:
-                number:
-                  min: -100
-                  max: 100
-                  mode: slider
-                  step: 1
+              selector: {number: {min: -100, max: 100, mode: slider, step: 1}}
             - name: effect
               label: Badge effect (overrides Effects → Icon Badge Effects)
-              selector:
-                select:
-                  options:
-                    - pulse
-                    - rotate
-                    - glow
-                    - shake
-                    - float
-                    - zoom
-                    - heartbeat
-                    - spin-360
-                    - flip
-                    - vibrate
+              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
             - name: effect_color
               label: Badge effect color
-              selector:
-                ui_color: {}
+              selector: {ui_color: {}}
             - name: condition
               label: Condition for the static settings (only used without rules or as fallback)
-              selector:
-                condition: {}
+              selector: {condition: {}}
             - name: rules
               label: Rules — first match wins and overrides the static settings
               selector:
@@ -4282,49 +2798,18 @@ badgy-condition-helper:
                   multiple: true
                   label_field: label
                   fields:
-                    label:
-                      label: Rule name
-                      selector:
-                        text: {}
-                    condition:
-                      label: Condition
-                      selector:
-                        condition: {}
-                    icon:
-                      label: Icon
-                      selector:
-                        icon: {}
-                    color:
-                      label: Badge color
-                      selector:
-                        ui_color: {}
-                    text_color:
-                      label: Icon color
-                      selector:
-                        ui_color: {}
+                    label: {label: Rule name, selector: {text: {}}}
+                    condition: {label: Condition, selector: {condition: {}}}
+                    icon: {label: Icon, selector: {icon: {}}}
+                    color: {label: Badge color, selector: {ui_color: {}}}
+                    text_color: {label: Icon color, selector: {ui_color: {}}}
                     effect:
                       label: Badge effect
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
-                    effect_color:
-                      label: Effect color
-                      selector:
-                        ui_color: {}
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                    effect_color: {label: Effect color, selector: {ui_color: {}}}
             - name: fallback_to_static
               label: 'Use the static settings above when no rule matches (default: off)'
-              selector:
-                boolean: {}
+              selector: {boolean: {}}
     - type: expandable
       title: Effects
       icon: mdi:animation
@@ -4340,27 +2825,13 @@ badgy-condition-helper:
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -4368,37 +2839,15 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         effect:
                           label: Effect
-                          selector:
-                            select:
-                              options:
-                                - pulse
-                                - rotate
-                                - glow
-                                - shake
-                                - float
-                                - zoom
-                                - heartbeat
-                                - spin-360
-                                - flip
-                                - vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
+                          selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                        color: {label: Effect color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button Icon Effects
               name: sub_button_icon
@@ -4409,27 +2858,13 @@ badgy-condition-helper:
                   schema:
                     - name: effect
                       label: Effect Type
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                     - name: color
                       label: Effect Color
-                      selector:
-                        ui_color: {}
+                      selector: {ui_color: {}}
                     - name: condition
                       label: Condition for the static settings (only used without rules or as fallback)
-                      selector:
-                        condition: {}
+                      selector: {condition: {}}
                     - name: rules
                       label: Rules — first match wins and overrides the static settings
                       selector:
@@ -4437,64 +2872,28 @@ badgy-condition-helper:
                           multiple: true
                           label_field: label
                           fields:
-                            label:
-                              label: Rule name
-                              selector:
-                                text: {}
-                            condition:
-                              label: Condition
-                              selector:
-                                condition: {}
+                            label: {label: Rule name, selector: {text: {}}}
+                            condition: {label: Condition, selector: {condition: {}}}
                             effect:
                               label: Effect
-                              selector:
-                                select:
-                                  options:
-                                    - pulse
-                                    - rotate
-                                    - glow
-                                    - shake
-                                    - float
-                                    - zoom
-                                    - heartbeat
-                                    - spin-360
-                                    - flip
-                                    - vibrate
-                            color:
-                              label: Effect color
-                              selector:
-                                ui_color: {}
+                              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                            color: {label: Effect color, selector: {ui_color: {}}}
                     - name: fallback_to_static
                       label: 'Use the static settings above when no rule matches (default: off)'
-                      selector:
-                        boolean: {}
+                      selector: {boolean: {}}
                 - type: expandable
                   title: Sub-Button Icon 2
                   name: '1'
                   schema:
                     - name: effect
                       label: Effect Type
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                     - name: color
                       label: Effect Color
-                      selector:
-                        ui_color: {}
+                      selector: {ui_color: {}}
                     - name: condition
                       label: Condition for the static settings (only used without rules or as fallback)
-                      selector:
-                        condition: {}
+                      selector: {condition: {}}
                     - name: rules
                       label: Rules — first match wins and overrides the static settings
                       selector:
@@ -4502,64 +2901,28 @@ badgy-condition-helper:
                           multiple: true
                           label_field: label
                           fields:
-                            label:
-                              label: Rule name
-                              selector:
-                                text: {}
-                            condition:
-                              label: Condition
-                              selector:
-                                condition: {}
+                            label: {label: Rule name, selector: {text: {}}}
+                            condition: {label: Condition, selector: {condition: {}}}
                             effect:
                               label: Effect
-                              selector:
-                                select:
-                                  options:
-                                    - pulse
-                                    - rotate
-                                    - glow
-                                    - shake
-                                    - float
-                                    - zoom
-                                    - heartbeat
-                                    - spin-360
-                                    - flip
-                                    - vibrate
-                            color:
-                              label: Effect color
-                              selector:
-                                ui_color: {}
+                              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                            color: {label: Effect color, selector: {ui_color: {}}}
                     - name: fallback_to_static
                       label: 'Use the static settings above when no rule matches (default: off)'
-                      selector:
-                        boolean: {}
+                      selector: {boolean: {}}
                 - type: expandable
                   title: Sub-Button Icon 3
                   name: '2'
                   schema:
                     - name: effect
                       label: Effect Type
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                     - name: color
                       label: Effect Color
-                      selector:
-                        ui_color: {}
+                      selector: {ui_color: {}}
                     - name: condition
                       label: Condition for the static settings (only used without rules or as fallback)
-                      selector:
-                        condition: {}
+                      selector: {condition: {}}
                     - name: rules
                       label: Rules — first match wins and overrides the static settings
                       selector:
@@ -4567,64 +2930,28 @@ badgy-condition-helper:
                           multiple: true
                           label_field: label
                           fields:
-                            label:
-                              label: Rule name
-                              selector:
-                                text: {}
-                            condition:
-                              label: Condition
-                              selector:
-                                condition: {}
+                            label: {label: Rule name, selector: {text: {}}}
+                            condition: {label: Condition, selector: {condition: {}}}
                             effect:
                               label: Effect
-                              selector:
-                                select:
-                                  options:
-                                    - pulse
-                                    - rotate
-                                    - glow
-                                    - shake
-                                    - float
-                                    - zoom
-                                    - heartbeat
-                                    - spin-360
-                                    - flip
-                                    - vibrate
-                            color:
-                              label: Effect color
-                              selector:
-                                ui_color: {}
+                              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                            color: {label: Effect color, selector: {ui_color: {}}}
                     - name: fallback_to_static
                       label: 'Use the static settings above when no rule matches (default: off)'
-                      selector:
-                        boolean: {}
+                      selector: {boolean: {}}
                 - type: expandable
                   title: Sub-Button Icon 4
                   name: '3'
                   schema:
                     - name: effect
                       label: Effect Type
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                     - name: color
                       label: Effect Color
-                      selector:
-                        ui_color: {}
+                      selector: {ui_color: {}}
                     - name: condition
                       label: Condition for the static settings (only used without rules or as fallback)
-                      selector:
-                        condition: {}
+                      selector: {condition: {}}
                     - name: rules
                       label: Rules — first match wins and overrides the static settings
                       selector:
@@ -4632,64 +2959,28 @@ badgy-condition-helper:
                           multiple: true
                           label_field: label
                           fields:
-                            label:
-                              label: Rule name
-                              selector:
-                                text: {}
-                            condition:
-                              label: Condition
-                              selector:
-                                condition: {}
+                            label: {label: Rule name, selector: {text: {}}}
+                            condition: {label: Condition, selector: {condition: {}}}
                             effect:
                               label: Effect
-                              selector:
-                                select:
-                                  options:
-                                    - pulse
-                                    - rotate
-                                    - glow
-                                    - shake
-                                    - float
-                                    - zoom
-                                    - heartbeat
-                                    - spin-360
-                                    - flip
-                                    - vibrate
-                            color:
-                              label: Effect color
-                              selector:
-                                ui_color: {}
+                              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                            color: {label: Effect color, selector: {ui_color: {}}}
                     - name: fallback_to_static
                       label: 'Use the static settings above when no rule matches (default: off)'
-                      selector:
-                        boolean: {}
+                      selector: {boolean: {}}
                 - type: expandable
                   title: Sub-Button Icon 5
                   name: '4'
                   schema:
                     - name: effect
                       label: Effect Type
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                     - name: color
                       label: Effect Color
-                      selector:
-                        ui_color: {}
+                      selector: {ui_color: {}}
                     - name: condition
                       label: Condition for the static settings (only used without rules or as fallback)
-                      selector:
-                        condition: {}
+                      selector: {condition: {}}
                     - name: rules
                       label: Rules — first match wins and overrides the static settings
                       selector:
@@ -4697,64 +2988,28 @@ badgy-condition-helper:
                           multiple: true
                           label_field: label
                           fields:
-                            label:
-                              label: Rule name
-                              selector:
-                                text: {}
-                            condition:
-                              label: Condition
-                              selector:
-                                condition: {}
+                            label: {label: Rule name, selector: {text: {}}}
+                            condition: {label: Condition, selector: {condition: {}}}
                             effect:
                               label: Effect
-                              selector:
-                                select:
-                                  options:
-                                    - pulse
-                                    - rotate
-                                    - glow
-                                    - shake
-                                    - float
-                                    - zoom
-                                    - heartbeat
-                                    - spin-360
-                                    - flip
-                                    - vibrate
-                            color:
-                              label: Effect color
-                              selector:
-                                ui_color: {}
+                              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                            color: {label: Effect color, selector: {ui_color: {}}}
                     - name: fallback_to_static
                       label: 'Use the static settings above when no rule matches (default: off)'
-                      selector:
-                        boolean: {}
+                      selector: {boolean: {}}
                 - type: expandable
                   title: Sub-Button Icon 6
                   name: '5'
                   schema:
                     - name: effect
                       label: Effect Type
-                      selector:
-                        select:
-                          options:
-                            - pulse
-                            - rotate
-                            - glow
-                            - shake
-                            - float
-                            - zoom
-                            - heartbeat
-                            - spin-360
-                            - flip
-                            - vibrate
+                      selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                     - name: color
                       label: Effect Color
-                      selector:
-                        ui_color: {}
+                      selector: {ui_color: {}}
                     - name: condition
                       label: Condition for the static settings (only used without rules or as fallback)
-                      selector:
-                        condition: {}
+                      selector: {condition: {}}
                     - name: rules
                       label: Rules — first match wins and overrides the static settings
                       selector:
@@ -4762,37 +3017,15 @@ badgy-condition-helper:
                           multiple: true
                           label_field: label
                           fields:
-                            label:
-                              label: Rule name
-                              selector:
-                                text: {}
-                            condition:
-                              label: Condition
-                              selector:
-                                condition: {}
+                            label: {label: Rule name, selector: {text: {}}}
+                            condition: {label: Condition, selector: {condition: {}}}
                             effect:
                               label: Effect
-                              selector:
-                                select:
-                                  options:
-                                    - pulse
-                                    - rotate
-                                    - glow
-                                    - shake
-                                    - float
-                                    - zoom
-                                    - heartbeat
-                                    - spin-360
-                                    - flip
-                                    - vibrate
-                            color:
-                              label: Effect color
-                              selector:
-                                ui_color: {}
+                              selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                            color: {label: Effect color, selector: {ui_color: {}}}
                     - name: fallback_to_static
                       label: 'Use the static settings above when no rule matches (default: off)'
-                      selector:
-                        boolean: {}
+                      selector: {boolean: {}}
         - type: expandable
           title: Sub-Button Effects
           icon: mdi:animation-outline
@@ -4804,27 +3037,13 @@ badgy-condition-helper:
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color (e.g. for Glow)
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -4832,64 +3051,28 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         effect:
                           label: Effect
-                          selector:
-                            select:
-                              options:
-                                - pulse
-                                - rotate
-                                - glow
-                                - shake
-                                - float
-                                - zoom
-                                - heartbeat
-                                - spin-360
-                                - flip
-                                - vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
+                          selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                        color: {label: Effect color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 2
               name: '1'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color (e.g. for Glow)
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -4897,64 +3080,28 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         effect:
                           label: Effect
-                          selector:
-                            select:
-                              options:
-                                - pulse
-                                - rotate
-                                - glow
-                                - shake
-                                - float
-                                - zoom
-                                - heartbeat
-                                - spin-360
-                                - flip
-                                - vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
+                          selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                        color: {label: Effect color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 3
               name: '2'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color (e.g. for Glow)
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -4962,64 +3109,28 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         effect:
                           label: Effect
-                          selector:
-                            select:
-                              options:
-                                - pulse
-                                - rotate
-                                - glow
-                                - shake
-                                - float
-                                - zoom
-                                - heartbeat
-                                - spin-360
-                                - flip
-                                - vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
+                          selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                        color: {label: Effect color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 4
               name: '3'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color (e.g. for Glow)
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -5027,64 +3138,28 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         effect:
                           label: Effect
-                          selector:
-                            select:
-                              options:
-                                - pulse
-                                - rotate
-                                - glow
-                                - shake
-                                - float
-                                - zoom
-                                - heartbeat
-                                - spin-360
-                                - flip
-                                - vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
+                          selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                        color: {label: Effect color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 5
               name: '4'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color (e.g. for Glow)
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -5092,64 +3167,28 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         effect:
                           label: Effect
-                          selector:
-                            select:
-                              options:
-                                - pulse
-                                - rotate
-                                - glow
-                                - shake
-                                - float
-                                - zoom
-                                - heartbeat
-                                - spin-360
-                                - flip
-                                - vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
+                          selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                        color: {label: Effect color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
             - type: expandable
               title: Sub-Button 6
               name: '5'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color (e.g. for Glow)
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition for the static settings (only used without rules or as fallback)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
                 - name: rules
                   label: Rules — first match wins and overrides the static settings
                   selector:
@@ -5157,37 +3196,15 @@ badgy-condition-helper:
                       multiple: true
                       label_field: label
                       fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
+                        label: {label: Rule name, selector: {text: {}}}
+                        condition: {label: Condition, selector: {condition: {}}}
                         effect:
                           label: Effect
-                          selector:
-                            select:
-                              options:
-                                - pulse
-                                - rotate
-                                - glow
-                                - shake
-                                - float
-                                - zoom
-                                - heartbeat
-                                - spin-360
-                                - flip
-                                - vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
+                          selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
+                        color: {label: Effect color, selector: {ui_color: {}}}
                 - name: fallback_to_static
                   label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
+                  selector: {boolean: {}}
         - type: expandable
           title: Entity Badge Effects
           icon: mdi:tag-text
@@ -5202,199 +3219,101 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: None
-                          value: none
-                        - label: Pulse
-                          value: pulse
-                        - label: Rotate
-                          value: rotate
-                        - label: Glow
-                          value: glow
-                        - label: Shake
-                          value: shake
-                        - label: Float
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - {label: None, value: none}
+                        - {label: Pulse, value: pulse}
+                        - {label: Rotate, value: rotate}
+                        - {label: Glow, value: glow}
+                        - {label: Shake, value: shake}
+                        - {label: Float, value: float}
+                        - {label: Zoom, value: zoom}
+                        - {label: Heartbeat, value: heartbeat}
+                        - {label: Spin, value: spin-360}
+                        - {label: Flip, value: flip}
+                        - {label: Vibrate, value: vibrate}
                 - name: color
                   label: Effect color
-                  selector:
-                    ui_color:
-                      include_none: true
+                  selector: {ui_color: {include_none: true}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 1
               name: '0'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 2
               name: '1'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 3
               name: '2'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 4
               name: '3'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 5
               name: '4'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 6
               name: '5'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
         - type: expandable
           title: Icon Badge Effects
           icon: mdi:tag-outline
@@ -5409,199 +3328,101 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: None
-                          value: none
-                        - label: Pulse
-                          value: pulse
-                        - label: Rotate
-                          value: rotate
-                        - label: Glow
-                          value: glow
-                        - label: Shake
-                          value: shake
-                        - label: Float
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - {label: None, value: none}
+                        - {label: Pulse, value: pulse}
+                        - {label: Rotate, value: rotate}
+                        - {label: Glow, value: glow}
+                        - {label: Shake, value: shake}
+                        - {label: Float, value: float}
+                        - {label: Zoom, value: zoom}
+                        - {label: Heartbeat, value: heartbeat}
+                        - {label: Spin, value: spin-360}
+                        - {label: Flip, value: flip}
+                        - {label: Vibrate, value: vibrate}
                 - name: color
                   label: Effect color
-                  selector:
-                    ui_color:
-                      include_none: true
+                  selector: {ui_color: {include_none: true}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 1
               name: '0'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 2
               name: '1'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 3
               name: '2'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 4
               name: '3'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 5
               name: '4'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
             - type: expandable
               title: Sub-Button 6
               name: '5'
               schema:
                 - name: effect
                   label: Effect Type
-                  selector:
-                    select:
-                      options:
-                        - pulse
-                        - rotate
-                        - glow
-                        - shake
-                        - float
-                        - zoom
-                        - heartbeat
-                        - spin-360
-                        - flip
-                        - vibrate
+                  selector: {select: {options: [pulse, rotate, glow, shake, float, zoom, heartbeat, spin-360, flip, vibrate]}}
                 - name: color
                   label: Effect Color
-                  selector:
-                    ui_color: {}
+                  selector: {ui_color: {}}
                 - name: condition
                   label: Condition (optional)
-                  selector:
-                    condition: {}
+                  selector: {condition: {}}
     - type: expandable
       title: Global Defaults
       icon: mdi:tune-variant
@@ -5609,97 +3430,53 @@ badgy-condition-helper:
       schema:
         - name: badge_color
           label: Global badge background color
-          selector:
-            ui_color:
-              include_none: true
+          selector: {ui_color: {include_none: true}}
         - name: badge_text_color
           label: Global badge text color
-          selector:
-            ui_color:
-              include_none: true
+          selector: {ui_color: {include_none: true}}
         - name: badge_scale
           label: 'Global badge scale (unless overridden) (default: 1)'
           default: 1
-          selector:
-            number:
-              min: 0.5
-              max: 3
-              step: 0.1
-              mode: slider
+          selector: {number: {min: 0.5, max: 3, step: 0.1, mode: slider}}
         - name: badge_h_pos
           label: 'Global sub-button badge horizontal offset (default: -8)'
           default: -8
-          selector:
-            number:
-              min: -100
-              max: 100
-              step: 1
-              mode: slider
+          selector: {number: {min: -100, max: 100, step: 1, mode: slider}}
         - name: badge_v_pos
           label: 'Global sub-button badge vertical offset (default: -8)'
           default: -8
-          selector:
-            number:
-              min: -100
-              max: 100
-              step: 1
-              mode: slider
+          selector: {number: {min: -100, max: 100, step: 1, mode: slider}}
         - name: main_badge_h_pos
           label: 'Global main icon badge horizontal offset (default: 0)'
           default: 0
-          selector:
-            number:
-              min: -100
-              max: 100
-              step: 1
-              mode: slider
+          selector: {number: {min: -100, max: 100, step: 1, mode: slider}}
         - name: main_badge_v_pos
           label: 'Global main icon badge vertical offset (default: 0)'
           default: 0
-          selector:
-            number:
-              min: -100
-              max: 100
-              step: 1
-              mode: slider
+          selector: {number: {min: -100, max: 100, step: 1, mode: slider}}
         - name: icon_color
           label: Global sub-button icon color
-          selector:
-            ui_color:
-              include_none: true
+          selector: {ui_color: {include_none: true}}
         - name: sub_button_effect
           label: 'Global sub-button effect (default: none)'
           default: none
           selector:
             select:
               options:
-                - label: None
-                  value: none
-                - label: Pulse
-                  value: pulse
-                - label: Rotate
-                  value: rotate
-                - label: Glow
-                  value: glow
-                - label: Shake
-                  value: shake
-                - label: Float
-                  value: float
-                - label: Zoom
-                  value: zoom
-                - label: Heartbeat
-                  value: heartbeat
-                - label: Spin
-                  value: spin-360
-                - label: Flip
-                  value: flip
-                - label: Vibrate
-                  value: vibrate
+                - {label: None, value: none}
+                - {label: Pulse, value: pulse}
+                - {label: Rotate, value: rotate}
+                - {label: Glow, value: glow}
+                - {label: Shake, value: shake}
+                - {label: Float, value: float}
+                - {label: Zoom, value: zoom}
+                - {label: Heartbeat, value: heartbeat}
+                - {label: Spin, value: spin-360}
+                - {label: Flip, value: flip}
+                - {label: Vibrate, value: vibrate}
         - name: sub_button_effect_color
           label: Global effect color
-          selector:
-            ui_color:
-              include_none: true
+          selector: {ui_color: {include_none: true}}
         - name: sub_button_background
           label: Global sub-button background
           selector:
@@ -5710,20 +3487,11 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Solid
-                          value: solid
-                        - label: Two-color gradient
-                          value: two-color
-                        - label: Three-color gradient
-                          value: three-color
-                color:
-                  label: Solid color
-                  selector:
-                    ui_color: {}
-                condition:
-                  label: Condition
-                  selector:
-                    condition: {}
+                        - {label: Solid, value: solid}
+                        - {label: Two-color gradient, value: two-color}
+                        - {label: Three-color gradient, value: three-color}
+                color: {label: Solid color, selector: {ui_color: {}}}
+                condition: {label: Condition, selector: {condition: {}}}
 ```
 
 </details>
@@ -5733,3 +3501,5 @@ badgy-condition-helper:
 ### Screenshots:
 ![Options](https://github.com/user-attachments/assets/05af8dac-5a6b-4c0d-8edc-5572ff2836e2)
 ![Badgy_sample](https://github.com/user-attachments/assets/8983ea13-0adb-4e94-ac95-d465ef2c94f4)
+
+- [X] I really enjoyed working on this module ❤️

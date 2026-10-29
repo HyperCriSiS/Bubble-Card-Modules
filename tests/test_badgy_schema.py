@@ -106,6 +106,9 @@ def main():
                            allow_unicode=True, width=10 ** 6, indent=2).encode("utf-8")
         assert len(stored) < budget, "%s would be stored with %d bytes (budget %d, BCT limit 262144)" % (
             module_id, len(stored), budget)
+    # The whole Markdown file is the Module Store post (GitHub discussion #1333).
+    # GitHub rejects very long bodies; the previous post had about 100k characters.
+    assert len(md) < 200000, "Store post has %d characters" % len(md)
     raw_beta = (ROOT / "Badgy-Conditions/Badgy-Conditions-beta.yaml").read_bytes()
     assert len(raw_beta) < budget, "Beta YAML has %d bytes" % len(raw_beta)
     code = new["code"]
