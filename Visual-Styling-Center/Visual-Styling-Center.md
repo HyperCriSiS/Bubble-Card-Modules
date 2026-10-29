@@ -1,6 +1,6 @@
 # Visual Styling Center
 
-**Version:** v2026.10.29
+**Version:** v2026.10.30
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
@@ -63,7 +63,7 @@ versions, so existing configurations keep working without migration.
 
 ### Sub-buttons
 - **Sub-icon Size Multiplier** and **Sub-button Background Ratio**
-- **Sub-button Container Right Margin**, **Row Spacing** and **Column Spacing** (also inside sub-button groups)
+- **Sub-button Container Outer Margin** (added to the default spacing, on the left in right-to-left languages), **Row Spacing** and **Column Spacing** (also inside sub-button groups)
 - **Sub-button Icon Color** and **Sub-button Background Color**
 - **Sub-button Corner Radius**: Empty keeps the theme value
 - A sub-button's own **custom height** (Bubble Card option) always wins over the module size
@@ -162,7 +162,7 @@ visual_styling_center:
 ```yaml
 visual_styling_center:
   name: "Visual Styling Center"
-  version: "v2026.10.29"
+  version: "v2026.10.30"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
   description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
@@ -324,7 +324,7 @@ visual_styling_center:
               mode: slider
               unit_of_measurement: "×"
         - name: subbutton_horizontal_margin
-          label: "Sub-button Container Right Margin"
+          label: "Sub-button Container Outer Margin (added to the default spacing)"
           default: 8
           selector:
             number:
@@ -1272,7 +1272,7 @@ visual_styling_center:
     }
     /* Apply independent row and column spacing to sub-buttons */
     .bubble-sub-button-container {
-      margin-right: var(--subbutton-horizontal-margin, 8px) !important;
+      margin-inline-end: var(--subbutton-horizontal-margin, 8px) !important;
       row-gap: var(--subbutton-row-spacing, 10px) !important;
       column-gap: var(--subbutton-column-spacing, 10px) !important;
     }
@@ -1380,7 +1380,7 @@ visual_styling_center:
     }
     /* Large layout sub-button margin */
     .large .bubble-sub-button-container {
-      margin-right: var(--subbutton-horizontal-margin, 14px) !important;
+      margin-inline-end: var(--subbutton-horizontal-margin, 14px) !important;
       row-gap: var(--subbutton-row-spacing, 10px) !important;
       column-gap: var(--subbutton-column-spacing, 10px) !important;
     }
