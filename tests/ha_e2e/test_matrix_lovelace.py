@@ -275,6 +275,13 @@ class LayoutThemeMatrix(base.RealLovelace):
                     self.wait_entity("light.vsc_child",lambda e:e["state"]=="on")
                     hold=page.locator("bubble-card").nth(self.card_index(name))
                     hold.scroll_into_view_if_needed()
+                    page.evaluate("""() => {
+                        window.__vscEvents=[];
+                        const log=ev => window.__vscEvents.push(ev.type+':'+(ev.composedPath()[0]?.className||ev.composedPath()[0]?.localName||'')
+                            +(ev.detail?.action?'/'+ev.detail.action:''));
+                        for (const t of ['pointerdown','pointerup','click','contextmenu','hass-action','ll-custom','hass-more-info'])
+                            window.addEventListener(t,log,{capture:true});
+                    }""")
                     box=hold.bounding_box()
                     page.mouse.move(box["x"]+box["width"]*0.5,box["y"]+box["height"]*0.5)
                     page.mouse.down()
@@ -283,7 +290,8 @@ class LayoutThemeMatrix(base.RealLovelace):
                     try:
                         self.wait_entity("light.vsc_child",lambda e:e["state"]=="off",timeout=10)
                     except AssertionError as exc:
-                        raise AssertionError(f"hold on {name!r} did not fire") from exc
+                        events=page.evaluate("() => window.__vscEvents")
+                        raise AssertionError(f"hold on {name!r} did not fire; events={events}") from exc
                 self.shot("gestures_"+scheme)
                 self.assertFalse(self.errors,self.errors)
 
