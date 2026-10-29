@@ -126,6 +126,14 @@ class PersistenceAndEditor(base.RealLovelace):
 
     def open_editor(self):
         """Mount the real editor visibly so mouse and keyboard reach it."""
+        # HA loads its pickers with its own card editors; do the same here.
+        defined=self.page.evaluate("""async () => {
+            await customElements.get('hui-entities-card')?.getConfigElement?.();
+            await Promise.race([customElements.whenDefined('ha-entity-picker'),
+                                new Promise(r => setTimeout(r, 15000))]);
+            return !!customElements.get('ha-entity-picker');
+        }""")
+        self.assertTrue(defined,"ha-entity-picker was not loaded by HA")
         self.page.locator("bubble-card").first.evaluate("""host => {
             const frame=document.createElement('div');
             frame.id='vsc-editor-frame';
@@ -238,7 +246,7 @@ class PersistenceAndEditor(base.RealLovelace):
             choices=[o["value"] if isinstance(o,dict) else o for o in options.get("options",[])]
             current=self.config_value(name) or field.get("default")
             target=next(c for c in choices if c!=current)
-            radios=root.locator("ha-radio")
+            radios=root.locator('[role="radio"]')
             if radios.count():
                 # HA draws short option lists as radio buttons.
                 radios.nth(choices.index(target)).click()
