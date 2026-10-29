@@ -1,6 +1,6 @@
 # Visual Styling Center
 
-**Version:** v2025.04.16
+**Version:** v2026.10.29
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
@@ -16,7 +16,7 @@
 
 ## Overview
 
-The Slider Control Center module offers advanced customization options for Bubble Card elements with a focus on visual enhancements.
+The Visual Styling Center module offers advanced customization options for Bubble Card elements with a focus on visual enhancements.
 It provides precise control over Icon and card sizes, spacing, colors, and visual effects like gradients.
 
 ## IMPORTANT
@@ -24,6 +24,9 @@ Due to the nature of the sections layout, you have to use the HA internal mechan
 It means that the "Card Height Multiplier" only works with the other layouts.
 Also with sections layout, you need to use the bubble-card grid layout if you use two row sub-buttons layout.
 So generally, if something does not work out as expected, try out a different bubble-card layout.
+
+On **Sub-buttons** and **Calendar** cards there is no main icon, name or slider, so only the
+sub-button options (sizes, spacing, colors, state colors, corner radius) have an effect there.
 
 ```markdown
 # Visual Styling Center for Bubble Card
@@ -36,36 +39,43 @@ So generally, if something does not work out as expected, try out a different bu
 - **Icon Contrast Helper** for better readability with radial background effects
 - **Dynamic gradient effects** based on light entities
 - **Slider Contrast Helper** for improved visibility with background gradients
-- **Hover effects** for improved user experience
+- **Hover effects** for improved user experience (switchable)
 - **Automatic adjustments** for optimal display
 - **Custom Slider** to see more of the visuals 
 
 ## Detailed Feature Description
 
-### Card Size Adjustments
-- **Card Height Multiplier**: Scale the overall height of your Bubble Card 
+The editor sections follow this order. All option keys are unchanged from earlier
+versions, so existing configurations keep working without migration.
 
-### Margin & Spacing Adjustments
-- **Main Icon Vertical Margin**: Adjust vertical spacing for the main icon 
-- **Sub-button Container Right Margin**: Control the right margin of the sub-button container 
-- **Sub-button Row Spacing**: Set the spacing between rows of sub-buttons 
-- **Sub-button Column Spacing**: Set the spacing between columns of sub-buttons 
+### Card
+- **Card Height Multiplier**: Scale the overall height of your Bubble Card (not in the sections layout)
 - **Inner Card Padding**: Add padding inside the card for more spacing
+- **Card Background Color** and **Opacity**: Solid color for button cards, opacity also fades the theme background
+- **Card Corner Radius**: Empty keeps the theme value
 
-### Icon Size Adjustments
-- **Main Icon Size Multiplier**: Scale the size of the main icon 
-- **Icon Background Ratio**: Adjust the size ratio of the icon background 
-- **Sub-icon Size Multiplier**: Scale the size of sub-button icons 
-- **Sub-button Background Ratio**: Adjust the size ratio of sub-button backgrounds 
-
-### Visual Enhancements
+### Main Icon
+- **Main Icon Size Multiplier** and **Icon Background Ratio**
+- **Main Icon Margin**: Spacing around the main icon (applies to all sides)
+- **Icon Background Corner Radius**: Empty keeps the theme value (a circle)
+- **Icon Color** and **Icon Background Color** (RGB picker or manual CSS value, the manual value wins)
 - **Hide Icon Background**: Remove the background from the main icon
-- **Hide Sub-button Backgrounds**: Remove backgrounds from all sub-buttons
-- **Custom Icon Colors**: Set custom colors for main icon and sub-icons
-- **Custom Background Colors**: Set custom colors for icon and sub-button backgrounds
-- **Entity-Colored Main Icon**: Automatically color the main icon based on its entity state
-- **Entity-Colored Sub-Icons**: Automatically color sub-buttons based on their entity state
-- **Custom Offline/Function Button Color**: Apply a custom color to icons for inactive states, functional entities (scenes, scripts, automations), or entities without states
+
+### Sub-buttons
+- **Sub-icon Size Multiplier** and **Sub-button Background Ratio**
+- **Sub-button Container Right Margin**, **Row Spacing** and **Column Spacing** (also inside sub-button groups)
+- **Sub-button Icon Color** and **Sub-button Background Color**
+- **Sub-button Corner Radius**: Empty keeps the theme value
+- A sub-button's own **custom height** (Bubble Card option) always wins over the module size
+- **Hide Sub-button Backgrounds**
+
+### Name & State Text
+- **Name Color**, **Name Font Size**, **State Color**, **State Font Size**: Empty keeps the theme
+
+### State Colors
+- **Use Home Assistant Theme State Colors**: Use the theme's `--state-*-color` instead of fixed green/grey
+- **Color Main Icon / Sub-button Icons by Entity State**: Light color when on, otherwise a color per state
+- **Custom Off/Offline/Function Color**: Apply a custom color to icons for inactive states, functional entities (scenes, scripts, automations), or entities without states
 
 ### Icon Contrast Helper
 The Icon Contrast Helper adds circular background behind icons to improve visibility and contrast regardless of the card's background color.
@@ -74,24 +84,28 @@ The Icon Contrast Helper adds circular background behind icons to improve visibi
 - **Helper Color**: Select the background color for the helper
 - **Helper Opacity**: Control the transparency of the helper background 
 - **Helper Size Ratio**: Adjust how much of the icon the background covers 
-- **Radial Fade Effect**: Enable a smooth fade from color to transparent
+- **Radial Fade Effect**: Enable a smooth fade from color to transparent (off unless enabled)
 - **Fade Strength**: Control how gradual the fade effect is 
 
 ### Gradient Effects
 - **Enable Gradient Effects**: Toggle dynamic gradients on/off
 - **Apply Gradient to**: Choose between slider fill or card background
-- **Gradient Entity**: Select a light group or single light to base the gradient on
-- **Hide Gradient When All Lights Off**: Option to show/hide gradient when no lights are active
+- **Gradient Direction**: Angle in degrees, 90 is left to right as before
+- **Gradient Entity**: Select a light group or single light to base the gradient on (empty uses the card's light)
+- **Hide Rainbow Fallback**: Without it, a rainbow gradient is shown while no colored light is on
+- **Slider Brightness**: Adjust the opacity of the slider when using background gradients
 
 ### Slider Contrast Helper
-When using background gradients, this feature improves the visibility of the slider element.
+Only active together with a card background gradient, it improves the visibility of the slider element.
 - **Enable Slider Contrast Helper**: Toggle the helper for slider with background gradients
 - **Slider Helper Color**: Select the background/glow color for the slider
 - **Slider Helper Opacity**: Control the transparency of the helper effect
 - **Slider Helper Size Ratio**: Adjust the size of the helper effect
-- **Enable Radial Fade Effect**: Add a smooth fade to the slider glow
+- **Enable Radial Fade Effect**: Add a smooth fade to the slider glow (off unless enabled)
 - **Slider Fade Strength**: Control the intensity of the fade effect
-- **Slider Brightness**: Adjust the opacity of the slider when using background gradients
+
+### Interaction Effects
+- **Hover Highlight, Brighter Active Icon and Sub-icon Opacity**: On by default as in earlier versions, set `enable_interaction_effects: false` to use Bubble Card's native look
 
 ### Compatibility
 - Works with all button layouts (normal, large, multi-row)
@@ -139,7 +153,7 @@ visual_styling_center:
 
 <details>
 
-<summary><b>ðŸ§© Get this Module</b></summary>
+<summary><b>Get this Module</b></summary>
 
 <br>
 
@@ -147,13 +161,13 @@ visual_styling_center:
 
 ```yaml
 visual_styling_center:
-  name: "Visual Styling Center"```
-  version: "v2025.03.30"
-  creator: "HyperCriSiS"</details>
+  name: "Visual Styling Center"
+  version: "v2026.10.29"
+  creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
-  description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.---
+  description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
   unsupported:
-    - cover### Screenshot:
+    - cover
     - climate
     - horizontal-buttons-stack
     - media-player
@@ -161,12 +175,14 @@ visual_styling_center:
     - select
     - separator
   editor:
+    # Sections have no `name` on purpose: values stay flat under
+    # visual_styling_center, so existing configurations keep working.
     - type: expandable
-      title: "Card Size Adjustments"
-      icon: "mdi:resize"
+      title: "Card"
+      icon: "mdi:card-outline"
       schema:
         - name: height_multiplier
-          label: "Card Height Multiplier"
+          label: "Card Height Multiplier (not in sections layout)"
           default: 1
           selector:
             number:
@@ -174,11 +190,7 @@ visual_styling_center:
               max: 5.0
               step: 0.1
               mode: slider
-              unit_of_measurement: "×"
-    - type: expandable
-      title: "Margin & Spacing Adjustments"
-      icon: "mdi:arrow-expand"
-      schema:
+              unit_of_measurement: "Ã—"
         - name: inner_padding
           label: "Inner Card Padding"
           default: 0
@@ -189,8 +201,58 @@ visual_styling_center:
               step: 1
               mode: slider
               unit_of_measurement: "px"
+        - name: custom_card_background_color
+          label: "Card Background Color (RGB, button cards)"
+          selector:
+            color_rgb: {}
+        - name: manual_card_background_color
+          label: "Card Background Color, manual (overrides RGB)"
+          selector:
+            text: {}
+        - name: card_background_opacity
+          label: "Card Background Opacity"
+          default: 1
+          selector:
+            number:
+              min: 0
+              max: 1
+              step: 0.05
+              mode: slider
+        - name: card_border_radius
+          label: "Card Corner Radius (empty = theme)"
+          selector:
+            number:
+              min: 0
+              max: 60
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
+    - type: expandable
+      title: "Main Icon"
+      icon: "mdi:circle-outline"
+      schema:
+        - name: icon_size_multiplier
+          label: "Main Icon Size Multiplier"
+          default: 1
+          selector:
+            number:
+              min: 0.8
+              max: 3.0
+              step: 0.1
+              mode: slider
+              unit_of_measurement: "Ã—"
+        - name: icon_background_ratio
+          label: "Icon Background Ratio"
+          default: 1
+          selector:
+            number:
+              min: 0.6
+              max: 1.4
+              step: 0.05
+              mode: slider
+              unit_of_measurement: "Ã—"
         - name: icon_vertical_margin
-          label: "Main Icon Vertical Margin"
+          label: "Main Icon Margin (all sides)"
           default: 6
           selector:
             number:
@@ -199,6 +261,68 @@ visual_styling_center:
               step: 1
               mode: slider
               unit_of_measurement: "px"
+        - name: icon_border_radius
+          label: "Icon Background Corner Radius (empty = theme)"
+          selector:
+            number:
+              min: 0
+              max: 40
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
+        - name: custom_icon_color
+          label: "Icon Color (RGB)"
+          selector:
+            color_rgb: {}
+        - name: manual_icon_color
+          label: "Icon Color, manual (overrides RGB, e.g. #FFFFFF or rgba(255,255,255,0.8))"
+          selector:
+            text: {}
+        - name: hide_icon_background
+          label: "Hide Icon Background"
+          default: false
+          selector:
+            boolean: {}
+        - name: custom_icon_background_color
+          label: "Icon Background Color (RGB)"
+          visible:
+            - field: hide_icon_background
+              operator: not_eq
+              value: true
+          selector:
+            color_rgb: {}
+        - name: manual_icon_background_color
+          label: "Icon Background Color, manual (overrides RGB)"
+          visible:
+            - field: hide_icon_background
+              operator: not_eq
+              value: true
+          selector:
+            text: {}
+    - type: expandable
+      title: "Sub-buttons"
+      icon: "mdi:dots-horizontal-circle-outline"
+      schema:
+        - name: subicon_size_multiplier
+          label: "Sub-icon Size Multiplier"
+          default: 1
+          selector:
+            number:
+              min: 0.8
+              max: 3.0
+              step: 0.1
+              mode: slider
+              unit_of_measurement: "Ã—"
+        - name: subbutton_background_ratio
+          label: "Sub-button Background Ratio"
+          default: 1
+          selector:
+            number:
+              min: 0.6
+              max: 1.4
+              step: 0.05
+              mode: slider
+              unit_of_measurement: "Ã—"
         - name: subbutton_horizontal_margin
           label: "Sub-button Container Right Margin"
           default: 8
@@ -229,80 +353,172 @@ visual_styling_center:
               step: 1
               mode: slider
               unit_of_measurement: "px"
+        - name: subbutton_border_radius
+          label: "Sub-button Corner Radius (empty = theme)"
+          selector:
+            number:
+              min: 0
+              max: 30
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
+        - name: custom_subicon_color
+          label: "Sub-button Icon Color (RGB)"
+          selector:
+            color_rgb: {}
+        - name: manual_subicon_color
+          label: "Sub-button Icon Color, manual (overrides RGB)"
+          selector:
+            text: {}
+        - name: hide_subbutton_background
+          label: "Hide Sub-button Backgrounds (also hidden by Icon Contrast Helper)"
+          default: false
+          selector:
+            boolean: {}
+        - name: custom_subbutton_background_color
+          label: "Sub-button Background Color (RGB)"
+          visible:
+            - field: hide_subbutton_background
+              operator: not_eq
+              value: true
+          selector:
+            color_rgb: {}
+        - name: manual_subbutton_background_color
+          label: "Sub-button Background Color, manual (overrides RGB)"
+          visible:
+            - field: hide_subbutton_background
+              operator: not_eq
+              value: true
+          selector:
+            text: {}
     - type: expandable
-      title: "Icon Size Adjustments"
-      icon: "mdi:shape"
+      title: "Name & State Text"
+      icon: "mdi:format-text"
       schema:
-        - name: icon_size_multiplier
-          label: "Main Icon Size Multiplier"
-          default: 1
+        - name: custom_name_color
+          label: "Name Color (RGB)"
+          selector:
+            color_rgb: {}
+        - name: manual_name_color
+          label: "Name Color, manual (overrides RGB)"
+          selector:
+            text: {}
+        - name: name_font_size
+          label: "Name Font Size (empty = theme)"
           selector:
             number:
-              min: 0.8
-              max: 3.0
-              step: 0.1
-              mode: slider
-              unit_of_measurement: "×"
-        - name: icon_background_ratio
-          label: "Icon Background Ratio"
-          default: 1
+              min: 8
+              max: 32
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
+        - name: custom_state_color
+          label: "State Color (RGB)"
+          selector:
+            color_rgb: {}
+        - name: manual_state_color
+          label: "State Color, manual (overrides RGB)"
+          selector:
+            text: {}
+        - name: state_font_size
+          label: "State Font Size (empty = theme)"
           selector:
             number:
-              min: 0.6
-              max: 1.4
-              step: 0.05
-              mode: slider
-              unit_of_measurement: "×"
-        - name: subicon_size_multiplier
-          label: "Sub-icon Size Multiplier"
-          default: 1
+              min: 8
+              max: 32
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
+    - type: expandable
+      title: "State Colors"
+      icon: "mdi:palette"
+      schema:
+        - name: use_theme_state_colors
+          label: "Use Home Assistant Theme State Colors (instead of fixed green/grey)"
+          default: false
           selector:
-            number:
-              min: 0.8
-              max: 3.0
-              step: 0.1
-              mode: slider
-              unit_of_measurement: "×"
-        - name: subbutton_background_ratio
-          label: "Sub-button Background Ratio"
-          default: 1
+            boolean: {}
+        - name: enable_entity_colored_main_icon
+          label: "Color Main Icon by Entity State"
+          default: false
           selector:
-            number:
-              min: 0.6
-              max: 1.4
-              step: 0.05
-              mode: slider
-              unit_of_measurement: "×"
+            boolean: {}
+        - name: enable_entity_colored_subicons
+          label: "Color Sub-button Icons by Entity State"
+          default: false
+          selector:
+            boolean: {}
+        - name: enable_function_button_color
+          label: "Custom Color for Off/Offline/Scene/Script/Automation Icons"
+          default: false
+          selector:
+            boolean: {}
+        - name: function_button_color
+          label: "Off/Offline/Function Color (RGB)"
+          visible:
+            - field: enable_function_button_color
+              operator: eq
+              value: true
+          selector:
+            color_rgb: {}
+        - name: manual_function_button_color
+          label: "Off/Offline/Function Color, manual (overrides RGB)"
+          visible:
+            - field: enable_function_button_color
+              operator: eq
+              value: true
+          selector:
+            text: {}
     - type: expandable
       title: "Icon Contrast Helper"
       icon: "mdi:contrast-circle"
       schema:
         - name: enable_icon_helper
-          label: "Enable Icon Contrast Helper"
+          label: "Enable Icon Contrast Helper (hides sub-button backgrounds)"
           default: false
           selector:
             boolean: {}
         - name: apply_to_main_icon
           label: "Apply Helper to Main Icon"
           default: true
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             boolean: {}
         - name: apply_to_sub_icons
           label: "Apply Helper to Sub-Icons"
           default: true
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             boolean: {}
         - name: helper_color
           label: "Helper Background Color (RGB)"
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             color_rgb: {}
         - name: manual_helper_color
-          label: "Manual Helper Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
+          label: "Helper Color, manual (overrides RGB and opacity)"
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             text: {}
         - name: helper_opacity
           label: "Helper Background Opacity"
           default: 0.7
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             number:
               min: 0.1
@@ -312,146 +528,42 @@ visual_styling_center:
         - name: helper_size_ratio
           label: "Helper Size Ratio"
           default: 0.7
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             number:
               min: 0.3
               max: 1.5
               step: 0.05
               mode: slider
-              unit_of_measurement: "×"
+              unit_of_measurement: "Ã—"
         - name: enable_helper_fade
           label: "Enable Radial Fade Effect"
-          default: true
+          default: false
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
           selector:
             boolean: {}
         - name: fade_strength
           label: "Fade Strength"
           default: 1.0
+          visible:
+            - field: enable_icon_helper
+              operator: eq
+              value: true
+            - field: enable_helper_fade
+              operator: eq
+              value: true
           selector:
             number:
               min: 0.5
               max: 2.0
               step: 0.1
               mode: slider
-    - type: expandable
-      title: "Slider Contrast Helper"
-      icon: "mdi:contrast-box"
-      schema:
-        - name: enable_slider_helper
-          label: "Enable Slider Contrast Helper"
-          default: false
-          selector:
-            boolean: {}
-        - name: slider_helper_color
-          label: "Slider Helper Background Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_slider_helper_color
-          label: "Manual Slider Helper Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: slider_helper_opacity
-          label: "Slider Helper Background Opacity"
-          default: 0.7
-          selector:
-            number:
-              min: 0.1
-              max: 1.0
-              step: 0.05
-              mode: slider
-        - name: slider_helper_size_ratio
-          label: "Slider Helper Size Ratio"
-          default: 0.7
-          selector:
-            number:
-              min: 0.3
-              max: 4.0
-              step: 0.1
-              mode: slider
-              unit_of_measurement: "×"
-        - name: enable_slider_helper_fade
-          label: "Enable Radial Fade Effect"
-          default: true
-          selector:
-            boolean: {}
-        - name: slider_fade_strength
-          label: "Slider Fade Strength"
-          default: 1.0
-          selector:
-            number:
-              min: 0.5
-              max: 2.0
-              step: 0.1
-              mode: slider
-    - type: expandable
-      title: "Visual Enhancements"
-      icon: "mdi:palette"
-      schema:
-        - name: hide_icon_background
-          label: "Hide Icon Background"
-          default: false
-          selector:
-            boolean: {}
-        - name: hide_subbutton_background
-          label: "Hide Sub-button Backgrounds"
-          default: false
-          selector:
-            boolean: {}
-        - name: custom_icon_color
-          label: "Icon Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_icon_color
-          label: "Manual Icon Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: custom_subicon_color
-          label: "Sub-Button Icon Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_subicon_color
-          label: "Manual Sub-Button Icon Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: custom_icon_background_color
-          label: "Icon Background Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_icon_background_color
-          label: "Manual Icon Background Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: custom_subbutton_background_color
-          label: "Sub-Button Background Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_subbutton_background_color
-          label: "Manual Sub-Button Background Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
-        - name: enable_entity_colored_main_icon
-          label: "Color Main Icon by Entity State"
-          default: false
-          selector:
-            boolean: {}
-        - name: enable_entity_colored_subicons
-          label: "Color Sub-Button Icons by Entity State"
-          default: false
-          selector:
-            boolean: {}
-        - name: enable_function_button_color
-          label: "Custom Offline/Function Button Color"
-          default: false
-          selector:
-            boolean: {}
-        - name: function_button_color
-          label: "Offline/Function Button Color (RGB)"
-          selector:
-            color_rgb: {}
-        - name: manual_function_button_color
-          label: "Manual Offline/Function Button Color (e.g. #FFFFFF or rgba(255,255,255,0.8))"
-          selector:
-            text: {}
     - type: expandable
       title: "Gradient Effects"
       icon: "mdi:gradient-horizontal"
@@ -464,6 +576,10 @@ visual_styling_center:
         - name: gradient_target
           label: "Apply Gradient to"
           default: "slider"
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
           selector:
             select:
               options:
@@ -471,143 +587,276 @@ visual_styling_center:
                   label: "Slider Fill"
                 - value: "background"
                   label: "Card Background"
+        - name: gradient_angle
+          label: "Gradient Direction"
+          default: 90
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
+          selector:
+            number:
+              min: 0
+              max: 360
+              step: 5
+              mode: slider
+              unit_of_measurement: "Â°"
         - name: gradient_entity
-          label: "Gradient Entity (Light Group or Single Light)"
+          label: "Gradient Entity (light or light group, empty = card light)"
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
           selector:
             entity:
               domain: light
         - name: disable_default_gradient
-          label: "Hide Gradient When All Lights Off"
+          label: "Hide Rainbow Fallback When No Colored Light Is On"
           default: false
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
           selector:
             boolean: {}
         - name: slider_bg_opacity
-          label: "Slider Brightness with Background Gradient"
+          label: "Slider Brightness on Background Gradient"
           default: 0.6
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
+            - field: gradient_target
+              operator: eq
+              value: background
           selector:
             number:
               min: 0.1
               max: 1.0
               step: 0.05
               mode: slider
+    - type: expandable
+      title: "Slider Contrast Helper (Background Gradient only)"
+      icon: "mdi:contrast-box"
+      schema:
+        - name: enable_slider_helper
+          label: "Enable Slider Contrast Helper"
+          default: false
+          selector:
+            boolean: {}
+        - name: slider_helper_color
+          label: "Slider Helper Color (RGB)"
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            color_rgb: {}
+        - name: manual_slider_helper_color
+          label: "Slider Helper Color, manual (overrides RGB and opacity)"
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            text: {}
+        - name: slider_helper_opacity
+          label: "Slider Helper Opacity"
+          default: 0.7
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            number:
+              min: 0.1
+              max: 1.0
+              step: 0.05
+              mode: slider
+        - name: slider_helper_size_ratio
+          label: "Slider Helper Size Ratio"
+          default: 0.7
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            number:
+              min: 0.3
+              max: 4.0
+              step: 0.1
+              mode: slider
+              unit_of_measurement: "Ã—"
+        - name: enable_slider_helper_fade
+          label: "Enable Radial Fade Effect"
+          default: false
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+          selector:
+            boolean: {}
+        - name: slider_fade_strength
+          label: "Slider Fade Strength"
+          default: 1.0
+          visible:
+            - field: enable_slider_helper
+              operator: eq
+              value: true
+            - field: enable_slider_helper_fade
+              operator: eq
+              value: true
+          selector:
+            number:
+              min: 0.5
+              max: 2.0
+              step: 0.1
+              mode: slider
+    - type: expandable
+      title: "Interaction Effects"
+      icon: "mdi:gesture-tap"
+      schema:
+        - name: enable_interaction_effects
+          label: "Hover Highlight, Brighter Active Icon and Sub-icon Opacity"
+          default: true
+          selector:
+            boolean: {}
   code: |
    ${(() => {
       const config = this.config.visual_styling_center || {};
+      // Keep each inline CSS variable's pre-module value. Without ownership,
+      // an unset VSC option would delete another module's or theme's overrides.
+      const ownedVariables = card._vscOwnedVariables ?? (card._vscOwnedVariables = new Map());
+      const restoreOwnedVariable = (name) => {
+        const saved = ownedVariables.get(name);
+        if (!saved) return;
+        if (card.style.getPropertyValue(name) === saved.applied) {
+          if (saved.previous) card.style.setProperty(name, saved.previous, saved.priority);
+          else card.style.removeProperty(name);
+        }
+        ownedVariables.delete(name);
+      };
+      const setCardVariable = (name, value) => {
+        if (value == null) {
+          restoreOwnedVariable(name);
+          return;
+        }
+        const desired = String(value);
+        const current = card.style.getPropertyValue(name);
+        let saved = ownedVariables.get(name);
+        if (!saved) {
+          saved = { previous: current, priority: card.style.getPropertyPriority(name), applied: desired };
+          ownedVariables.set(name, saved);
+        } else {
+          saved.applied = desired;
+        }
+        if (current !== desired) card.style.setProperty(name, desired);
+      };
+      // onTeardown fires when Bubble Card detaches a card, including view
+      // caching/re-attachment. Keep registration idempotent across style passes.
+      const vscClassNames = [
+        'slider-background-mode', 'vsc-custom-subbutton-background',
+        'use-function-button-color', 'hide-icon-background',
+        'hide-subbutton-background', 'icon-helper-enabled',
+        'helper-fade-enabled', 'helper-main-icon', 'helper-sub-icons',
+        'slider-helper-enabled', 'slider-helper-fade-enabled',
+        'use-gradient-background', 'use-gradient-slider',
+        'vsc-interaction-effects', 'vsc-custom-icon-background',
+        'vsc-name-color', 'vsc-state-color', 'vsc-name-size', 'vsc-state-size'
+      ];
+      const initialClasses = card._vscInitialClasses ?? (card._vscInitialClasses =
+        new Map(vscClassNames.map(name => [name, card.classList.contains(name)])));
 
-      // Default gradient configuration
-      if (config.gradient_target === undefined) {
-        config.gradient_target = "slider";
-      }
-      if (config.gradient_target === 'background' && config.enable_gradient) {
+      // Derive defaults without mutating the saved Bubble Card configuration.
+      const gradientTarget = config.gradient_target ?? 'slider';
+      const gradientEntity = config.gradient_entity ||
+        (this.config.entity?.startsWith('light.') ? this.config.entity : null);
+      if (gradientTarget === 'background' && config.enable_gradient) {
         card.classList.add('slider-background-mode');
       } else {
         card.classList.remove('slider-background-mode');
       }
-      if (!config.gradient_entity && this.config.entity && this.config.entity.startsWith('light.')) {
-        config.gradient_entity = this.config.entity;
-      }
-
       // Apply all size and spacing configurations
-      if (config.height_multiplier !== undefined) {
-        card.style.setProperty('--height-multiplier', config.height_multiplier);
-      }
-      if (config.inner_padding !== undefined) {
-        card.style.setProperty('--inner-padding', `${config.inner_padding}px`);
-      }
-      if (config.icon_vertical_margin !== undefined) {
-        card.style.setProperty('--icon-vertical-margin', `${config.icon_vertical_margin}px`);
-      }
-      if (config.subbutton_horizontal_margin !== undefined) {
-        card.style.setProperty('--subbutton-horizontal-margin', `${config.subbutton_horizontal_margin}px`);
-      }
-      if (config.subbutton_row_spacing !== undefined) {
-        card.style.setProperty('--subbutton-row-spacing', `${config.subbutton_row_spacing}px`);
-      }
-      if (config.subbutton_column_spacing !== undefined) {
-        card.style.setProperty('--subbutton-column-spacing', `${config.subbutton_column_spacing}px`);
-      }
-      if (config.icon_size_multiplier !== undefined) {
-        card.style.setProperty('--icon-size-multiplier', config.icon_size_multiplier);
-      }
-      if (config.icon_background_ratio !== undefined) {
-        card.style.setProperty('--icon-background-ratio', config.icon_background_ratio);
-      }
-      if (config.subicon_size_multiplier !== undefined) {
-        card.style.setProperty('--subicon-size-multiplier', config.subicon_size_multiplier);
-      }
-      if (config.subbutton_background_ratio !== undefined) {
-        card.style.setProperty('--subbutton-background-ratio', config.subbutton_background_ratio);
-      }
+      setCardVariable('--height-multiplier', config.height_multiplier);
+      setCardVariable('--inner-padding', config.inner_padding == null ? null : `${config.inner_padding}px`);
+      setCardVariable('--icon-vertical-margin', config.icon_vertical_margin == null ? null : `${config.icon_vertical_margin}px`);
+      setCardVariable('--subbutton-horizontal-margin', config.subbutton_horizontal_margin == null ? null : `${config.subbutton_horizontal_margin}px`);
+      setCardVariable('--subbutton-row-spacing', config.subbutton_row_spacing == null ? null : `${config.subbutton_row_spacing}px`);
+      setCardVariable('--subbutton-column-spacing', config.subbutton_column_spacing == null ? null : `${config.subbutton_column_spacing}px`);
+      setCardVariable('--icon-size-multiplier', config.icon_size_multiplier);
+      setCardVariable('--icon-background-ratio', config.icon_background_ratio);
+      setCardVariable('--subicon-size-multiplier', config.subicon_size_multiplier);
+      setCardVariable('--subbutton-background-ratio', config.subbutton_background_ratio);
       if (config.slider_bg_opacity !== undefined) {
-        card.style.setProperty('--slider-bg-opacity', config.slider_bg_opacity);
+        setCardVariable('--slider-bg-opacity', config.slider_bg_opacity);
       } else {
-        card.style.setProperty('--slider-bg-opacity', 0.6);
+        setCardVariable('--slider-bg-opacity', 0.6);
       }
 
-      // Apply custom colors
-      if (config.manual_icon_color) {
-        card.style.setProperty('--icon-color', config.manual_icon_color);
-      } else if (config.custom_icon_color) {
-        const iconColor = config.custom_icon_color;
-        const colorValue = Array.isArray(iconColor)
-          ? `rgb(${iconColor[0]}, ${iconColor[1]}, ${iconColor[2]})`
-          : iconColor;
-        card.style.setProperty('--icon-color', colorValue);
-      }
-      if (config.manual_subicon_color) {
-        card.style.setProperty('--subicon-color', config.manual_subicon_color);
-      } else if (config.custom_subicon_color) {
-        const subiconColor = config.custom_subicon_color;
-        const colorValue = Array.isArray(subiconColor)
-          ? `rgb(${subiconColor[0]}, ${subiconColor[1]}, ${subiconColor[2]})`
-          : subiconColor;
-        card.style.setProperty('--subicon-color', colorValue);
-      }
-      if (config.manual_icon_background_color) {
-        card.style.setProperty('--icon-background-color', config.manual_icon_background_color);
-      } else if (config.custom_icon_background_color) {
-        const bgColor = config.custom_icon_background_color;
-        const colorValue = Array.isArray(bgColor)
-          ? `rgb(${bgColor[0]}, ${bgColor[1]}, ${bgColor[2]})`
-          : bgColor;
-        card.style.setProperty('--icon-background-color', colorValue);
-      }
-      if (config.manual_subbutton_background_color) {
-        card.style.setProperty('--subbutton-background-color', config.manual_subbutton_background_color);
-      } else if (config.custom_subbutton_background_color) {
-        const subbgColor = config.custom_subbutton_background_color;
-        const colorValue = Array.isArray(subbgColor)
-          ? `rgb(${subbgColor[0]}, ${subbgColor[1]}, ${subbgColor[2]})`
-          : subbgColor;
-        card.style.setProperty('--subbutton-background-color', colorValue);
-      }
-
-      // Apply function button color for non-active/function buttons
-      if (config.enable_function_button_color === true) {
-        let functionColor;
-        if (config.manual_function_button_color) {
-          functionColor = config.manual_function_button_color;
-        } else if (config.function_button_color) {
-          const fbColor = config.function_button_color;
-          functionColor = Array.isArray(fbColor)
-            ? `rgb(${fbColor[0]}, ${fbColor[1]}, ${fbColor[2]})`
-            : fbColor;
-        } else {
-          functionColor = 'rgba(255, 255, 255, 0.9)'; // Default color
+      // Only keep module-owned variables while an option has a value.
+      const resolveColor = (manual, selected) => {
+        if (typeof manual === 'string' && manual.trim()) return manual;
+        if (Array.isArray(selected) && selected.length === 3) {
+          return `rgb(${selected[0]}, ${selected[1]}, ${selected[2]})`;
         }
-        card.style.setProperty('--function-button-color', functionColor);
-        card.classList.add('use-function-button-color');
-      } else {
-        card.classList.remove('use-function-button-color');
+        return typeof selected === 'string' && selected.trim() ? selected : null;
+      };
+      setCardVariable('--icon-color', resolveColor(config.manual_icon_color, config.custom_icon_color));
+      setCardVariable('--subicon-color', resolveColor(config.manual_subicon_color, config.custom_subicon_color));
+      const customSubbuttonBackground = resolveColor(config.manual_subbutton_background_color, config.custom_subbutton_background_color);
+      setCardVariable('--subbutton-background-color', customSubbuttonBackground);
+      // Keep the native on/off background and v3.4.2 contrast unless overridden.
+      card.classList.toggle('vsc-custom-subbutton-background', customSubbuttonBackground != null);
+      const iconBackgroundColor = config.hide_icon_background === true ? 'transparent'
+        : resolveColor(config.manual_icon_background_color, config.custom_icon_background_color);
+      setCardVariable('--icon-background-color', iconBackgroundColor);
+      // Without an explicit color the native chain applies. The old fallback
+      // stopped at --bubble-secondary-background-color, which only Bubble
+      // themes define, so the icon circle turned transparent everywhere else.
+      card.classList.toggle('vsc-custom-icon-background', iconBackgroundColor != null);
+
+      // Name and state text
+      const nameColor = resolveColor(config.manual_name_color, config.custom_name_color);
+      setCardVariable('--vsc-name-color', nameColor);
+      card.classList.toggle('vsc-name-color', nameColor != null);
+      const stateColor = resolveColor(config.manual_state_color, config.custom_state_color);
+      setCardVariable('--vsc-state-color', stateColor);
+      card.classList.toggle('vsc-state-color', stateColor != null);
+      const px = (value) => (value == null || value === '') ? null : `${value}px`;
+      setCardVariable('--vsc-name-font-size', px(config.name_font_size));
+      card.classList.toggle('vsc-name-size', px(config.name_font_size) != null);
+      setCardVariable('--vsc-state-font-size', px(config.state_font_size));
+      card.classList.toggle('vsc-state-size', px(config.state_font_size) != null);
+
+      // Corner radii and main background through Bubble Card's own variables
+      // ('card-type' resolves to 'button' on button cards).
+      setCardVariable('--bubble-button-border-radius', px(config.card_border_radius));
+      setCardVariable('--bubble-button-icon-border-radius', px(config.icon_border_radius));
+      setCardVariable('--bubble-sub-button-border-radius', px(config.subbutton_border_radius));
+      const cardBackground = resolveColor(config.manual_card_background_color, config.custom_card_background_color);
+      const cardBackgroundOpacity = config.card_background_opacity ?? 1;
+      let cardBackgroundValue = null;
+      if (cardBackground != null || cardBackgroundOpacity < 1) {
+        const base = cardBackground ??
+          'var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))';
+        cardBackgroundValue = cardBackgroundOpacity < 1
+          ? `color-mix(in srgb, ${base} ${Math.round(cardBackgroundOpacity * 100)}%, transparent)`
+          : base;
       }
+      setCardVariable('--bubble-button-main-background-color', cardBackgroundValue);
+
+      const functionButtonColor = config.enable_function_button_color === true
+        ? (resolveColor(config.manual_function_button_color, config.function_button_color) ?? 'rgba(255, 255, 255, 0.9)')
+        : null;
+      setCardVariable('--function-button-color', functionButtonColor);
+      card.classList.toggle('use-function-button-color', functionButtonColor != null);
+
+      // Hover/active polish was always on before it got a switch, so only an
+      // explicit false turns it off.
+      card.classList.toggle('vsc-interaction-effects', config.enable_interaction_effects !== false);
 
       // Apply background visibility toggling
-      if (config.hide_icon_background === true) {
-        card.style.setProperty('--icon-background-color', 'transparent');
-        card.classList.add('hide-icon-background');
-      } else {
-        card.classList.remove('hide-icon-background');
-      }
+      card.classList.toggle('hide-icon-background', config.hide_icon_background === true);
 
       // Apply sub-button background visibility - automatically hide if helper is enabled
       if (config.hide_subbutton_background === true || config.enable_icon_helper === true) {
@@ -616,177 +865,114 @@ visual_styling_center:
         card.classList.remove('hide-subbutton-background');
       }
 
-      // Apply sub-button background visibility to individual elements
-      const subButtonElements = card.querySelectorAll('.bubble-sub-button');
-      subButtonElements.forEach(button => {
-        if (config.hide_subbutton_background === true || config.enable_icon_helper === true) {
-          button.style.backgroundColor = 'transparent';
-          button.style.boxShadow = 'none';
-          button.style.border = 'none';
-        } else {
-          button.style.backgroundColor = '';
-          button.style.boxShadow = '';
-          button.style.border = '';
-        }
-      });
+      // The CSS .hide-subbutton-background class handles this; avoid inline
+      // writes that could overwrite Bubble Card or another module's own styling.
 
-      // Helper function to get entity color based on state
+      // Restore only inline styles owned by this module. Native Bubble Card
+      // can update other inline styles independently during state changes.
+      function applyOwnedIconColor(icon, color) {
+        if (!icon) return;
+        if (color != null) {
+          if (!Object.prototype.hasOwnProperty.call(icon.dataset, 'vscAppliedColor')) {
+            icon.dataset.vscPreviousColor = icon.style.getPropertyValue('color');
+            icon.dataset.vscPreviousPriority = icon.style.getPropertyPriority('color');
+          }
+          if (icon.style.getPropertyValue('color') !== color || icon.style.getPropertyPriority('color') !== 'important') {
+            icon.style.setProperty('color', color, 'important');
+          }
+          icon.dataset.vscAppliedColor = color;
+        } else if (Object.prototype.hasOwnProperty.call(icon.dataset, 'vscAppliedColor')) {
+          if (icon.style.getPropertyValue('color') === icon.dataset.vscAppliedColor) {
+            if (icon.dataset.vscPreviousColor) {
+              icon.style.setProperty('color', icon.dataset.vscPreviousColor, icon.dataset.vscPreviousPriority);
+            } else {
+              icon.style.removeProperty('color');
+            }
+          }
+          delete icon.dataset.vscAppliedColor;
+          delete icon.dataset.vscPreviousColor;
+          delete icon.dataset.vscPreviousPriority;
+        }
+      }
+
       function getEntityColor(entityId) {
-        if (!entityId || !hass.states[entityId]) return null;
-        const entity = hass.states[entityId];
-        if (entity.state === 'on' && entity.attributes.rgb_color) {
-          const rgb = entity.attributes.rgb_color;
+        const entityState = hass?.states?.[entityId];
+        if (!entityId || !entityState) return null;
+        if (entityState.state === 'on' && Array.isArray(entityState.attributes?.rgb_color)) {
+          const rgb = entityState.attributes.rgb_color;
           return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
         }
         const activeStates = ['on', 'home', 'active', 'open', 'unlocked', 'detected'];
         const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear'];
         const errorStates = ['unavailable', 'unknown'];
-
-        // Check if this is a scene or functional button (these don't have typical states)
-        const isFunctionButton = entityId.startsWith('scene.') || 
-                              entityId.startsWith('script.') || 
-                              entityId.startsWith('automation.');
-
-        if (isFunctionButton && config.enable_function_button_color) {
-          return card.style.getPropertyValue('--function-button-color');
-        } else if (activeStates.indexOf(entity.state) >= 0) {
-          return `rgb(140, 200, 105)`;
-        } else if (inactiveStates.indexOf(entity.state) >= 0 && config.enable_function_button_color) {
-          // Apply the function button color to inactive states too when enabled
-          return card.style.getPropertyValue('--function-button-color');
-        } else if (inactiveStates.indexOf(entity.state) >= 0) {
-          return `rgb(150, 150, 150)`;
-        } else if (errorStates.indexOf(entity.state) >= 0 && config.enable_function_button_color) {
-          // Apply the function button color to error states too when enabled
-          return card.style.getPropertyValue('--function-button-color');
-        } else if (errorStates.indexOf(entity.state) >= 0) {
-          return `rgb(180, 180, 180)`;
+        const isFunction = /^(scene|script|automation)\./.test(entityId);
+        // Home Assistant's theme state colors, falling back to the old fixed ones.
+        const domain = entityId.split('.')[0];
+        const themed = config.use_theme_state_colors === true;
+        const activeColor = themed
+          ? `var(--state-${domain}-active-color, var(--state-active-color, rgb(140, 200, 105)))` : 'rgb(140, 200, 105)';
+        const inactiveColor = themed
+          ? `var(--state-${domain}-inactive-color, var(--state-inactive-color, rgb(150, 150, 150)))` : 'rgb(150, 150, 150)';
+        const errorColor = themed ? 'var(--state-unavailable-color, rgb(180, 180, 180))' : 'rgb(180, 180, 180)';
+        if (isFunction && functionButtonColor != null) return functionButtonColor;
+        if (activeStates.includes(entityState.state)) return activeColor;
+        if (inactiveStates.includes(entityState.state) || errorStates.includes(entityState.state)) {
+          if (functionButtonColor != null) return functionButtonColor;
+          return inactiveStates.includes(entityState.state) ? inactiveColor : errorColor;
         }
         return null;
       }
 
-      // Apply function button color directly to main icon if enabled
-      if (config.enable_function_button_color === true) {
-        const mainIcon = card.querySelector('.bubble-icon');
-        if (mainIcon) {
-          const entityId = this.config.entity;
-          const functionColor = card.style.getPropertyValue('--function-button-color');
-
-          // Check if entity exists and has a state
-          if (!entityId || !hass.states[entityId]) {
-            // No entity defined or entity not found - apply function color
-            if (functionColor) {
-              mainIcon.style.setProperty('color', functionColor, 'important');
-            }
-          } else {
-            // Entity exists - check state
-            const entityState = hass.states[entityId];
-            const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'];
-            const isFunctionButton = entityId.startsWith('scene.') || 
-                                  entityId.startsWith('script.') || 
-                                  entityId.startsWith('automation.');
-
-            if (isFunctionButton || inactiveStates.indexOf(entityState.state) >= 0) {
-              // Apply function button color for functional entities or inactive states
-              if (functionColor) {
-                mainIcon.style.setProperty('color', functionColor, 'important');
-              }
-            }
-          }
-        }
+      function getFunctionOnlyColor(entityId) {
+        if (functionButtonColor == null) return null;
+        const st = hass?.states?.[entityId];
+        if (!entityId || !st || /^(scene|script|automation)\./.test(entityId)) return functionButtonColor;
+        return ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'].includes(st.state)
+          ? functionButtonColor : null;
       }
 
-      // Apply entity-colored main icon
-      if (config.enable_entity_colored_main_icon === true && this.config.entity) {
-        const entityId = this.config.entity;
-        if (entityId && hass.states[entityId]) {
-          const mainIcon = card.querySelector('.bubble-icon');
-          if (mainIcon) {
-            const color = getEntityColor(entityId);
-            if (color) {
-              mainIcon.style.setProperty('color', color, 'important');
-            }
-          }
-        }
-      } else if (!config.manual_icon_color && !config.custom_icon_color && !config.enable_function_button_color) {
-        // Only reset if no custom colors are set and function button color is not enabled
-        const mainIcon = card.querySelector('.bubble-icon');
-        if (mainIcon) {
-          mainIcon.style.removeProperty('color');
-        }
-      }
+      const mainEntityId = this.config.entity;
+      const mainColor = (config.enable_entity_colored_main_icon === true && getEntityColor(mainEntityId)) ||
+        getFunctionOnlyColor(mainEntityId);
+      applyOwnedIconColor(card.querySelector('.bubble-icon'), mainColor);
 
-      // Apply function button color directly to sub-buttons if enabled
-      if (config.enable_function_button_color === true) {
-        const subButtons = this.config.sub_button || [];
-        const functionColor = card.style.getPropertyValue('--function-button-color');
-
-        subButtons.forEach((buttonConfig, index) => {
-          if (!buttonConfig) return;
-          const buttonNumber = index + 1;
-          try {
-            const subButton = card.querySelector(`.bubble-sub-button-${buttonNumber}`);
-            if (!subButton) return;
-            const iconElement = subButton.querySelector('ha-icon');
-            if (!iconElement) return;
-
-            const entityId = buttonConfig.entity;
-
-            // Check if entity exists and has a state
-            if (!entityId || !hass.states[entityId]) {
-              // No entity defined or entity not found - apply function color
-              if (functionColor) {
-                iconElement.style.setProperty('color', functionColor, 'important');
-              }
-            } else {
-              // Entity exists - check state
-              const entityState = hass.states[entityId];
-              const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear', 'unavailable', 'unknown'];
-              const isFunctionButton = entityId.startsWith('scene.') || 
-                                     entityId.startsWith('script.') || 
-                                     entityId.startsWith('automation.');
-
-              if (isFunctionButton || inactiveStates.indexOf(entityState.state) >= 0) {
-                // Apply function button color directly for functional entities or inactive states
-                if (functionColor) {
-                  iconElement.style.setProperty('color', functionColor, 'important');
-                }
-              }
-            }
-          } catch (error) {
-            console.error("Error applying function color to sub-button " + buttonNumber, error);
-          }
+      // Match Bubble Card's actual class numbering in updateGroupButtons().
+      // In mixed layouts explicit groups are indexed first, followed by the
+      // implicit main group, then bottom groups and bottom individual buttons.
+      // Flattening YAML order directly would color the wrong icons.
+      const subButtonConfigs = [];
+      const collectSubButtons = (items) => {
+        if (!Array.isArray(items)) return;
+        items.forEach(item => {
+          if (!item) return;
+          if (Array.isArray(item.group)) collectSubButtons(item.group);
+          else subButtonConfigs.push(item);
         });
-      }
-
-      // Apply entity-colored sub-icons
-      if (config.enable_entity_colored_subicons === true) {
-        const subButtons = this.config.sub_button || [];
-        subButtons.forEach((buttonConfig, index) => {
-          if (!buttonConfig || !buttonConfig.entity) return;
-          const entityId = buttonConfig.entity;
-          if (!entityId || !hass.states[entityId]) return;
-          const buttonNumber = index + 1;
-          try {
-            const subButton = card.querySelector(`.bubble-sub-button-${buttonNumber}`);
-            if (!subButton) return;
-            const iconElement = subButton.querySelector('ha-icon');
-            if (!iconElement) return;
-            const color = getEntityColor(entityId);
-            if (color) {
-              iconElement.style.setProperty('color', color, 'important');
-            }
-          } catch (error) {
-            console.error("Error applying color to sub-button " + buttonNumber, error);
-          }
-        });
-      } else if (!config.enable_function_button_color) {
-        // Only reset if function button color is not enabled
-        const iconElements = card.querySelectorAll('.bubble-sub-button ha-icon');
-        iconElements.forEach(icon => {
-          icon.style.removeProperty('color');
-        });
-      }
+      };
+      const configuredSubButtons = this.config.sub_button;
+      const mainItems = Array.isArray(configuredSubButtons) ? configuredSubButtons
+        : (Array.isArray(configuredSubButtons?.main) ? configuredSubButtons.main : []);
+      const bottomItems = Array.isArray(configuredSubButtons?.bottom) ? configuredSubButtons.bottom : [];
+      const mainGroups = mainItems.filter(item => Array.isArray(item?.group) && item.group.length > 0);
+      const bottomGroups = bottomItems.filter(item => Array.isArray(item?.group) && item.group.length > 0);
+      const mainSingles = mainItems.filter(item => item && !Array.isArray(item.group));
+      const bottomSingles = bottomItems.filter(item => item && !Array.isArray(item.group));
+      const mainLayout = configuredSubButtons?.main_layout ?? 'inline';
+      const mainUsesAutoGroup = mainLayout === 'rows' || mainGroups.length > 0 ||
+        bottomGroups.length > 0 || bottomSingles.length > 0;
+      if (!mainUsesAutoGroup) collectSubButtons(mainSingles);
+      mainGroups.forEach(item => collectSubButtons(item.group));
+      if (mainUsesAutoGroup) collectSubButtons(mainSingles);
+      bottomGroups.forEach(item => collectSubButtons(item.group));
+      collectSubButtons(bottomSingles);
+      subButtonConfigs.forEach((buttonConfig, index) => {
+        const icon = card.querySelector(`.bubble-sub-button-${index + 1} .bubble-sub-button-icon`);
+        // Bubble Card falls back to the parent entity when the sub-button has none.
+        const entityId = buttonConfig.entity ?? this.config.entity;
+        const color = (config.enable_entity_colored_subicons === true && getEntityColor(entityId)) ||
+          getFunctionOnlyColor(entityId);
+        applyOwnedIconColor(icon, color);
+      });
 
       // Icon Contrast Helper Implementation
       if (config.enable_icon_helper === true) {
@@ -799,16 +985,16 @@ visual_styling_center:
         } else if (config.helper_color) {
           const colorArray = config.helper_color;
           helperColor = Array.isArray(colorArray)
-            ? `rgba(${colorArray[0]}, ${colorArray[1]}, ${colorArray[2]}, ${config.helper_opacity || 0.7})`
+            ? `rgba(${colorArray[0]}, ${colorArray[1]}, ${colorArray[2]}, ${config.helper_opacity ?? 0.7})`
             : colorArray;
         } else {
           // Default to a light grey if no color specified
-          helperColor = `rgba(255, 255, 255, ${config.helper_opacity || 0.7})`;
+          helperColor = `rgba(255, 255, 255, ${config.helper_opacity ?? 0.7})`;
         }
 
-        card.style.setProperty('--helper-color', helperColor);
-        card.style.setProperty('--helper-size', config.helper_size_ratio || 0.7);
-        card.style.setProperty('--fade-strength', config.fade_strength || 1.0);
+        setCardVariable('--helper-color', helperColor);
+        setCardVariable('--helper-size', config.helper_size_ratio ?? 0.7);
+        setCardVariable('--fade-strength', config.fade_strength ?? 1.0);
 
         if (config.enable_helper_fade === true) {
           card.classList.add('helper-fade-enabled');
@@ -832,7 +1018,7 @@ visual_styling_center:
       }
 
       // Slider Contrast Helper Implementation - Only apply when Card Background gradient is active
-      if (config.enable_slider_helper === true && config.gradient_target === 'background' && config.enable_gradient === true) {
+      if (config.enable_slider_helper === true && gradientTarget === 'background' && config.enable_gradient === true) {
         card.classList.add('slider-helper-enabled');
 
         // Set slider helper colors and properties
@@ -842,16 +1028,16 @@ visual_styling_center:
         } else if (config.slider_helper_color) {
           const colorArray = config.slider_helper_color;
           sliderHelperColor = Array.isArray(colorArray)
-            ? `rgba(${colorArray[0]}, ${colorArray[1]}, ${colorArray[2]}, ${config.slider_helper_opacity || 0.7})`
+            ? `rgba(${colorArray[0]}, ${colorArray[1]}, ${colorArray[2]}, ${config.slider_helper_opacity ?? 0.7})`
             : colorArray;
         } else {
           // Default to black if no color specified
-          sliderHelperColor = `rgba(0, 0, 0, ${config.slider_helper_opacity || 0.7})`;
+          sliderHelperColor = `rgba(0, 0, 0, ${config.slider_helper_opacity ?? 0.7})`;
         }
 
-        card.style.setProperty('--slider-helper-color', sliderHelperColor);
-        card.style.setProperty('--slider-helper-size', config.slider_helper_size_ratio || 0.7);
-        card.style.setProperty('--slider-fade-strength', config.slider_fade_strength || 1.0);
+        setCardVariable('--slider-helper-color', sliderHelperColor);
+        setCardVariable('--slider-helper-size', config.slider_helper_size_ratio ?? 0.7);
+        setCardVariable('--slider-fade-strength', config.slider_fade_strength ?? 1.0);
 
         if (config.enable_slider_helper_fade === true) {
           card.classList.add('slider-helper-fade-enabled');
@@ -862,23 +1048,20 @@ visual_styling_center:
         card.classList.remove('slider-helper-enabled', 'slider-helper-fade-enabled');
       }
 
-      // Reset and apply gradient effects
-      card.classList.remove('use-gradient-slider');
-      card.classList.remove('use-gradient-background');
-      card.style.removeProperty('--slider-gradient');
-      card.style.removeProperty('--card-gradient');
+      // Collect the final gradient before updating the DOM.
+      let appliedGradient = null;
 
-      if (config.enable_gradient === true && config.gradient_entity) {
-        const entityId = config.gradient_entity;
-        const entityState = hass.states[entityId];
+      if (config.enable_gradient === true && gradientEntity) {
+        const entityId = gradientEntity;
+        const entityState = hass?.states?.[entityId];
         let coloredLights = [];
 
         // Get light colors from group or single light
-        if (entityState && entityState.attributes && entityState.attributes.entity_id) {
+        if (Array.isArray(entityState?.attributes?.entity_id)) {
           entityState.attributes.entity_id.forEach(childId => {
             if (childId.startsWith('light.')) {
-              const lightState = hass.states[childId];
-              if (lightState && lightState.state === 'on' && lightState.attributes.rgb_color) {
+              const lightState = hass?.states?.[childId];
+              if (lightState?.state === 'on' && Array.isArray(lightState.attributes?.rgb_color) && lightState.attributes.rgb_color.length >= 3) {
                 coloredLights.push({
                   rgb: lightState.attributes.rgb_color,
                   brightness: lightState.attributes.brightness || 255,
@@ -887,7 +1070,7 @@ visual_styling_center:
               }
             }
           });
-        } else if (entityState && entityState.state === 'on' && entityState.attributes.rgb_color) {
+        } else if (entityState?.state === 'on' && Array.isArray(entityState.attributes?.rgb_color) && entityState.attributes.rgb_color.length >= 3) {
           coloredLights.push({
             rgb: entityState.attributes.rgb_color,
             brightness: entityState.attributes.brightness || 255,
@@ -895,7 +1078,20 @@ visual_styling_center:
           });
         }
 
-        if (coloredLights.length > 0) {
+        // Always read child states above: Bubble Card's trackedHass observes
+        // these dependencies and will refresh on external child RGB changes.
+        // hasChanged only skips expensive hue sorting when the inputs are equal.
+        const gradientProperty = gradientTarget === 'background' ? '--card-gradient' : '--slider-gradient';
+        const gradientInputs = coloredLights.map(light => light.rgb.slice(0, 3).join(','));
+        // 'to right' equals 90deg and keeps the previous output when unset.
+        const gradientDirection = config.gradient_angle == null ? 'to right' : `${config.gradient_angle}deg`;
+        const needsGradientRebuild = typeof hasChanged !== 'function' ||
+          hasChanged('vsc-gradient', gradientEntity, gradientTarget, config.disable_default_gradient === true, gradientInputs, gradientDirection);
+        const previousGradient = card.style.getPropertyValue(gradientProperty);
+
+        if (!needsGradientRebuild && previousGradient) {
+          appliedGradient = previousGradient;
+        } else if (coloredLights.length > 0) {
           // RGB to HSL conversion helper
           const rgbToHsl = (r, g, b) => {
             r /= 255; g /= 255; b /= 255;
@@ -947,45 +1143,66 @@ visual_styling_center:
             gradientColors = stops.map(stop => `rgb(${stop.rgb[0]}, ${stop.rgb[1]}, ${stop.rgb[2]}) ${stop.position}%`).join(', ');
           }
 
-          // Apply the gradient to the target element
-          const gradient = `linear-gradient(to right, ${gradientColors})`;
-          if (config.gradient_target === 'background') {
-            card.style.setProperty('--card-gradient', gradient);
-            card.classList.add('use-gradient-background');
-          } else {
-            card.style.setProperty('--slider-gradient', gradient);
-            card.classList.add('use-gradient-slider');
-          }
+          appliedGradient = `linear-gradient(${gradientDirection}, ${gradientColors})`;
         } else if (config.disable_default_gradient !== true) {
           // Fallback rainbow gradient if no colored lights are found and option is not disabled
-          const defaultGradient = 'linear-gradient(to right, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3)';
-          if (config.gradient_target === 'background') {
-            card.style.setProperty('--card-gradient', defaultGradient);
-            card.classList.add('use-gradient-background');
-          } else {
-            card.style.setProperty('--slider-gradient', defaultGradient);
-            card.classList.add('use-gradient-slider');
-          }
+          appliedGradient = `linear-gradient(${gradientDirection}, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3)`;
         }
       }
 
-      // We use a more gentle approach for slider updates
-      // Only watch for HA state changes to avoid interfering with user interactions
-      if (this.config.entity && this.config.entity.startsWith('light.')) {
-        // Create our own one-time state update without interfering with the standard slider behavior
-        const updateInitialSliderState = () => {
-          const entityState = hass.states[this.config.entity];
-          if (entityState && entityState.state === 'on' && entityState.attributes.brightness) {
-            // Skip updating for now - standard HA mechanisms will handle this
-            // This prevents any interference with the native slider behavior
-          }
-        };
+      const backgroundGradientActive = appliedGradient != null && gradientTarget === 'background';
+      card.classList.toggle('use-gradient-background', backgroundGradientActive);
+      card.classList.toggle('use-gradient-slider', appliedGradient != null && !backgroundGradientActive);
+      setCardVariable('--card-gradient', backgroundGradientActive ? appliedGradient : null);
+      setCardVariable('--slider-gradient', backgroundGradientActive ? null : appliedGradient);
 
-        // Initial update is optional and only happens once
-        if (!this._hasInitialSliderUpdate) {
-          updateInitialSliderState();
-          this._hasInitialSliderUpdate = true;
-        }
+      // Restore our own changes when disconnected OR when the module is
+      // removed from a still-mounted card using setConfig(). Bubble Card's
+      // native onTeardown currently runs on disconnect, not on this edit path.
+      const cleanupVSC = () => {
+        Array.from(ownedVariables.keys()).forEach(restoreOwnedVariable);
+        applyOwnedIconColor(card.querySelector('.bubble-icon'), null);
+        card.querySelectorAll('.bubble-sub-button-icon').forEach(icon => applyOwnedIconColor(icon, null));
+        initialClasses.forEach((wasPresent, name) => card.classList.toggle(name, wasPresent));
+        if (card._vscOwnedVariables === ownedVariables) delete card._vscOwnedVariables;
+        if (card._vscInitialClasses === initialClasses) delete card._vscInitialClasses;
+      };
+      // Update the current cleanup callback on each pass without stacking hooks.
+      this._vscCleanupCurrent = cleanupVSC;
+      if (typeof this.setConfig === 'function' && !this._vscSetConfigWrapper) {
+        const host = this;
+        const originalSetConfig = this.setConfig;
+        // VSC is applied either through the card's `modules:` list (the normal
+        // way, "!id" excludes it) or embedded in `styles`. A global module is
+        // in neither, so its removal cannot be seen here and is left alone.
+        const usesVSC = (cfg) => {
+          const modules = Array.isArray(cfg?.modules) ? cfg.modules
+            : (typeof cfg?.modules === 'string' ? [cfg.modules] : []);
+          return (modules.includes('visual_styling_center') &&
+              !modules.includes('!visual_styling_center')) ||
+            String(cfg?.styles ?? '').includes('this.config.visual_styling_center');
+        };
+        const wrappedSetConfig = function(nextConfig) {
+          // Only react to removing VSC: a still-active VSC rewrites its own
+          // state on the next style pass anyway.
+          if (usesVSC(host.config) && !usesVSC(nextConfig)) {
+            host._vscCleanupCurrent?.();
+          }
+          return originalSetConfig.call(this, nextConfig);
+        };
+        this._vscSetConfigWrapper = { originalSetConfig, wrappedSetConfig };
+        this.setConfig = wrappedSetConfig;
+      }
+      if (typeof onTeardown === 'function') {
+        onTeardown(() => {
+          cleanupVSC();
+          const wrapper = this._vscSetConfigWrapper;
+          if (wrapper && this.setConfig === wrapper.wrappedSetConfig) {
+            this.setConfig = wrapper.originalSetConfig;
+          }
+          delete this._vscSetConfigWrapper;
+          delete this._vscCleanupCurrent;
+        });
       }
 
       return '';
@@ -1003,25 +1220,11 @@ visual_styling_center:
       box-sizing: border-box !important;
       height: 100% !important;
     }
-    /* Style for regular range fill (slider) */
-    .bubble-range-fill {
-      background-color: var(--slider-color, var(--bubble-accent-color, var(--accent-color))) !important;
-      z-index: 1 !important;
-      opacity: 1 !important;
-    }
-
-    /* Enhance clickability of slider */
-    .bubble-range-slider {
-      cursor: pointer !important;
-      z-index: 1 !important;
-    }
-
-    .bubble-range-slider:hover {
-      cursor: ew-resize !important;
-    }
+    /* Native Bubble Card manages default slider colors and interaction states.
+       VSC only overrides the main slider when an explicit gradient is active. */
 
     /* Gradient slider styles - target only the slider fill */
-    .use-gradient-slider .bubble-range-fill {
+    .use-gradient-slider .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill {
       background: var(--slider-gradient) !important;
       background-size: 100% 100% !important;
       background-position: center !important;
@@ -1036,7 +1239,7 @@ visual_styling_center:
     }
 
     /* Improve slider visibility with background gradient - move to bottom edge */
-    .use-gradient-background .bubble-range-fill {
+    .use-gradient-background .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill {
       background-color: rgba(255, 255, 255, var(--slider-bg-opacity, 0.6)) !important; /* Higher contrast */
       box-shadow: 0 0 4px rgba(255, 255, 255, 0.8) !important; /* Glow effect */
       height: 12px !important; /* Thinner height */
@@ -1047,12 +1250,12 @@ visual_styling_center:
     }
 
     /* Slider Contrast Helper Implementation - creating a glow effect around the edges */
-    .slider-helper-enabled.use-gradient-background .bubble-range-fill {
+    .slider-helper-enabled.use-gradient-background .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill {
       /* Maintain existing styles but add glow effect */
       box-shadow: 0 0 calc(3px * var(--slider-helper-size, 0.7)) var(--slider-helper-color, rgba(0, 0, 0, 0.7)) !important;
     }
 
-    .slider-helper-fade-enabled.use-gradient-background .bubble-range-fill {
+    .slider-helper-fade-enabled.use-gradient-background .bubble-button-card-container > .bubble-range-slider > .bubble-range-fill {
       /* For the fade effect, a more complex shadow with variable fade strength */
       box-shadow: 
         0 0 calc(2px * var(--slider-helper-size, 0.7)) var(--slider-helper-color, rgba(0, 0, 0, 0.7)),
@@ -1073,11 +1276,24 @@ visual_styling_center:
       row-gap: var(--subbutton-row-spacing, 10px) !important;
       column-gap: var(--subbutton-column-spacing, 10px) !important;
     }
+    /* Since v3 the buttons can sit inside groups (rows layout, explicit or
+       bottom groups), where the container gap no longer reaches them. The
+       8px fallback is Bubble Card's own group gap, so unset options change
+       nothing. */
+    .bubble-sub-button-container .bubble-sub-button-group,
+    .bubble-sub-button-bottom-container .bubble-sub-button-group {
+      row-gap: var(--subbutton-row-spacing, 8px);
+      column-gap: var(--subbutton-column-spacing, 8px);
+    }
     /* Make sub-buttons size independent from main icon margin */
+    /* A sub-button's own "custom_height" (set by Bubble Card as
+       --bubble-sub-button-height on that button) wins over the module size. */
     .bubble-sub-button {
-      height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px) !important;
-      min-height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px) !important;
-      background-color: var(--subbutton-background-color, var(--bubble-sub-button-background-color, var(--bubble-secondary-background-color))) !important;
+      height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px)) !important;
+      min-height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px)) !important;
+    }
+    .vsc-custom-subbutton-background .bubble-sub-button {
+      background-color: var(--subbutton-background-color) !important;
     }
     /* Hide sub-button backgrounds when option is enabled - with !important to override inline styles */
     .hide-subbutton-background .bubble-sub-button {
@@ -1093,7 +1309,22 @@ visual_styling_center:
       height: calc(var(--icon-size-multiplier, 1) * var(--icon-background-ratio, 1) * 38px) !important;
       width: calc(var(--icon-size-multiplier, 1) * var(--icon-background-ratio, 1) * 38px) !important;
       min-width: calc(var(--icon-size-multiplier, 1) * var(--icon-background-ratio, 1) * 38px) !important;
-      background-color: var(--icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color))) !important;
+    }
+    .vsc-custom-icon-background .bubble-icon-container {
+      background-color: var(--icon-background-color) !important;
+    }
+    /* Name and state text (only while an option is set) */
+    .vsc-name-color .bubble-name {
+      color: var(--vsc-name-color) !important;
+    }
+    .vsc-state-color .bubble-state {
+      color: var(--vsc-state-color) !important;
+    }
+    .vsc-name-size .bubble-name {
+      font-size: var(--vsc-name-font-size) !important;
+    }
+    .vsc-state-size .bubble-state {
+      font-size: var(--vsc-state-font-size) !important;
     }
     /* Specific rule to fully hide icon background when enabled */
     .hide-icon-background .bubble-icon-container {
@@ -1145,7 +1376,7 @@ visual_styling_center:
     }
     /* Multi-row layout support with independent sub-button sizing */
     .rows-2 .bubble-sub-button {
-      height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 20px) !important;
+      height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 20px)) !important;
     }
     /* Large layout sub-button margin */
     .large .bubble-sub-button-container {
@@ -1208,24 +1439,31 @@ visual_styling_center:
       background: radial-gradient(circle, var(--helper-color, rgba(255, 255, 255, 0.7)) 0%, transparent calc(100% * var(--fade-strength, 1.0))) !important;
     }
 
+    /* Interaction effects (enable_interaction_effects, on unless set to false) */
     /* Make sub-button icons brighter and more visible */
-    .bubble-sub-button ha-icon {
+    .vsc-interaction-effects .bubble-sub-button ha-icon {
       opacity: 0.9 !important;
     }
 
     /* Enhance icons in active states for better visibility */
-    .is-on .bubble-icon {
+    .vsc-interaction-effects .is-on .bubble-icon,
+    .vsc-interaction-effects.is-on .bubble-icon {
       opacity: 1 !important;
       filter: brightness(1.1) !important;
     }
 
     /* Highlight elements on hover/focus for better interaction cues */
-    .bubble-sub-button:hover ha-icon,
-    .bubble-sub-button:focus ha-icon,
-    .bubble-icon-container:hover .bubble-icon,
-    .bubble-icon-container:focus .bubble-icon {
+    .vsc-interaction-effects .bubble-sub-button:hover ha-icon,
+    .vsc-interaction-effects .bubble-sub-button:focus ha-icon,
+    .vsc-interaction-effects .bubble-icon-container:hover .bubble-icon,
+    .vsc-interaction-effects .bubble-icon-container:focus .bubble-icon {
       filter: brightness(1.2) !important;
     }
+```
+</details>
 
-   return '';
-    })()}
+### Screenshots
+
+![Options](./Options.png)
+![Gradient slider](./Gradient_Slider.png)
+![Gradient background helper](./Gradient_Background_Helper.png)
