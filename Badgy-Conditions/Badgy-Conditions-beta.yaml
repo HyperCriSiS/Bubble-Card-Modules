@@ -1,6 +1,6 @@
 badgy-condition-helper-beta:
   name: "Badgy Condition Helper (Beta)"
-  version: "v2026.10.19-beta.6"
+  version: "v2026.10.29-beta.7"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   unsupported:
@@ -10,56 +10,17 @@ badgy-condition-helper-beta:
     - pop-up
     - separator
   description: |
-    Advanced badge and effect helper module with conditional logic.
-
-    Badgy 2026 beta — validated in automated Bubble Card 3.4.2 tests (full HA UI pending):
-    - New (beta.6): rules for badges and effects, badge effects set on the badge itself,
-      optional fallback when no rule matches, clearer editor labels and visibility.
-    - Fixed (beta.5): badges rebuilt by Bubble Card are filled again instead of staying empty;
-      a rule's own color wins over a dynamic color of its parent entry.
-    - Changed: background opacity only fades the background, not the icon or text.
-    - Fixed: sub-button & icon effects now stop when their condition turns false
-      (previously the animation kept running until a full page reload).
-    - Improved: effects are applied idempotently, so animations are no longer
-      restarted on every unrelated Home Assistant state change.
-    - Improved: badges are updated in place instead of being recreated, which
-      avoids restarting badge animations and reduces DOM churn.
-    - Improved: conditions now use Bubble Card's native checkConditionsMet when
-      available (adds support for time/template/sun/zone/...), with a safe
-      fallback to the built-in evaluator.
-    - Cleanup: removed the non-functional state_changed subscription and the
-      custom disconnectedCallback override.
-
-    Features:
-    - Entity badges: Display entity states or attributes on sub-buttons
-    - Icon badges: Show icon indicators on sub-buttons
-    - Sub-button backgrounds: Change background colors based on conditions
-    - Icon effects: Apply animations to main and sub-button icons
-    - Badge effects: Apply animations to badges
-    - Main icon background: Change the main icon background conditionally
-    - Sub-button effects: Apply animations (including color for glow) to the entire sub-button container
-    - Main icon badges, icon colors, icon replacement, card glow and global defaults
-    - Rule lists (first match wins) and dynamic colors from templates or entities
-
-    All features support Home Assistant-style conditions for state-based logic.
-  suggestions_code: |-
-    // Optional Card Picker shortcut. No network requests, timers, or side effects.
-    const domain = helpers.domainOf(entity);
-    if (domain !== "sensor" && domain !== "binary_sensor") return null;
-    const badge = { entity, scale: 1.1 };
-    if (domain === "binary_sensor") badge.translated_state = true;
-    return {
-      label: "Live main-icon badge",
-      config: {
-        card_type: "button",
-        entity,
-        name: helpers.friendlyName(entity),
-        modules: [module.id],
-        [module.id]: {
-          entity_badges: { main: badge },
-        },
-      },
-    };
+    Badges, conditional colors, backgrounds, icons and animations for
+    sub-buttons and the main icon of a Bubble Card.<br><br>
+    <b>Features</b><br>
+    • Entity and icon badges on sub-buttons and the main icon<br>
+    • Conditional icon colors, backgrounds and icons<br>
+    • Effects for icons, sub-buttons, badges and a card glow<br>
+    • Rule lists (first match wins) with an optional fallback<br>
+    • Dynamic colors from a template or an entity attribute<br>
+    • Global defaults<br><br>
+    Large layout recommended for badges on sub-buttons.
+    Changelog and upgrade notes: UPGRADE-2026.md in the GitHub repository.
   code: |
     /* =============================
        CSS for the badge visuals

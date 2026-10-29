@@ -20,7 +20,7 @@ paths are preserved**. Existing cards should not require migration.
 
 ## Bubble Card v3.4.2 hardening (2026-10-15)
 
-The isolated import artifact is currently `v2026.10.19-beta.6`.
+The isolated import artifact is currently `v2026.10.29-beta.7`.
 
 - All Badgy animation CSS class names, keyframes, and effect color variables
   are namespaced. The effect cleanup no longer removes unowned classes.
@@ -35,13 +35,10 @@ The isolated import artifact is currently `v2026.10.19-beta.6`.
   `overflow-clip-margin` on just the card with these opt-in badges; unlike
   `overflow: visible`, this preserves Bubble Card's no-scroll clipping behavior.
 - The native `hasChanged()` hook gates unchanged badge/background updates,
-  using live DOM element identity as part of each fingerprint.
+  using a per-node token (since beta.5) so rebuilt DOM is always refilled.
 - `onTeardown()` restores owned CSS/icons and removes owned badges/effects when
   Bubble Card disconnects a card, without patching its lifecycle callbacks.
-- `suggestions_code` offers one opt-in main-icon badge configuration for a
-  selected sensor or binary sensor in Bubble Card 3.4.2's Card Picker.
-
-The native Card Picker and visual editor still require testing in a real HA
+The visual editor still requires testing in a real HA
 frontend; neither the Node mock nor the standalone Chromium smoke test reproduces
 Home Assistant's real editor, entity subscriptions or shadow DOM.
 
@@ -53,6 +50,14 @@ Home Assistant's real editor, entity subscriptions or shadow DOM.
 - The README card example now has a module-ID string in `modules:` and a
   separate `badgy-condition-helper:` configuration block.
 - Automated tests verify custom text and correct example YAML.
+
+## Beta.7 cleanup (2026-10-29)
+
+- The module description shown in Bubble Card's module list is short and
+  formatted with HTML line breaks; the changelog lives only in this file.
+- Removed the Card Picker suggestion (`suggestions_code`). It offered a main
+  icon badge with the card's own entity, which duplicated the state the
+  button already shows, and appeared for every sensor in the Card Picker.
 
 ## Beta.6 editor and rule changes (2026-10-19)
 

@@ -31,8 +31,8 @@ full Home Assistant frontend. None of the checkboxes below are considered comple
       it brings the separate effect back.
 - [ ] Global defaults: sub-button badge offsets do not move main icon badges;
       the main icon badge offsets do.
-- [ ] Test the new Card Picker suggestion on a `sensor` and `binary_sensor`.
-      It should use the beta module and not appear for an unrelated `light`.
+- [ ] The module description in the module list shows line breaks and a
+      short feature list, not one long paragraph.
 
 ## Rendering and state changes
 
