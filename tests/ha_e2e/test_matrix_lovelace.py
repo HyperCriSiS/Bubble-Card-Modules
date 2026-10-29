@@ -240,7 +240,8 @@ class LayoutThemeMatrix(base.RealLovelace):
                 self.wait_entity("light.vsc_child",
                                  lambda e:e["state"]=="on" and e["attributes"].get("brightness")==128)
                 page=self.open(scheme,"gestures")
-                self.wait_cards(("Gesture Overlay","Gesture Hold"),lambda c:c["icon"]==RED)
+                self.wait_cards(("Gesture Overlay",),lambda c:c["icon"]==RED)
+                self.wait_cards(("Gesture Hold",),lambda c:c["icon"]==GREEN)
                 card=page.locator("bubble-card").nth(self.card_index("Gesture Overlay"))
                 state=lambda:card.evaluate("""el => ({
                     open:!!el.card?.querySelector('.bubble-sub-slider-wrapper:not(.is-hidden)'),

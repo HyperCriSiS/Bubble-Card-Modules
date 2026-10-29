@@ -62,7 +62,7 @@ class HAContracts(unittest.TestCase):
         self.assertEqual(views["themed"]["theme"],"VSC E2E Theme")
         gestures=views["gestures"]["cards"]
         self.assertNotIn("always_visible",gestures[0]["sub_button"]["main"][0])
-        self.assertEqual(gestures[1]["button_action"]["hold_action"]["action"],"perform-action")
+        self.assertEqual(gestures[1]["button_action"]["hold_action"]["action"],"toggle")
         self.assertIn("VSC E2E Theme",make_config()["frontend"]["themes"])
         self.assertEqual(views["sections"]["type"],"sections")
         native=views["sections"]["sections"][0]["cards"][1]

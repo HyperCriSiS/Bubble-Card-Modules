@@ -127,12 +127,10 @@ def make_dashboard(code, combined_code="", badgy_code=""):
         {"title":"Gestures","path":"gestures","cards":[
             button("Gesture Overlay","light.vsc_main",matrix,
                    {"main":[{"entity":"light.vsc_child","sub_button_type":"slider"}]}),
-            *[dict(button(name,"light.vsc_main",opts),button_type="name",
+            *[dict(button(name,"light.vsc_child",opts),button_type="name",
                    # The card body's actions live under button_action in Bubble Card.
                    button_action={"tap_action":{"action":"none"},
-                                  "hold_action":{"action":"perform-action",
-                                                 "perform_action":"input_boolean.turn_off",
-                                                 "target":{"entity_id":"input_boolean.vsc_child_enabled"}}})
+                                  "hold_action":{"action":"toggle"}})
               for name,opts in (("Gesture Hold",matrix),("Gesture Hold Native",None))]]},
         {"title":"Away","path":"away","cards":[{"type":"markdown","content":"Lifecycle navigation target"}]}
     ]}
