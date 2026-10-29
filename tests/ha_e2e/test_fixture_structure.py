@@ -60,6 +60,9 @@ class HAContracts(unittest.TestCase):
         self.assertIn("badgy-condition-helper",matrix[4])
         self.assertEqual(matrix[5]["card_type"],"pop-up")
         self.assertEqual(views["themed"]["theme"],"VSC E2E Theme")
+        gestures=views["gestures"]["cards"]
+        self.assertNotIn("always_visible",gestures[0]["sub_button"]["main"][0])
+        self.assertEqual(gestures[1]["hold_action"]["action"],"perform-action")
         self.assertIn("VSC E2E Theme",make_config()["frontend"]["themes"])
         self.assertEqual(views["sections"]["type"],"sections")
         native=views["sections"]["sections"][0]["cards"][1]

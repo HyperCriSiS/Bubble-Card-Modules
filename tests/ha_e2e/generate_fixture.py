@@ -123,6 +123,14 @@ def make_dashboard(code, combined_code="", badgy_code=""):
             button("Themed Native","light.vsc_main"),
             button("Themed Custom BG","light.vsc_main",
                    dict(matrix,custom_card_background_color=[10,20,30]))]},
+        # Native gestures under VSC: overlay sub-slider and hold action.
+        {"title":"Gestures","path":"gestures","cards":[
+            button("Gesture Overlay","light.vsc_main",matrix,
+                   {"main":[{"entity":"light.vsc_child","sub_button_type":"slider"}]}),
+            dict(button("Gesture Hold","light.vsc_main",matrix),button_type="name",
+                 tap_action={"action":"none"},
+                 hold_action={"action":"perform-action","perform_action":"input_boolean.turn_off",
+                              "target":{"entity_id":"input_boolean.vsc_child_enabled"}})]},
         {"title":"Away","path":"away","cards":[{"type":"markdown","content":"Lifecycle navigation target"}]}
     ]}
 

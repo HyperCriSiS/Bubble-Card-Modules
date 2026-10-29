@@ -228,4 +228,56 @@ class LayoutThemeMatrix(base.RealLovelace):
                 self.shot("mobile_popup_"+scheme)
                 self.assertFalse(self.errors,self.errors)
 
+    def card_index(self,name):
+        return self.page.locator("bubble-card").evaluate_all(
+            "(els,n) => els.findIndex(el => el.config?.name === n)",name)
+
+    def test_30_overlay_sub_slider_and_hold_gesture(self):
+        for scheme in SCHEMES:
+            with self.subTest(scheme=scheme):
+                self.service("input_number","set_value","input_number.vsc_child_brightness",value=128)
+                self.service("input_boolean","turn_on","input_boolean.vsc_child_enabled")
+                self.wait_entity("light.vsc_child",
+                                 lambda e:e["state"]=="on" and e["attributes"].get("brightness")==128)
+                page=self.open(scheme,"gestures")
+                self.wait_cards(("Gesture Overlay","Gesture Hold"),lambda c:c["icon"]==RED)
+                card=page.locator("bubble-card").nth(self.card_index("Gesture Overlay"))
+                state=lambda:card.evaluate("""el => ({
+                    open:!!el.card?.querySelector('.bubble-sub-slider-wrapper:not(.is-hidden)'),
+                    iconHidden:!!el.card?.querySelector('.bubble-icon-container.is-hidden'),
+                    icon:el.card?.querySelector('.bubble-icon')?.style.color||'',
+                    owned:!!el.card?._vscOwnedVariables
+                })""")
+                self.assertFalse(state()["open"],state())
+                # Tap opens the native overlay slider in front of the card.
+                card.locator(".bubble-sub-button-1").first.click()
+                opened=self.wait_value(state,lambda d:d["open"] and d["iconHidden"])
+                self.assertTrue(opened["owned"],opened)
+                slider=card.locator(".bubble-sub-slider-wrapper .bubble-range-slider").first
+                bounds=self.wait_slider_layout(slider,page=page)
+                y=bounds["y"]+bounds["height"]/2
+                page.mouse.move(bounds["x"]+bounds["width"]*0.2,y)
+                page.mouse.down()
+                page.mouse.move(bounds["x"]+bounds["width"]*0.85,y,steps=10)
+                page.mouse.up()
+                self.wait_entity("input_number.vsc_child_brightness",
+                                 lambda e:abs(float(e["state"])-128)>=10,timeout=25)
+                # The close button collapses it; VSC's colors are intact afterwards.
+                card.locator(".bubble-sub-slider-close").first.click()
+                closed=self.wait_value(state,lambda d:not d["open"] and not d["iconHidden"])
+                self.assertEqual(closed["icon"],RED,closed)
+                self.assertTrue(closed["owned"],closed)
+
+                # A real long press fires the card's hold action in HA.
+                hold=page.locator("bubble-card").nth(self.card_index("Gesture Hold"))
+                target=hold.locator(".bubble-name").first
+                box=target.bounding_box()
+                page.mouse.move(box["x"]+box["width"]/2,box["y"]+box["height"]/2)
+                page.mouse.down()
+                page.wait_for_timeout(900)
+                page.mouse.up()
+                self.wait_entity("light.vsc_child",lambda e:e["state"]=="off",timeout=15)
+                self.shot("gestures_"+scheme)
+                self.assertFalse(self.errors,self.errors)
+
 if __name__=="__main__":unittest.main()
