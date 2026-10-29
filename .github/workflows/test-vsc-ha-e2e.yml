@@ -6,6 +6,7 @@ on:
       - 'Visual-Styling-Center/**'
       - 'tests/ha_e2e/**'
       - 'Sub-Button-Below-Normal-Layout/**'
+      - 'Badgy-Conditions/**'
       - '.github/workflows/test-vsc-ha-e2e.yml'
   workflow_dispatch:
 

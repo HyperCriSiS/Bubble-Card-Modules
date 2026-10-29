@@ -7,6 +7,8 @@ import yaml
 
 MODULE_ID = "visual_styling_center"
 COMBINED_MODULE_ID = "subbutton_below_normal_layout"
+BADGY_MODULE_ID = "badgy-condition-helper"
+THEME = "VSC E2E Theme"
 
 def extract_module(markdown, module_id=MODULE_ID):
     fence = re.escape(chr(96) * 3)
@@ -59,10 +61,16 @@ def make_config():
             "dashboards":{"lovelace-vsc-e2e":{"mode":"yaml","filename":"ui-lovelace-vsc-e2e.yaml",
                 "title":"VSC E2E","icon":"mdi:test-tube","show_in_sidebar":True}}
         },
+        # A user theme with distinct light/dark surfaces for the theme matrix.
+        "frontend":{"themes":{THEME:{"modes":{
+            "light":{"card-background-color":"rgb(250, 240, 200)",
+                     "secondary-background-color":"rgb(250, 240, 200)"},
+            "dark":{"card-background-color":"rgb(20, 30, 60)",
+                    "secondary-background-color":"rgb(20, 30, 60)"}}}}},
         "logger":{"default":"warning"}
     }
 
-def make_dashboard(code, combined_code=""):
+def make_dashboard(code, combined_code="", badgy_code=""):
     def button(name,entity,options=None,subs=None):
         card={"type":"custom:bubble-card","card_type":"button","button_type":"slider",
               "entity":entity,"name":name}
@@ -100,12 +108,30 @@ def make_dashboard(code, combined_code=""):
             # VSC combined with another styling module of this repository.
             dict(button("Matrix Combined","light.vsc_main",matrix,
                         {"main":[{"entity":"light.vsc_child"}]}),styles=code+"\n"+combined_code),
+            # VSC together with Badgy on the same sub-button.
+            dict(button("Matrix Badgy","light.vsc_main",matrix,{"main":[{"entity":"light.vsc_child"}]}),
+                 styles=code+"\n"+badgy_code,
+                 **{BADGY_MODULE_ID:{"icon_badges":{0:{"icon":"mdi:alert","color":"yellow"}}}}),
             {"type":"custom:bubble-card","card_type":"pop-up","hash":"#vsc-matrix","name":"VSC pop-up",
              "cards":[button("Matrix Popup","light.vsc_main",matrix)]}
         ]},
         {"title":"Sections","path":"sections","type":"sections","max_columns":2,"sections":[
             {"type":"grid","cards":[button("Sections VSC","light.vsc_main",matrix),
                                     button("Sections Native","light.vsc_main")]}]},
+        {"title":"Themed","path":"themed","theme":THEME,"cards":[
+            button("Themed VSC","light.vsc_main",matrix),
+            button("Themed Native","light.vsc_main"),
+            button("Themed Custom BG","light.vsc_main",
+                   dict(matrix,custom_card_background_color=[10,20,30]))]},
+        # Native gestures under VSC: overlay sub-slider and hold action.
+        {"title":"Gestures","path":"gestures","cards":[
+            button("Gesture Overlay","light.vsc_main",matrix,
+                   {"main":[{"entity":"light.vsc_child","sub_button_type":"slider"}]}),
+            *[dict(button(name,"light.vsc_child",opts),button_type="name",
+                   # The card body's actions live under button_action in Bubble Card.
+                   button_action={"tap_action":{"action":"none"},
+                                  "hold_action":{"action":"toggle"}})
+              for name,opts in (("Gesture Hold",matrix),("Gesture Hold Native",None))]]},
         {"title":"Away","path":"away","cards":[{"type":"markdown","content":"Lifecycle navigation target"}]}
     ]}
 
@@ -117,6 +143,8 @@ def main():
     module=extract_module((args.repo/"Visual-Styling-Center/Visual-Styling-Center.md").read_text(encoding="utf-8"))
     combined=extract_module((args.repo/"Sub-Button-Below-Normal-Layout/Sub-button-below-normal-layout.md")
                             .read_text(encoding="utf-8"),COMBINED_MODULE_ID)
+    badgy=extract_module((args.repo/"Badgy-Conditions/Badgy-Conditions.md").read_text(encoding="utf-8"),
+                         BADGY_MODULE_ID)
     dest=args.config_dir.resolve()
     dest.mkdir(parents=True,exist_ok=True)
     (dest/"www").mkdir(exist_ok=True)
@@ -128,7 +156,7 @@ def main():
         encoding="utf-8")
     (dest/"configuration.yaml").write_text(yaml.safe_dump(make_config(),sort_keys=False,allow_unicode=True),encoding="utf-8")
     (dest/"ui-lovelace-vsc-e2e.yaml").write_text(
-        yaml.safe_dump(make_dashboard(module["code"],combined["code"]),sort_keys=False,allow_unicode=True,width=120),encoding="utf-8")
+        yaml.safe_dump(make_dashboard(module["code"],combined["code"],badgy["code"]),sort_keys=False,allow_unicode=True,width=120),encoding="utf-8")
     print("Generated isolated Home Assistant configuration and Lovelace dashboard")
 
 if __name__=="__main__":

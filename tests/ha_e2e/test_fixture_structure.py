@@ -56,7 +56,14 @@ class HAContracts(unittest.TestCase):
         self.assertEqual(matrix[1]["card_layout"],"large")
         self.assertEqual(matrix[2]["type"],"grid")
         self.assertTrue(matrix[3]["styles"].startswith("VSC") and matrix[3]["styles"].endswith("OTHER"))
-        self.assertEqual(matrix[4]["card_type"],"pop-up")
+        self.assertTrue(matrix[4]["styles"].startswith("VSC"))
+        self.assertIn("badgy-condition-helper",matrix[4])
+        self.assertEqual(matrix[5]["card_type"],"pop-up")
+        self.assertEqual(views["themed"]["theme"],"VSC E2E Theme")
+        gestures=views["gestures"]["cards"]
+        self.assertNotIn("always_visible",gestures[0]["sub_button"]["main"][0])
+        self.assertEqual(gestures[1]["button_action"]["hold_action"]["action"],"toggle")
+        self.assertIn("VSC E2E Theme",make_config()["frontend"]["themes"])
         self.assertEqual(views["sections"]["type"],"sections")
         native=views["sections"]["sections"][0]["cards"][1]
         self.assertNotIn("styles",native)

@@ -1,8 +1,9 @@
 """Real HA layout/theme matrix for VSC.
 
-Each layout (normal, large, grid, pop-up, sections and a card combining VSC
-with another styling module) is rendered by the real Lovelace frontend under
-both the light and the dark default theme (driven by prefers-color-scheme).
+Each layout (normal, large, grid, pop-up, sections, mobile pop-up and cards
+combining VSC with other styling modules) is rendered by the real Lovelace
+frontend under light and dark mode (driven by prefers-color-scheme), with the
+default theme and with a user theme.
 """
 import json
 import unittest
@@ -29,7 +30,11 @@ READ_CARDS="""els => els.map(el => {
         large:!!(card?.classList.contains('large')||q('.large')),
         background:container?getComputedStyle(container).backgroundColor:'',
         areas:button?getComputedStyle(button).gridTemplateAreas:'',
-        height:rect?.height||0
+        width:rect?.width||0,
+        height:rect?.height||0,
+        badge:!!q('.bubble-sub-button-1 .badgy-owned-badge.icon-badge'),
+        bgVar:card?.style.getPropertyValue('--bubble-button-main-background-color')||'',
+        themeBg:card?getComputedStyle(card).getPropertyValue('--card-background-color').trim():''
     };
 })"""
 
@@ -46,6 +51,7 @@ class LayoutThemeMatrix(base.RealLovelace):
         self.service("input_boolean","turn_on","input_boolean.vsc_main_enabled")
         self.service("input_boolean","turn_on","input_boolean.vsc_child_enabled")
         for slug,colors in (("main",(255,0,0)),("child",(0,200,20))):
+            self.service("input_number","set_value",f"input_number.vsc_{slug}_brightness",value=128)
             for name,v in zip(("red","green","blue"),colors):
                 self.service("input_number","set_value",f"input_number.vsc_{slug}_{name}",value=v)
         for slug,rgb in (("main",[255,0,0]),("child",[0,200,20])):
@@ -56,8 +62,10 @@ class LayoutThemeMatrix(base.RealLovelace):
     def tearDown(self):
         for ctx in self.contexts: ctx.close()
 
-    def open(self,scheme,path):
-        ctx=self.browser.new_context(viewport={"width":1280,"height":900},color_scheme=scheme)
+    def open(self,scheme,path,mobile=False):
+        size={"viewport":{"width":390,"height":844},"device_scale_factor":2,"is_mobile":True,
+              "has_touch":True} if mobile else {"viewport":{"width":1280,"height":900}}
+        ctx=self.browser.new_context(color_scheme=scheme,**size)
         self.contexts.append(ctx)
         tokens=json.dumps(self.auth,separators=(",",":"))
         ctx.add_init_script(script=f"""
@@ -145,6 +153,151 @@ class LayoutThemeMatrix(base.RealLovelace):
                 # Sections default to the large layout in Bubble Card.
                 self.assertTrue(vsc["large"] and native["large"],(vsc,native))
                 self.assertEqual(vsc["background"],native["background"],(vsc,native))
+                self.assertFalse(self.errors,self.errors)
+
+    def test_24_user_theme_light_and_dark_modes(self):
+        names=("Themed VSC","Themed Native","Themed Custom BG")
+        native_bg,custom_bg={},{}
+        expected={"light":"rgb(250, 240, 200)","dark":"rgb(20, 30, 60)"}
+        for scheme in SCHEMES:
+            with self.subTest(scheme=scheme):
+                self.open(scheme,"themed")
+                cards=self.wait_cards(names,lambda c:c["height"]>0 and c["background"])
+                cards=self.wait_cards(("Themed VSC","Themed Custom BG"),lambda c:c["icon"]==RED)
+                self.shot("theme_"+scheme)
+                vsc,native,custom=(cards[n] for n in names)
+                # The view's user theme is really active, in the right mode.
+                self.assertEqual(native["themeBg"],expected[scheme],native)
+                self.assertTrue(vsc["owned"] and custom["owned"],(vsc,custom))
+                # Without a background option VSC leaves the theme surface alone ...
+                self.assertEqual(vsc["background"],native["background"],(vsc,native))
+                # ... and a VSC background option wins over the theme.
+                self.assertIn("10, 20, 30",custom["bgVar"],custom)
+                self.assertNotEqual(custom["background"],native["background"],(custom,native))
+                native_bg[scheme],custom_bg[scheme]=native["background"],custom["background"]
+                self.assertFalse(self.errors,self.errors)
+        self.assertNotEqual(native_bg["light"],native_bg["dark"],native_bg)
+        self.assertEqual(custom_bg["light"],custom_bg["dark"],custom_bg)
+
+    def test_25_combined_with_badgy(self):
+        for scheme in SCHEMES:
+            with self.subTest(scheme=scheme):
+                self.open(scheme,"matrix")
+                card=self.wait_cards(("Matrix Badgy",),
+                    lambda c:c["icon"]==RED and c["sub"]==GREEN and c["badge"])["Matrix Badgy"]
+                self.assertTrue(card["owned"],card)
+                # A child state change still reaches VSC's colors next to the badge.
+                self.service("input_boolean","turn_off","input_boolean.vsc_child_enabled")
+                card=self.wait_cards(("Matrix Badgy",),
+                    lambda c:c["sub"]=="rgb(150, 150, 150)")["Matrix Badgy"]
+                self.assertTrue(card["badge"],card)
+                self.service("input_boolean","turn_on","input_boolean.vsc_child_enabled")
+                self.wait_entity("light.vsc_child",lambda e:e["state"]=="on")
+                self.assertFalse(self.errors,self.errors)
+
+    def test_26_mobile_popup_touch(self):
+        for scheme in SCHEMES:
+            with self.subTest(scheme=scheme):
+                self.service("input_number","set_value","input_number.vsc_main_brightness",value=128)
+                self.wait_entity("light.vsc_main",lambda e:e["attributes"].get("brightness")==128)
+                page=self.open(scheme,"matrix",mobile=True)
+                self.wait_cards(("Matrix Normal",),lambda c:c["icon"]==RED)
+                page.evaluate("() => { location.hash='#vsc-matrix'; }")
+                card=self.wait_cards(("Matrix Popup",),
+                                     lambda c:c["icon"]==RED and c["height"]>0)["Matrix Popup"]
+                self.assertTrue(card["owned"],card)
+                self.assertLessEqual(card["width"],390,card)
+                index=page.locator("bubble-card").evaluate_all(
+                    "els => els.findIndex(el => el.config?.name === 'Matrix Popup')")
+                popup=page.locator("bubble-card").nth(index)
+                slider=popup.locator(".bubble-range-slider").first
+                bounds=self.wait_slider_layout(slider,page=page)
+                y=bounds["y"]+bounds["height"]*0.5
+                x0,x1=bounds["x"]+bounds["width"]*0.2,bounds["x"]+bounds["width"]*0.85
+                client=page.context.new_cdp_session(page)
+                client.send("Input.dispatchTouchEvent",{"type":"touchStart",
+                    "touchPoints":[{"x":x0,"y":y,"id":1,"force":1}]})
+                page.wait_for_timeout(110)
+                for step in range(1,10):
+                    client.send("Input.dispatchTouchEvent",{"type":"touchMove",
+                        "touchPoints":[{"x":x0+(x1-x0)*step/9,"y":y,"id":1,"force":1}]})
+                    page.wait_for_timeout(25)
+                client.send("Input.dispatchTouchEvent",{"type":"touchEnd","touchPoints":[]})
+                self.wait_entity("input_number.vsc_main_brightness",
+                                 lambda e:abs(float(e["state"])-128)>=10,timeout=25)
+                self.shot("mobile_popup_"+scheme)
+                self.assertFalse(self.errors,self.errors)
+
+    def card_index(self,name):
+        return self.page.locator("bubble-card").evaluate_all(
+            "(els,n) => els.findIndex(el => el.config?.name === n)",name)
+
+    def test_30_overlay_sub_slider_and_hold_gesture(self):
+        for scheme in SCHEMES:
+            with self.subTest(scheme=scheme):
+                self.service("input_number","set_value","input_number.vsc_child_brightness",value=128)
+                self.service("input_boolean","turn_on","input_boolean.vsc_child_enabled")
+                self.wait_entity("light.vsc_child",
+                                 lambda e:e["state"]=="on" and e["attributes"].get("brightness")==128)
+                page=self.open(scheme,"gestures")
+                self.wait_cards(("Gesture Overlay",),lambda c:c["icon"]==RED)
+                self.wait_cards(("Gesture Hold",),lambda c:c["icon"]==GREEN)
+                card=page.locator("bubble-card").nth(self.card_index("Gesture Overlay"))
+                state=lambda:card.evaluate("""el => ({
+                    open:!!el.card?.querySelector('.bubble-sub-slider-wrapper:not(.is-hidden)'),
+                    iconHidden:!!el.card?.querySelector('.bubble-icon-container.is-hidden'),
+                    icon:el.card?.querySelector('.bubble-icon')?.style.color||'',
+                    owned:!!el.card?._vscOwnedVariables
+                })""")
+                self.assertFalse(state()["open"],state())
+                # Tap opens the native overlay slider in front of the card.
+                card.locator(".bubble-sub-button-1").first.click()
+                opened=self.wait_value(state,lambda d:d["open"] and d["iconHidden"])
+                self.assertTrue(opened["owned"],opened)
+                slider=card.locator(".bubble-sub-slider-wrapper .bubble-range-slider").first
+                bounds=self.wait_slider_layout(slider,page=page)
+                y=bounds["y"]+bounds["height"]/2
+                page.mouse.move(bounds["x"]+bounds["width"]*0.2,y)
+                page.mouse.down()
+                page.mouse.move(bounds["x"]+bounds["width"]*0.85,y,steps=10)
+                page.mouse.up()
+                self.wait_entity("input_number.vsc_child_brightness",
+                                 lambda e:abs(float(e["state"])-128)>=10,timeout=25)
+                # The close button collapses it; VSC's colors are intact afterwards.
+                card.locator(".bubble-sub-slider-close").first.click()
+                closed=self.wait_value(state,lambda d:not d["open"] and not d["iconHidden"])
+                self.assertEqual(closed["icon"],RED,closed)
+                self.assertTrue(closed["owned"],closed)
+
+                # A real long press fires the card's hold action in HA, with
+                # and without VSC (the native card is the harness baseline).
+                for name in ("Gesture Hold Native","Gesture Hold"):
+                    self.service("input_boolean","turn_on","input_boolean.vsc_child_enabled")
+                    self.wait_entity("light.vsc_child",lambda e:e["state"]=="on")
+                    hold=page.locator("bubble-card").nth(self.card_index(name))
+                    hold.scroll_into_view_if_needed()
+                    page.evaluate("""() => {
+                        window.__vscEvents=[];
+                        const log=ev => window.__vscEvents.push(ev.type+':'+(ev.composedPath()[0]?.className||ev.composedPath()[0]?.localName||'')
+                            +(ev.detail?.action?'/'+ev.detail.action:''));
+                        for (const t of ['pointerdown','pointerup','click','contextmenu','hass-action','ll-custom','hass-more-info'])
+                            window.addEventListener(t,log,{capture:true});
+                    }""")
+                    box=hold.bounding_box()
+                    # Approach the card like a user before pressing: Bubble Card
+                    # sets up its action handler on the first pointer contact.
+                    page.mouse.move(box["x"]+box["width"]*0.3,box["y"]+box["height"]*0.5)
+                    page.mouse.move(box["x"]+box["width"]*0.5,box["y"]+box["height"]*0.5,steps=5)
+                    page.wait_for_timeout(400)
+                    page.mouse.down()
+                    page.wait_for_timeout(1000)
+                    page.mouse.up()
+                    try:
+                        self.wait_entity("light.vsc_child",lambda e:e["state"]=="off",timeout=10)
+                    except AssertionError as exc:
+                        events=page.evaluate("() => window.__vscEvents")
+                        raise AssertionError(f"hold on {name!r} did not fire; events={events}") from exc
+                self.shot("gestures_"+scheme)
                 self.assertFalse(self.errors,self.errors)
 
 if __name__=="__main__":unittest.main()
