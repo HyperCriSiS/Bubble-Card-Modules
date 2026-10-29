@@ -195,7 +195,10 @@ class PersistenceAndEditor(base.RealLovelace):
             box=root.locator("input").last
             box.click()
             self.page.keyboard.press("Control+a")
+            current=self.config_value(name)
+            if current is None: current=field.get("default")
             value=options.get("max",9)
+            if current==value: value=options.get("min",0)
             self.page.keyboard.type(str(value))
             self.page.keyboard.press("Tab")
             return value
@@ -213,14 +216,25 @@ class PersistenceAndEditor(base.RealLovelace):
             choices=[o["value"] if isinstance(o,dict) else o for o in options.get("options",[])]
             current=self.config_value(name) or field.get("default")
             target=next(c for c in choices if c!=current)
+            radios=root.locator("ha-radio")
+            if radios.count():
+                # HA draws short option lists as radio buttons.
+                radios.nth(choices.index(target)).click()
+                return target
             root.locator("ha-select").first.click()
             self.page.locator(f'#vsc-editor-frame ha-list-item[value="{target}"], '
                               f'#vsc-editor-frame mwc-list-item[value="{target}"]').first.click()
             return target
         if kind=="entity":
-            root.locator("input").first.click()
+            # HA 2026.10 opens a search popup from the picker field.
+            root.click()
+            self.page.wait_for_timeout(400)
             self.page.keyboard.type("light.vsc_child")
-            self.page.keyboard.press("Enter")
+            self.page.wait_for_timeout(600)
+            option=self.page.locator('ha-combo-box-item, [role="option"]').filter(
+                has_text="light.vsc_child")
+            if option.count(): option.first.click()
+            else: self.page.keyboard.press("Enter")
             return "light.vsc_child"
         raise AssertionError("Unhandled selector "+kind)
 
@@ -233,6 +247,8 @@ class PersistenceAndEditor(base.RealLovelace):
         for f in fields:
             for rule in f.get("visible") or []:
                 dependents.setdefault(rule["field"],set()).add(f["name"])
+        stacks=[]
+        self.page.on("pageerror",lambda e:stacks.append((e.stack or str(e))[:700]))
         self.open_editor()
         self.wait_value(lambda:self.page.evaluate("() => !!window.__vscEditor?._modulesLoaded"),bool,timeout=30)
         self.page.wait_for_timeout(500)
@@ -279,7 +295,7 @@ class PersistenceAndEditor(base.RealLovelace):
         element=self.open_stored(reload=True)
         self.wait_value(lambda:element.evaluate(READ_CARD),lambda d:d["owned"])
         self.assertEqual(self.stored_card()[MODULE_ID],final[MODULE_ID])
-        self.assertFalse(self.errors,self.errors)
+        self.assertFalse(self.errors,"\n\n".join(stacks))
 
 if __name__=="__main__":
     import unittest
