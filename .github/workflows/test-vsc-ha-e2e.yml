@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   real-ha-e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Playwright 1.57 has no Chromium for ubuntu-latest (26.04)
     timeout-minutes: 20
     env:
       HA_CONFIG: /tmp/vsc-homeassistant-config

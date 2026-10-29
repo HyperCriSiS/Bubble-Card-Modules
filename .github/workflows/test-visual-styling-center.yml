@@ -29,7 +29,7 @@ jobs:
         run: .venv/bin/python -m unittest discover -s tests -p 'test_visual_styling_center.py' -v
 
   chromium:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Playwright 1.57 has no Chromium for ubuntu-latest (26.04)
     timeout-minutes: 15
     steps:
       - name: Checkout
