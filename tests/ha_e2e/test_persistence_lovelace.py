@@ -262,7 +262,8 @@ class PersistenceAndEditor(base.RealLovelace):
             if not progressed: break
         self.assertEqual(sorted(pending),[],"fields never became visible")
         self.page.screenshot(path=str(base.ARTIFACTS/"test_29_editor.png"),full_page=True,timeout=12000)
-        self.assertEqual(failures,{},f"{len(failures)}/{len(fields)} fields failed")
+        self.assertFalse(failures,f"{len(failures)}/{len(fields)} fields failed:\n"
+                         +"\n".join(f"{k}: {v}" for k,v in failures.items()))
 
         # Live CSS update: hand the edited config to the mounted VSC card.
         final=self.page.evaluate("() => window.__vscConfig")
