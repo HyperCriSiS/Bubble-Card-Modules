@@ -34,7 +34,7 @@ Diese Tests verwenden **echte HA-Backend-Entities, das authentifizierte Lovelace
 
 ## Grenzen
 
-Nicht vollständig geprüft: alle 46 Optionen im visuellen Modul-Editor, mobile Touch-Drag-Gesten, sämtliche Pop-up-/Sections-/Grid-Varianten, Drittmodul-Kombinationen, lange Laufzeit- und Performance-Szenarien sowie das reine Deaktivieren eines Moduls, während die Karte verbunden bleibt. Siehe [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11).
+Nicht vollständig geprüft: alle 46 Optionen im visuellen Modul-Editor, mobile Touch-Drag-Gesten, Pop-up-/Sections-/Grid-Varianten über die Fälle 20–23 hinaus, Kombinationen mit weiteren Modulen, benutzerdefinierte Themes, lange Laufzeit- und Performance-Szenarien sowie das reine Deaktivieren eines Moduls, während die Karte verbunden bleibt. Siehe [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11).
 
 ## Ausführung
 
@@ -59,3 +59,16 @@ Mit VSC v2026.10.19 kommt die Option `enable_interaction_effects` hinzu (Standar
 ## 29. Oktober 2026 – 61 Optionen, zwei neue Tests
 
 VSC v2026.10.29 ergänzt 14 optionale Felder (61 insgesamt, die bisherigen IDs unverändert). Das Dashboard hat eine vierte Karte vom Typ `sub-buttons`. `test_18` vergleicht den Icon-Hintergrund der VSC-Karte mit der nativen Karte bei roter Lampe, `test_19` prüft die `sub-buttons`-Karte samt `custom_height`.
+
+## 29. Oktober 2026 – Layout-/Theme-Matrix (Fälle 20–23)
+
+`test_matrix_lovelace.py` rendert die Dashboard-Ansichten `matrix` (Masonry) und `sections` jeweils mit `prefers-color-scheme: light` und `dark`. Geprüft wird auch, dass das HA-Standardtheme tatsächlich in den jeweiligen Modus wechselt (`hass.themes.darkMode`).
+
+| # | Prüfung |
+| --- | --- |
+| 20 | Normal, `card_layout: large` und zwei Karten in einer `grid`-Karte: VSC-Icon-Farbe und eigene Variablen vorhanden, Large-Layout aktiv, Kartenhintergrund folgt dem Theme (hell ≠ dunkel) |
+| 21 | VSC zusammen mit dem Modul *Sub-button below (normal layout)* in einer Karte: VSC-Farben für Haupt- und Sub-Icon, das Grid des anderen Moduls (`'b b b'`) bleibt wirksam |
+| 22 | VSC-Karte in einem Standalone-Pop-up (`#vsc-matrix`): Rendern nach Öffnen per Hash, externer Zustandswechsel färbt das Icon um |
+| 23 | Sections-Ansicht: VSC-Karte und native Karte nebeneinander, beide im Standard-Large-Layout mit identischem Theme-Hintergrund, keine VSC-Variablen auf der nativen Karte |
+
+Erster Lauf: 23/23 bestanden ([Run #40949703367](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/40949703367)). Benutzerdefinierte Themes, mobile Pop-up-Ansicht und Kombinationen mit anderen Fremdmodulen sind damit nicht abgedeckt.
