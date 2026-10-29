@@ -1,0 +1,46 @@
+name: Validate Badgy module
+
+on:
+  pull_request:
+    paths:
+      - 'Badgy-Conditions/**'
+      - 'tests/test_badgy_schema.py'
+      - 'tests/test_badgy_browser.py'
+      - 'tests/test_badgy_upstream_layout.py'
+      - 'docs/upstream/bubble-card/stable/src/components/base-card/styles.css'
+      - 'tests/badgy_runtime.cjs'
+      - '.github/workflows/test-badgy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  badgy-schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout with main history
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Install schema parser
+        run: python3 -m pip install 'PyYAML==6.0.3'
+      - name: Check YAML, JavaScript and configuration compatibility
+        run: python3 tests/test_badgy_schema.py
+
+  badgy-browser:
+    # Playwright 1.57 cannot install Chromium dependencies on Ubuntu 26.04,
+    # which ubuntu-latest now resolves to.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install browser test dependencies
+        run: python3 -m pip install 'PyYAML==6.0.3' 'playwright==1.57.0'
+      - name: Install Chromium
+        run: python3 -m playwright install --with-deps chromium
+      - name: Chromium badge and CSS regression tests
+        run: |
+          python3 tests/test_badgy_browser.py
+          python3 tests/test_badgy_upstream_layout.py
