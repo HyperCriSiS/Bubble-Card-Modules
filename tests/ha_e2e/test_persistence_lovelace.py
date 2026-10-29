@@ -198,16 +198,18 @@ class PersistenceAndEditor(base.RealLovelace):
                 }
             })(window.__vscEditor.shadowRoot);
             if (!root) return 'missing';
+            let up=root, chain=[];
+            while (up && chain.length<12) { chain.push(up.localName+(('hass' in up)?(up.hass?'+':'-'):'')); up=up.parentNode?.host||up.parentNode; }
             const out=[];
             const walk=(el,depth)=>{
                 if (depth>7 || out.length>60) return;
                 const box=el.getBoundingClientRect();
                 out.push('  '.repeat(depth)+el.localName+(el.getAttribute('role')?'[role='+el.getAttribute('role')+']':'')
-                    +(el.type?'[type='+el.type+']':'')+' '+Math.round(box.width)+'x'+Math.round(box.height));
+                    +(el.type?'[type='+el.type+']':'')+(('hass' in el)?(el.hass?'(hass)':'(NO hass)'):'')+' '+Math.round(box.width)+'x'+Math.round(box.height));
                 for (const c of [...(el.shadowRoot?.children||[]),...el.children]) walk(c,depth+1);
             };
             walk(root,0);
-            return out.join('\\n');
+            return chain.join('<')+' :: '+out.join('\\n');
         }""",name)
 
     def operate(self,field):
