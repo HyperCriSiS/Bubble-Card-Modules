@@ -47,6 +47,8 @@ class HAContracts(unittest.TestCase):
         self.assertIn("styles",cards[2])
         self.assertEqual(cards[3]["card_type"],"sub-buttons")
         self.assertIn("styles",cards[3])
+        # v3.4.2 drops the main section on sub-buttons cards.
+        self.assertEqual(list(cards[3]["sub_button"]),["bottom"])
 
     def test_ci_isolated_and_verified(self):
         text=(ROOT/".github/workflows/test-vsc-ha-e2e.yml").read_text(encoding="utf-8")
