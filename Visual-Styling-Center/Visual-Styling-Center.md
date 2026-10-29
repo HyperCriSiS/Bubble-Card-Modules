@@ -1,6 +1,6 @@
 # Visual Styling Center
 
-**Version:** v2026.10.19
+**Version:** v2026.10.29
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
@@ -25,6 +25,9 @@ It means that the "Card Height Multiplier" only works with the other layouts.
 Also with sections layout, you need to use the bubble-card grid layout if you use two row sub-buttons layout.
 So generally, if something does not work out as expected, try out a different bubble-card layout.
 
+On **Sub-buttons** and **Calendar** cards there is no main icon, name or slider, so only the
+sub-button options (sizes, spacing, colors, state colors, corner radius) have an effect there.
+
 ```markdown
 # Visual Styling Center for Bubble Card
 
@@ -48,10 +51,13 @@ versions, so existing configurations keep working without migration.
 ### Card
 - **Card Height Multiplier**: Scale the overall height of your Bubble Card (not in the sections layout)
 - **Inner Card Padding**: Add padding inside the card for more spacing
+- **Card Background Color** and **Opacity**: Solid color for button cards, opacity also fades the theme background
+- **Card Corner Radius**: Empty keeps the theme value
 
 ### Main Icon
 - **Main Icon Size Multiplier** and **Icon Background Ratio**
 - **Main Icon Margin**: Spacing around the main icon (applies to all sides)
+- **Icon Background Corner Radius**: Empty keeps the theme value (a circle)
 - **Icon Color** and **Icon Background Color** (RGB picker or manual CSS value, the manual value wins)
 - **Hide Icon Background**: Remove the background from the main icon
 
@@ -59,9 +65,15 @@ versions, so existing configurations keep working without migration.
 - **Sub-icon Size Multiplier** and **Sub-button Background Ratio**
 - **Sub-button Container Right Margin**, **Row Spacing** and **Column Spacing** (also inside sub-button groups)
 - **Sub-button Icon Color** and **Sub-button Background Color**
+- **Sub-button Corner Radius**: Empty keeps the theme value
+- A sub-button's own **custom height** (Bubble Card option) always wins over the module size
 - **Hide Sub-button Backgrounds**
 
+### Name & State Text
+- **Name Color**, **Name Font Size**, **State Color**, **State Font Size**: Empty keeps the theme
+
 ### State Colors
+- **Use Home Assistant Theme State Colors**: Use the theme's `--state-*-color` instead of fixed green/grey
 - **Color Main Icon / Sub-button Icons by Entity State**: Light color when on, otherwise a color per state
 - **Custom Off/Offline/Function Color**: Apply a custom color to icons for inactive states, functional entities (scenes, scripts, automations), or entities without states
 
@@ -78,6 +90,7 @@ The Icon Contrast Helper adds circular background behind icons to improve visibi
 ### Gradient Effects
 - **Enable Gradient Effects**: Toggle dynamic gradients on/off
 - **Apply Gradient to**: Choose between slider fill or card background
+- **Gradient Direction**: Angle in degrees, 90 is left to right as before
 - **Gradient Entity**: Select a light group or single light to base the gradient on (empty uses the card's light)
 - **Hide Rainbow Fallback**: Without it, a rainbow gradient is shown while no colored light is on
 - **Slider Brightness**: Adjust the opacity of the slider when using background gradients
@@ -149,7 +162,7 @@ visual_styling_center:
 ```yaml
 visual_styling_center:
   name: "Visual Styling Center"
-  version: "v2026.10.19"
+  version: "v2026.10.29"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
   description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
@@ -188,6 +201,32 @@ visual_styling_center:
               step: 1
               mode: slider
               unit_of_measurement: "px"
+        - name: custom_card_background_color
+          label: "Card Background Color (RGB, button cards)"
+          selector:
+            color_rgb: {}
+        - name: manual_card_background_color
+          label: "Card Background Color, manual (overrides RGB)"
+          selector:
+            text: {}
+        - name: card_background_opacity
+          label: "Card Background Opacity"
+          default: 1
+          selector:
+            number:
+              min: 0
+              max: 1
+              step: 0.05
+              mode: slider
+        - name: card_border_radius
+          label: "Card Corner Radius (empty = theme)"
+          selector:
+            number:
+              min: 0
+              max: 60
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
     - type: expandable
       title: "Main Icon"
       icon: "mdi:circle-outline"
@@ -221,6 +260,15 @@ visual_styling_center:
               max: 30
               step: 1
               mode: slider
+              unit_of_measurement: "px"
+        - name: icon_border_radius
+          label: "Icon Background Corner Radius (empty = theme)"
+          selector:
+            number:
+              min: 0
+              max: 40
+              step: 1
+              mode: box
               unit_of_measurement: "px"
         - name: custom_icon_color
           label: "Icon Color (RGB)"
@@ -305,6 +353,15 @@ visual_styling_center:
               step: 1
               mode: slider
               unit_of_measurement: "px"
+        - name: subbutton_border_radius
+          label: "Sub-button Corner Radius (empty = theme)"
+          selector:
+            number:
+              min: 0
+              max: 30
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
         - name: custom_subicon_color
           label: "Sub-button Icon Color (RGB)"
           selector:
@@ -335,9 +392,52 @@ visual_styling_center:
           selector:
             text: {}
     - type: expandable
+      title: "Name & State Text"
+      icon: "mdi:format-text"
+      schema:
+        - name: custom_name_color
+          label: "Name Color (RGB)"
+          selector:
+            color_rgb: {}
+        - name: manual_name_color
+          label: "Name Color, manual (overrides RGB)"
+          selector:
+            text: {}
+        - name: name_font_size
+          label: "Name Font Size (empty = theme)"
+          selector:
+            number:
+              min: 8
+              max: 32
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
+        - name: custom_state_color
+          label: "State Color (RGB)"
+          selector:
+            color_rgb: {}
+        - name: manual_state_color
+          label: "State Color, manual (overrides RGB)"
+          selector:
+            text: {}
+        - name: state_font_size
+          label: "State Font Size (empty = theme)"
+          selector:
+            number:
+              min: 8
+              max: 32
+              step: 1
+              mode: box
+              unit_of_measurement: "px"
+    - type: expandable
       title: "State Colors"
       icon: "mdi:palette"
       schema:
+        - name: use_theme_state_colors
+          label: "Use Home Assistant Theme State Colors (instead of fixed green/grey)"
+          default: false
+          selector:
+            boolean: {}
         - name: enable_entity_colored_main_icon
           label: "Color Main Icon by Entity State"
           default: false
@@ -487,6 +587,20 @@ visual_styling_center:
                   label: "Slider Fill"
                 - value: "background"
                   label: "Card Background"
+        - name: gradient_angle
+          label: "Gradient Direction"
+          default: 90
+          visible:
+            - field: enable_gradient
+              operator: eq
+              value: true
+          selector:
+            number:
+              min: 0
+              max: 360
+              step: 5
+              mode: slider
+              unit_of_measurement: "°"
         - name: gradient_entity
           label: "Gradient Entity (light or light group, empty = card light)"
           visible:
@@ -647,7 +761,8 @@ visual_styling_center:
         'helper-fade-enabled', 'helper-main-icon', 'helper-sub-icons',
         'slider-helper-enabled', 'slider-helper-fade-enabled',
         'use-gradient-background', 'use-gradient-slider',
-        'vsc-interaction-effects'
+        'vsc-interaction-effects', 'vsc-custom-icon-background',
+        'vsc-name-color', 'vsc-state-color', 'vsc-name-size', 'vsc-state-size'
       ];
       const initialClasses = card._vscInitialClasses ?? (card._vscInitialClasses =
         new Map(vscClassNames.map(name => [name, card.classList.contains(name)])));
@@ -692,8 +807,43 @@ visual_styling_center:
       setCardVariable('--subbutton-background-color', customSubbuttonBackground);
       // Keep the native on/off background and v3.4.2 contrast unless overridden.
       card.classList.toggle('vsc-custom-subbutton-background', customSubbuttonBackground != null);
-      const iconBackgroundColor = resolveColor(config.manual_icon_background_color, config.custom_icon_background_color);
-      setCardVariable('--icon-background-color', config.hide_icon_background === true ? 'transparent' : iconBackgroundColor);
+      const iconBackgroundColor = config.hide_icon_background === true ? 'transparent'
+        : resolveColor(config.manual_icon_background_color, config.custom_icon_background_color);
+      setCardVariable('--icon-background-color', iconBackgroundColor);
+      // Without an explicit color the native chain applies. The old fallback
+      // stopped at --bubble-secondary-background-color, which only Bubble
+      // themes define, so the icon circle turned transparent everywhere else.
+      card.classList.toggle('vsc-custom-icon-background', iconBackgroundColor != null);
+
+      // Name and state text
+      const nameColor = resolveColor(config.manual_name_color, config.custom_name_color);
+      setCardVariable('--vsc-name-color', nameColor);
+      card.classList.toggle('vsc-name-color', nameColor != null);
+      const stateColor = resolveColor(config.manual_state_color, config.custom_state_color);
+      setCardVariable('--vsc-state-color', stateColor);
+      card.classList.toggle('vsc-state-color', stateColor != null);
+      const px = (value) => (value == null || value === '') ? null : `${value}px`;
+      setCardVariable('--vsc-name-font-size', px(config.name_font_size));
+      card.classList.toggle('vsc-name-size', px(config.name_font_size) != null);
+      setCardVariable('--vsc-state-font-size', px(config.state_font_size));
+      card.classList.toggle('vsc-state-size', px(config.state_font_size) != null);
+
+      // Corner radii and main background through Bubble Card's own variables
+      // ('card-type' resolves to 'button' on button cards).
+      setCardVariable('--bubble-button-border-radius', px(config.card_border_radius));
+      setCardVariable('--bubble-button-icon-border-radius', px(config.icon_border_radius));
+      setCardVariable('--bubble-sub-button-border-radius', px(config.subbutton_border_radius));
+      const cardBackground = resolveColor(config.manual_card_background_color, config.custom_card_background_color);
+      const cardBackgroundOpacity = config.card_background_opacity ?? 1;
+      let cardBackgroundValue = null;
+      if (cardBackground != null || cardBackgroundOpacity < 1) {
+        const base = cardBackground ??
+          'var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))';
+        cardBackgroundValue = cardBackgroundOpacity < 1
+          ? `color-mix(in srgb, ${base} ${Math.round(cardBackgroundOpacity * 100)}%, transparent)`
+          : base;
+      }
+      setCardVariable('--bubble-button-main-background-color', cardBackgroundValue);
 
       const functionButtonColor = config.enable_function_button_color === true
         ? (resolveColor(config.manual_function_button_color, config.function_button_color) ?? 'rgba(255, 255, 255, 0.9)')
@@ -756,11 +906,19 @@ visual_styling_center:
         const inactiveStates = ['off', 'away', 'inactive', 'closed', 'locked', 'clear'];
         const errorStates = ['unavailable', 'unknown'];
         const isFunction = /^(scene|script|automation)\./.test(entityId);
+        // Home Assistant's theme state colors, falling back to the old fixed ones.
+        const domain = entityId.split('.')[0];
+        const themed = config.use_theme_state_colors === true;
+        const activeColor = themed
+          ? `var(--state-${domain}-active-color, var(--state-active-color, rgb(140, 200, 105)))` : 'rgb(140, 200, 105)';
+        const inactiveColor = themed
+          ? `var(--state-${domain}-inactive-color, var(--state-inactive-color, rgb(150, 150, 150)))` : 'rgb(150, 150, 150)';
+        const errorColor = themed ? 'var(--state-unavailable-color, rgb(180, 180, 180))' : 'rgb(180, 180, 180)';
         if (isFunction && functionButtonColor != null) return functionButtonColor;
-        if (activeStates.includes(entityState.state)) return 'rgb(140, 200, 105)';
+        if (activeStates.includes(entityState.state)) return activeColor;
         if (inactiveStates.includes(entityState.state) || errorStates.includes(entityState.state)) {
           if (functionButtonColor != null) return functionButtonColor;
-          return inactiveStates.includes(entityState.state) ? 'rgb(150, 150, 150)' : 'rgb(180, 180, 180)';
+          return inactiveStates.includes(entityState.state) ? inactiveColor : errorColor;
         }
         return null;
       }
@@ -925,8 +1083,10 @@ visual_styling_center:
         // hasChanged only skips expensive hue sorting when the inputs are equal.
         const gradientProperty = gradientTarget === 'background' ? '--card-gradient' : '--slider-gradient';
         const gradientInputs = coloredLights.map(light => light.rgb.slice(0, 3).join(','));
+        // 'to right' equals 90deg and keeps the previous output when unset.
+        const gradientDirection = config.gradient_angle == null ? 'to right' : `${config.gradient_angle}deg`;
         const needsGradientRebuild = typeof hasChanged !== 'function' ||
-          hasChanged('vsc-gradient', gradientEntity, gradientTarget, config.disable_default_gradient === true, gradientInputs);
+          hasChanged('vsc-gradient', gradientEntity, gradientTarget, config.disable_default_gradient === true, gradientInputs, gradientDirection);
         const previousGradient = card.style.getPropertyValue(gradientProperty);
 
         if (!needsGradientRebuild && previousGradient) {
@@ -983,10 +1143,10 @@ visual_styling_center:
             gradientColors = stops.map(stop => `rgb(${stop.rgb[0]}, ${stop.rgb[1]}, ${stop.rgb[2]}) ${stop.position}%`).join(', ');
           }
 
-          appliedGradient = `linear-gradient(to right, ${gradientColors})`;
+          appliedGradient = `linear-gradient(${gradientDirection}, ${gradientColors})`;
         } else if (config.disable_default_gradient !== true) {
           // Fallback rainbow gradient if no colored lights are found and option is not disabled
-          appliedGradient = 'linear-gradient(to right, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3)';
+          appliedGradient = `linear-gradient(${gradientDirection}, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3)`;
         }
       }
 
@@ -1126,9 +1286,11 @@ visual_styling_center:
       column-gap: var(--subbutton-column-spacing, 8px);
     }
     /* Make sub-buttons size independent from main icon margin */
+    /* A sub-button's own "custom_height" (set by Bubble Card as
+       --bubble-sub-button-height on that button) wins over the module size. */
     .bubble-sub-button {
-      height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px) !important;
-      min-height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px) !important;
+      height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px)) !important;
+      min-height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px)) !important;
     }
     .vsc-custom-subbutton-background .bubble-sub-button {
       background-color: var(--subbutton-background-color) !important;
@@ -1147,7 +1309,22 @@ visual_styling_center:
       height: calc(var(--icon-size-multiplier, 1) * var(--icon-background-ratio, 1) * 38px) !important;
       width: calc(var(--icon-size-multiplier, 1) * var(--icon-background-ratio, 1) * 38px) !important;
       min-width: calc(var(--icon-size-multiplier, 1) * var(--icon-background-ratio, 1) * 38px) !important;
-      background-color: var(--icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color))) !important;
+    }
+    .vsc-custom-icon-background .bubble-icon-container {
+      background-color: var(--icon-background-color) !important;
+    }
+    /* Name and state text (only while an option is set) */
+    .vsc-name-color .bubble-name {
+      color: var(--vsc-name-color) !important;
+    }
+    .vsc-state-color .bubble-state {
+      color: var(--vsc-state-color) !important;
+    }
+    .vsc-name-size .bubble-name {
+      font-size: var(--vsc-name-font-size) !important;
+    }
+    .vsc-state-size .bubble-state {
+      font-size: var(--vsc-state-font-size) !important;
     }
     /* Specific rule to fully hide icon background when enabled */
     .hide-icon-background .bubble-icon-container {
@@ -1199,7 +1376,7 @@ visual_styling_center:
     }
     /* Multi-row layout support with independent sub-button sizing */
     .rows-2 .bubble-sub-button {
-      height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 20px) !important;
+      height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 20px)) !important;
     }
     /* Large layout sub-button margin */
     .large .bubble-sub-button-container {

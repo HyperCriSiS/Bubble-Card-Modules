@@ -222,3 +222,67 @@ test("removing VSC from the modules list cleans up a mounted card",()=>{
   assert.equal(moduleCard.style.getPropertyValue("--inner-padding"),"");
   assert.equal(moduleCard.classList.contains("vsc-interaction-effects"),false);
 });
+// v2026.10.29: options from the D list and the measured icon background fix.
+const dCard=makeCard();
+const dCtx={config:{entity:"light.a",visual_styling_center:{}}};
+const dCfg=dCtx.config.visual_styling_center;
+const runD=()=>runner.call(dCtx,dCard,hass,nativeHasChanged,()=>{});
+test("icon background is only overridden on request",()=>{
+  runD();
+  assert.equal(dCard.classList.contains("vsc-custom-icon-background"),false);
+  dCfg.custom_icon_background_color=[1,2,3];runD();
+  assert.equal(dCard.classList.contains("vsc-custom-icon-background"),true);
+  assert.equal(dCard.style.getPropertyValue("--icon-background-color"),"rgb(1, 2, 3)");
+  delete dCfg.custom_icon_background_color;dCfg.hide_icon_background=true;runD();
+  assert.equal(dCard.style.getPropertyValue("--icon-background-color"),"transparent");
+  delete dCfg.hide_icon_background;runD();
+  assert.equal(dCard.classList.contains("vsc-custom-icon-background"),false);
+  assert.equal(dCard.style.getPropertyValue("--icon-background-color"),"");
+});
+test("name/state text, radii and card background use native variables",()=>{
+  Object.assign(dCfg,{manual_name_color:"#ff0000",custom_state_color:[0,0,255],
+    name_font_size:16,state_font_size:0,card_border_radius:4,icon_border_radius:0,
+    subbutton_border_radius:6,custom_card_background_color:[10,20,30],card_background_opacity:0.5});
+  runD();
+  assert.equal(dCard.style.getPropertyValue("--vsc-name-color"),"#ff0000");
+  assert.equal(dCard.style.getPropertyValue("--vsc-state-color"),"rgb(0, 0, 255)");
+  assert.equal(dCard.style.getPropertyValue("--vsc-name-font-size"),"16px");
+  assert.equal(dCard.style.getPropertyValue("--vsc-state-font-size"),"0px");
+  assert.equal(dCard.style.getPropertyValue("--bubble-button-border-radius"),"4px");
+  assert.equal(dCard.style.getPropertyValue("--bubble-button-icon-border-radius"),"0px");
+  assert.equal(dCard.style.getPropertyValue("--bubble-sub-button-border-radius"),"6px");
+  assert.equal(dCard.style.getPropertyValue("--bubble-button-main-background-color"),
+    "color-mix(in srgb, rgb(10, 20, 30) 50%, transparent)");
+  ["vsc-name-color","vsc-state-color","vsc-name-size","vsc-state-size"].forEach(c=>assert.equal(dCard.classList.contains(c),true,c));
+  for (const k of Object.keys(dCfg)) delete dCfg[k];
+  runD();
+  ["--vsc-name-color","--bubble-button-border-radius","--bubble-button-main-background-color"].forEach(v=>assert.equal(dCard.style.getPropertyValue(v),"",v));
+  assert.equal(dCard.classList.contains("vsc-name-color"),false);
+});
+test("opacity alone fades the native background",()=>{
+  dCfg.card_background_opacity=0.25;runD();
+  assert.match(dCard.style.getPropertyValue("--bubble-button-main-background-color"),
+    /^color-mix\(in srgb, var\(--bubble-main-background-color.* 25%, transparent\)$/);
+  delete dCfg.card_background_opacity;runD();
+});
+test("theme state colors keep fixed colors as fallback",()=>{
+  hass.states["switch.s"]=st("on");hass.states["light.off"]=st("off");
+  dCtx.config.entity="switch.s";dCfg.enable_entity_colored_main_icon=true;runD();
+  assert.equal(dCard.main.style.getPropertyValue("color"),"rgb(140, 200, 105)");
+  dCfg.use_theme_state_colors=true;runD();
+  assert.equal(dCard.main.style.getPropertyValue("color"),
+    "var(--state-switch-active-color, var(--state-active-color, rgb(140, 200, 105)))");
+  dCtx.config.entity="light.off";runD();
+  assert.equal(dCard.main.style.getPropertyValue("color"),
+    "var(--state-light-inactive-color, var(--state-inactive-color, rgb(150, 150, 150)))");
+  delete dCfg.use_theme_state_colors;delete dCfg.enable_entity_colored_main_icon;dCtx.config.entity="light.a";runD();
+});
+test("gradient angle keeps the old direction unless set",()=>{
+  Object.assign(dCfg,{enable_gradient:true,gradient_target:"background"});
+  hass.states["light.a"]=st("on",[10,20,30]);runD();
+  assert.match(dCard.style.getPropertyValue("--card-gradient"),/^linear-gradient\(to right,/);
+  dCfg.gradient_angle=135;runD();
+  assert.match(dCard.style.getPropertyValue("--card-gradient"),/^linear-gradient\(135deg,/);
+  hass.states["light.a"]=st("off");runD();
+  assert.match(dCard.style.getPropertyValue("--card-gradient"),/^linear-gradient\(135deg, #FF0000/);
+});

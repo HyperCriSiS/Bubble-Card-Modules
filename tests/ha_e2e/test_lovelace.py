@@ -81,7 +81,7 @@ class RealLovelace(unittest.TestCase):
         self.page.on("pageerror",lambda e:self.errors.append(str(e)))
         self.page.goto(BASE+"/lovelace-vsc-e2e/vsc",wait_until="domcontentloaded",timeout=65000)
         try:
-            expect(self.page.locator("bubble-card")).to_have_count(3,timeout=65000)
+            expect(self.page.locator("bubble-card")).to_have_count(4,timeout=65000)
             expect(self.page.locator("bubble-card").first.locator(".bubble-icon")).to_be_attached(timeout=45000)
         except Exception as exc:
             try: body=self.page.locator("body").inner_text(timeout=4000)[:800]
@@ -184,7 +184,7 @@ class RealLovelace(unittest.TestCase):
         self.page.goto(BASE+"/lovelace-vsc-e2e/away",wait_until="domcontentloaded")
         expect(self.page.get_by_text("Lifecycle navigation target")).to_be_visible(timeout=25000)
         self.page.goto(BASE+"/lovelace-vsc-e2e/vsc",wait_until="domcontentloaded")
-        expect(self.page.locator("bubble-card")).to_have_count(3,timeout=45000)
+        expect(self.page.locator("bubble-card")).to_have_count(4,timeout=45000)
         self.wait_value(lambda:self.card_data()["icon"],lambda v:v=="rgb(255, 0, 0)")
 
 if __name__=="__main__":unittest.main()

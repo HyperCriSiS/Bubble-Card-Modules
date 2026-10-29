@@ -265,3 +265,43 @@ class VSCBrowser(unittest.TestCase):
         self.change(cfg={'manual_subbutton_background_color':''})
         self.page.wait_for_timeout(650)
         self.assertEqual(self.cssval('.bubble-sub-button-1','background-color'),native)
+
+    def test_icon_background_matches_native_without_bubble_theme(self):
+        # Home Assistant always defines --card-background-color, Bubble themes
+        # add --bubble-secondary-background-color. Without one the old module
+        # fallback made the icon circle transparent.
+        self.page.add_style_tag(content="#card{--card-background-color:rgb(40, 40, 40)}")
+        self.change()
+        self.page.wait_for_timeout(650)
+        self.assertEqual(self.cssval('.bubble-icon-container','background-color'),'rgb(40, 40, 40)')
+        self.change(cfg={'custom_icon_background_color':[1,2,3]})
+        self.assertEqual(self.cssval('.bubble-icon-container','background-color'),'rgb(1, 2, 3)')
+        self.change(cfg={'custom_icon_background_color':None})
+        self.assertEqual(self.cssval('.bubble-icon-container','background-color'),'rgb(40, 40, 40)')
+
+    def test_native_sub_button_custom_height_wins(self):
+        # Bubble Card writes a sub-button's custom_height as this variable.
+        self.page.locator('.bubble-sub-button-2').evaluate(
+            "e=>e.style.setProperty('--bubble-sub-button-height','44px')")
+        self.change(cfg={'subbutton_background_ratio':1.25})
+        self.page.wait_for_timeout(650)
+        self.assertEqual(self.cssval('.bubble-sub-button-2','height'),'44px')
+        self.assertEqual(self.cssval('.bubble-sub-button-1','height'),'40px')
+
+    def test_name_state_text_and_slider_radius(self):
+        self.page.evaluate("""()=>{
+            const c=document.querySelector('.bubble-name-container');
+            c.innerHTML='<div class="bubble-name">Name</div><div class="bubble-state">On</div>';
+        }""")
+        self.change()
+        native_size=self.cssval('.bubble-name','font-size')
+        self.change(cfg={'manual_name_color':'#ff0000','name_font_size':17,
+                         'custom_state_color':[0,0,255],'state_font_size':9,'card_border_radius':3})
+        self.assertEqual(self.cssval('.bubble-name','color'),'rgb(255, 0, 0)')
+        self.assertEqual(self.cssval('.bubble-name','font-size'),'17px')
+        self.assertEqual(self.cssval('.bubble-state','color'),'rgb(0, 0, 255)')
+        self.assertEqual(self.cssval('.bubble-state','font-size'),'9px')
+        self.assertEqual(self.cssval('.bubble-button-card-container > .bubble-range-slider','border-top-left-radius'),'3px')
+        self.change(cfg={'manual_name_color':'','name_font_size':None,'card_border_radius':None})
+        self.assertEqual(self.cssval('.bubble-name','font-size'),native_size)
+        self.assertNotEqual(self.cssval('.bubble-name','color'),'rgb(255, 0, 0)')

@@ -57,3 +57,39 @@ class ExtendedRealLovelace(base.RealLovelace):
         }""")
         self.assertFalse(after["owned"],after)
         self.assertEqual(after["gradient"],"",after)
+
+    def test_18_icon_background_matches_native_card_with_red_light(self):
+        """VSC with no icon background option keeps Bubble Card's own circle."""
+        def backgrounds():
+            loc=self.page.locator("bubble-card")
+            read="""el => {
+                const icon=el.card?.querySelector('.bubble-icon-container');
+                return icon ? getComputedStyle(icon).backgroundColor : null;
+            }"""
+            return [loc.nth(0).evaluate(read), loc.nth(1).evaluate(read)]
+        vsc,native=self.wait_value(backgrounds,lambda v:all(v))
+        self.assertEqual(self.entity("light.vsc_main")["attributes"]["rgb_color"],[255,0,0])
+        self.assertEqual(vsc,native,(vsc,native))
+        self.assertNotEqual(vsc,"rgba(0, 0, 0, 0)",(vsc,native))
+
+    def test_19_sub_buttons_card_type_with_vsc(self):
+        """The sub-buttons card has no main icon or slider; VSC styles its sub-buttons."""
+        card=self.page.locator("bubble-card").nth(3)
+        def data():
+            return card.evaluate("""el => {
+                const b=n=>el.card?.querySelector('.bubble-sub-button-'+n);
+                const box=n=>b(n)?.getBoundingClientRect().height||0;
+                return {
+                    color:b(1)?.querySelector('.bubble-sub-button-icon')?.style.color||'',
+                    first:box(1), second:box(2),
+                    owned:!!el.card?._vscOwnedVariables
+                };
+            }""")
+        # Height transitions natively for 0.5 s.
+        self.page.wait_for_timeout(700)
+        result=self.wait_value(data,lambda d:d["color"]=="rgb(255, 0, 0)" and d["second"]>0)
+        self.assertTrue(result["owned"],result)
+        self.assertAlmostEqual(result["first"],40,delta=0.5,msg=result)
+        # The sub-button's own custom_height beats the module size.
+        self.assertAlmostEqual(result["second"],44,delta=0.5,msg=result)
+        self.assertFalse(self.errors,self.errors)

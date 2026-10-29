@@ -34,17 +34,19 @@ class HAContracts(unittest.TestCase):
         cfg=make_config()
         self.assertIn("lovelace",cfg)
         source=extract_module((ROOT/"Visual-Styling-Center/Visual-Styling-Center.md").read_text(encoding="utf-8"))
-        self.assertEqual(len([item for section in source["editor"] for item in section.get("schema",[]) if "name" in item]),47)
+        self.assertEqual(len([item for section in source["editor"] for item in section.get("schema",[]) if "name" in item]),61)
         workflow=(ROOT/".github/workflows/test-vsc-ha-e2e.yml").read_text(encoding="utf-8")
         self.assertIn("2708319696513f5916f062723847c6cd80715dcc",workflow)
         self.assertIn("custom_components/bubble_card_tools",workflow)
 
     def test_lovelace_and_native_baseline(self):
         cards=make_dashboard(".bubble-icon { color:red }")["views"][0]["cards"]
-        self.assertEqual(len(cards),3)
+        self.assertEqual(len(cards),4)
         self.assertNotIn("styles",cards[1])
         self.assertIn("styles",cards[0])
         self.assertIn("styles",cards[2])
+        self.assertEqual(cards[3]["card_type"],"sub-buttons")
+        self.assertIn("styles",cards[3])
 
     def test_ci_isolated_and_verified(self):
         text=(ROOT/".github/workflows/test-vsc-ha-e2e.yml").read_text(encoding="utf-8")

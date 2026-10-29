@@ -56,8 +56,8 @@ class BubbleCardToolsStorage(base.RealLovelace):
         document=yaml.safe_load(result["content"])
         module=document["visual_styling_center"]
         fields=[f["name"] for section in module["editor"] for f in section.get("schema",[]) if "name" in f]
-        self.assertEqual(len(fields),47,fields)
-        self.assertEqual(len(set(fields)),47)
+        self.assertEqual(len(fields),61,fields)
+        self.assertEqual(len(set(fields)),61)
         self.assertGreater(len(module["code"]),15000)
 
         # Write into a throwaway file, verify exact BCT persistence, delete it.
@@ -124,8 +124,8 @@ class BubbleCardToolsStorage(base.RealLovelace):
         self.assertTrue(visible["panel"],visible)
         self.assertGreaterEqual(visible["forms"],1,visible)
         # The schema is drawn from BCT's installed YAML, not a fixture mock.
-        self.assertEqual(len(set(visible["names"])),47,visible)
-        self.assertEqual(len(visible["names"]),47,visible)
+        self.assertEqual(len(set(visible["names"])),61,visible)
+        self.assertEqual(len(visible["names"]),61,visible)
         card.evaluate("host => window.__vscRealBctEditor.remove()")
 
     def test_17_bct_real_form_emits_and_reloads_config_change(self):

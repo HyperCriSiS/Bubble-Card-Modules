@@ -80,7 +80,12 @@ def make_dashboard(code):
             button("VSC Primary","light.vsc_main",options,single),
             button("Native baseline (no VSC)","light.vsc_main",None,single),
             button("VSC Mixed Groups","light.vsc_group",
-                   {"enable_entity_colored_main_icon":True,"enable_entity_colored_subicons":True},mixed)
+                   {"enable_entity_colored_main_icon":True,"enable_entity_colored_subicons":True},mixed),
+            # Sub-buttons card type: VSC only reaches its sub-buttons there.
+            {"type":"custom:bubble-card","card_type":"sub-buttons","styles":code,
+             MODULE_ID:{"enable_entity_colored_subicons":True,"subbutton_background_ratio":1.25},
+             "sub_button":{"main":[{"entity":"light.vsc_main"},
+                                   {"entity":"light.vsc_child","custom_height":44}]}}
         ]},
         {"title":"Away","path":"away","cards":[{"type":"markdown","content":"Lifecycle navigation target"}]}
     ]}

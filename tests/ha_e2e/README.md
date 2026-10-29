@@ -55,3 +55,7 @@ Das ist unabhängig von der vollständigen manuellen Feldbedienung im BCT-Module
 ## 19. Oktober 2026 – 47 Optionen
 
 Mit VSC v2026.10.19 kommt die Option `enable_interaction_effects` hinzu (Standard `true`, also das bisherige Verhalten). Die Feldzählungen der E2E-Tests erwarten deshalb 47 statt 46 Optionen. Die 46 bestehenden Options-IDs bleiben unverändert. Die Editor-Abschnitte haben weiterhin kein `name`, die Werte liegen also weiter flach unter `visual_styling_center`.
+
+## 29. Oktober 2026 – 61 Optionen, zwei neue Tests
+
+VSC v2026.10.29 ergänzt 14 optionale Felder (61 insgesamt, die bisherigen IDs unverändert). Das Dashboard hat eine vierte Karte vom Typ `sub-buttons`. `test_18` vergleicht den Icon-Hintergrund der VSC-Karte mit der nativen Karte bei roter Lampe, `test_19` prüft die `sub-buttons`-Karte samt `custom_height`.
