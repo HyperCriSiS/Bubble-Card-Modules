@@ -312,7 +312,14 @@ class PersistenceAndEditor(base.RealLovelace):
         self.page.screenshot(path=str(base.ARTIFACTS/"test_29_editor.png"),full_page=True,timeout=12000)
         self.assertFalse(failures,f"{len(failures)}/{len(fields)} fields failed:\n"
                          +"\n".join(f"{k}: {v}" for k,v in failures.items())
-                         +"\nSTACKS:\n"+"\n--\n".join(stacks[:3]))
+                         +"\nSTACKS:\n"+"\n--\n".join(stacks[:3])
+                         +"\nCHUNK:\n"+self.page.evaluate("""async s => {
+                             const m=/(http[^\\s)]+\\.js):1:(\\d+)/.exec(s||'');
+                             if (!m) return 'none';
+                             const t=await (await fetch(m[1])).text();
+                             return t.slice(Math.max(0,+m[2]-900),+m[2]+300)
+                                 +' || TAGS: '+(t.match(/"(ha|hui|state)-[a-z-]+"/g)||[]).slice(0,30).join(',');
+                         }""",stacks[0] if stacks else ""))
 
         # Live CSS update: hand the edited config to the mounted VSC card.
         final=self.page.evaluate("() => window.__vscConfig")
