@@ -34,7 +34,7 @@ Diese Tests verwenden **echte HA-Backend-Entities, das authentifizierte Lovelace
 
 ## Grenzen
 
-Nicht vollständig geprüft: alle 46 Optionen im visuellen Modul-Editor, mobile Touch-Drag-Gesten, Pop-up-/Sections-/Grid-Varianten über die Fälle 20–23 hinaus, Kombinationen mit weiteren Modulen, benutzerdefinierte Themes, lange Laufzeit- und Performance-Szenarien sowie das reine Deaktivieren eines Moduls, während die Karte verbunden bleibt. Siehe [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11).
+Die Akzeptanztests aus [Issue #11](https://github.com/HyperCriSiS/Bubble-Card-Modules/issues/11) sind durch die Fälle 01–30 abgedeckt (siehe unten). Bewusst nicht automatisiert sind Performance-Messungen auf echter, schwacher Hardware und Wochen-Langzeitläufe. Fall 28 prüft nur 40 Zustandswechsel und 8 Navigationen in einem CI-Lauf. Außerdem ist nur das Standard-Theme von HA plus ein eigenes Test-Theme abgedeckt, nicht beliebige Community-Themes.
 
 ## Ausführung
 
@@ -71,4 +71,24 @@ VSC v2026.10.29 ergänzt 14 optionale Felder (61 insgesamt, die bisherigen IDs u
 | 22 | VSC-Karte in einem Standalone-Pop-up (`#vsc-matrix`): Rendern nach Öffnen per Hash, externer Zustandswechsel färbt das Icon um |
 | 23 | Sections-Ansicht: VSC-Karte und native Karte nebeneinander, beide im Standard-Large-Layout mit identischem Theme-Hintergrund, keine VSC-Variablen auf der nativen Karte |
 
-Erster Lauf: 23/23 bestanden ([Run #40949703367](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/40949703367)). Benutzerdefinierte Themes, mobile Pop-up-Ansicht und Kombinationen mit anderen Fremdmodulen sind damit nicht abgedeckt.
+Erster Lauf: 23/23 bestanden ([Run #40949703367](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/40949703367)).
+
+## 30. Oktober 2026 – Abschluss von Issue #11 (Fälle 24–30)
+
+| # | Prüfung |
+| --- | --- |
+| 24 | Eigenes Theme (`VSC E2E Theme`, Ansicht `themed`) im hellen und dunklen Modus: Theme wirkt nachweislich, VSC ohne Hintergrundoption übernimmt den Theme-Hintergrund, `custom_card_background_color` überschreibt ihn in beiden Modi |
+| 25 | VSC und Badgy auf derselben Karte: Badge vorhanden, VSC-Farben für Haupt- und Sub-Icon, Zustandswechsel des Kindlichts erreicht VSC weiterhin |
+| 26 | Mobiles Pop-up (390×844, Touch): Karte passt in die Breite, echte CDP-Touch-Geste auf dem Slider ändert die Helligkeit in HA |
+| 27 | Storage-Dashboard: Speichern über `lovelace/config/save`, Neuladen der Seite, Optionen (`0`, `false`, RGB-Liste) bleiben exakt erhalten. Nach Abschalten einer Option übernimmt Bubble Card wieder die Icon-Farbe |
+| 28 | Langzeit: 40 Zustandswechsel und 8 Navigationen ohne zusätzliche `<style>`-Elemente oder VSC-Variablen, Median-Latenz unter 1,5 s, keine JS-Fehler |
+| 29 | Realer Editor: **alle 61 VSC-Felder** werden per Maus und Tastatur bedient (Schalter, Zahlenfelder, Text, Farbe, Radio-Auswahl, Entity-Picker). Abhängige Felder (`visible:`) werden durch ihre Schalter sichtbar gemacht. Danach wird die Konfiguration live angewendet, gespeichert, neu geladen und unverändert zurückgelesen |
+| 30 | Overlay-Sub-Slider: Tippen öffnet ihn, Ziehen ändert die Helligkeit in HA, der Schließen-Knopf schließt ihn, und VSC-Farben bleiben erhalten. Langes Drücken löst die Hold-Aktion aus, mit und ohne VSC |
+
+Erkenntnisse aus dem Aufbau:
+
+- Der Editor muss innerhalb von `home-assistant` eingehängt werden. Der Entity-Picker von HA 2026.10 bezieht seine Übersetzungen über einen Lit-Context, außerhalb dieses Baums wirft er `localize`-Fehler und bleibt leer.
+- Kurze Auswahllisten zeichnet HA als `ha-radio-option`, nicht als `ha-select`.
+- Aktionen der Kartenfläche stehen bei Bubble Card unter `button_action`. Ein `perform-action` als Hold-Aktion wurde von Bubble Card v3.4.2 im Test auch ohne VSC nicht ausgelöst, daher nutzt Fall 30 `toggle`.
+
+Lauf: 30/30 bestanden ([Run #40971364131](https://github.com/HyperCriSiS/Bubble-Card-Modules/actions/runs/40971364131)).
