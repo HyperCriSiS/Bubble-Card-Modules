@@ -170,6 +170,16 @@ class VSCBrowser(unittest.TestCase):
         self.change(cfg={'subbutton_column_spacing':12})
         self.assertEqual(self.cssval('.bubble-sub-button-container','column-gap'),'12px')
 
+    def test_sub_button_margin_follows_text_direction(self):
+        # Bubble Card positions the container with inset-inline-end, so the
+        # module margin has to sit on the same logical side.
+        self.change(cfg={'subbutton_horizontal_margin':12})
+        self.assertEqual(self.cssval('.bubble-sub-button-container','margin-right'),'12px')
+        self.assertEqual(self.cssval('.bubble-sub-button-container','margin-left'),'0px')
+        self.page.locator('#card').evaluate("e=>e.setAttribute('dir','rtl')")
+        self.assertEqual(self.cssval('.bubble-sub-button-container','margin-left'),'12px')
+        self.assertEqual(self.cssval('.bubble-sub-button-container','margin-right'),'0px')
+
     def test_sub_button_group_spacing_keeps_native_default(self):
         # Bubble Card v3 wraps buttons in groups, the container gap misses them.
         self.page.evaluate("""()=>{
