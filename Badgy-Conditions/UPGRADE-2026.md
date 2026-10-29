@@ -20,7 +20,7 @@ paths are preserved**. Existing cards should not require migration.
 
 ## Bubble Card v3.4.2 hardening (2026-10-15)
 
-The isolated import artifact is currently `v2026.10.29-beta.7`.
+The isolated import artifact is currently `v2026.10.29-beta.8`.
 
 - All Badgy animation CSS class names, keyframes, and effect color variables
   are namespaced. The effect cleanup no longer removes unowned classes.
@@ -50,6 +50,24 @@ Home Assistant's real editor, entity subscriptions or shadow DOM.
 - The README card example now has a module-ID string in `modules:` and a
   separate `badgy-condition-helper:` configuration block.
 - Automated tests verify custom text and correct example YAML.
+
+## Beta.8 size fix (2026-10-29)
+
+- **Imported module disappeared after saving or reloading.** Bubble Card Tools
+  only stores module files up to 256 KB (`DEFAULT_MAX_BYTES`). Bubble Card's
+  "Import from YAML" re-serializes the module in block style and then reports
+  success even when Bubble Card Tools rejects the file, so beta.6/beta.7
+  (about 270 KB when stored) only lived in the browser until the next reload.
+- The stored module is now about 206 KB:
+  - effect dropdowns list the effect values (`pulse`, `spin-360`, ...) instead
+    of separate display labels;
+  - the separate Entity/Icon Badge Effects entries no longer offer their own
+    rule lists in the editor. Use the effect on the badge and badge rules
+    instead. Rules already written there in YAML keep working.
+- A schema test now fails if the stored size of the module or the beta
+  exceeds 230 KB.
+- CI: the Chromium job runs on `ubuntu-24.04`, because Playwright 1.57 cannot
+  install its browser dependencies on Ubuntu 26.04 (`ubuntu-latest`).
 
 ## Beta.7 cleanup (2026-10-29)
 

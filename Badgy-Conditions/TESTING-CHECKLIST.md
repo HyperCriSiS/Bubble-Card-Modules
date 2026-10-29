@@ -15,6 +15,8 @@ full Home Assistant frontend. None of the checkboxes below are considered comple
 
 - [ ] Import the beta YAML from the branch in **Modules → My Modules → Import from YAML**.
 - [ ] Add a duplicate card using only the beta module and confirm it can be saved/reloaded.
+- [ ] After importing, reload the browser: the beta module must still be listed
+      (file `modules/badgy-condition-helper-beta.yaml` written by Bubble Card Tools).
 - [ ] Open every editor group (Icon Colors, Backgrounds, Icons, Entity Badges,
       Icon Badges, Effects, Global Defaults); confirm nested fields appear.
 - [ ] Save a list of 2+ condition rules, reorder them, reopen the card and

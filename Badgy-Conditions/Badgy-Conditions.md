@@ -1,6 +1,6 @@
 # Badgy Condition Helper
 
-**Version:** v2026.10.29-beta.7
+**Version:** v2026.10.29-beta.8
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT]
@@ -180,7 +180,7 @@ badgy-condition-helper:
 ```yaml
 badgy-condition-helper:
   name: "Badgy Condition Helper"
-  version: "v2026.10.29-beta.7"
+  version: "v2026.10.29-beta.8"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   unsupported:
@@ -2497,26 +2497,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -2557,26 +2547,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -2668,26 +2648,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -2728,26 +2698,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -2839,26 +2799,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -2899,26 +2849,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -3010,26 +2950,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -3070,26 +3000,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -3181,26 +3101,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -3241,26 +3151,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -3352,26 +3252,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -3412,26 +3302,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -3523,26 +3403,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -3583,26 +3453,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -3671,26 +3531,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -3731,26 +3581,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -3812,26 +3652,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -3872,26 +3702,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -3953,26 +3773,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -4013,26 +3823,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -4094,26 +3894,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -4154,26 +3944,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -4235,26 +4015,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -4295,26 +4065,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -4376,26 +4136,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -4436,26 +4186,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -4517,26 +4257,16 @@ badgy-condition-helper:
               selector:
                 select:
                   options:
-                    - label: Pulse (Scale)
-                      value: pulse
-                    - label: Gentle Rotation
-                      value: rotate
-                    - label: Glow Effect
-                      value: glow
-                    - label: Gentle Shake
-                      value: shake
-                    - label: Float Up & Down
-                      value: float
-                    - label: Zoom
-                      value: zoom
-                    - label: Heartbeat
-                      value: heartbeat
-                    - label: Spin 360
-                      value: spin-360
-                    - label: Flip
-                      value: flip
-                    - label: Vibrate
-                      value: vibrate
+                    - pulse
+                    - rotate
+                    - glow
+                    - shake
+                    - float
+                    - zoom
+                    - heartbeat
+                    - spin-360
+                    - flip
+                    - vibrate
             - name: effect_color
               label: Badge effect color
               selector:
@@ -4577,26 +4307,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     effect_color:
                       label: Effect color
                       selector:
@@ -4623,26 +4343,16 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
@@ -4671,26 +4381,16 @@ badgy-condition-helper:
                           selector:
                             select:
                               options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
+                                - pulse
+                                - rotate
+                                - glow
+                                - shake
+                                - float
+                                - zoom
+                                - heartbeat
+                                - spin-360
+                                - flip
+                                - vibrate
                         color:
                           label: Effect color
                           selector:
@@ -4712,26 +4412,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     - name: color
                       label: Effect Color
                       selector:
@@ -4760,26 +4450,16 @@ badgy-condition-helper:
                               selector:
                                 select:
                                   options:
-                                    - label: Pulse (Scale)
-                                      value: pulse
-                                    - label: Gentle Rotation
-                                      value: rotate
-                                    - label: Glow Effect
-                                      value: glow
-                                    - label: Gentle Shake
-                                      value: shake
-                                    - label: Float Up & Down
-                                      value: float
-                                    - label: Zoom
-                                      value: zoom
-                                    - label: Heartbeat
-                                      value: heartbeat
-                                    - label: Spin 360
-                                      value: spin-360
-                                    - label: Flip
-                                      value: flip
-                                    - label: Vibrate
-                                      value: vibrate
+                                    - pulse
+                                    - rotate
+                                    - glow
+                                    - shake
+                                    - float
+                                    - zoom
+                                    - heartbeat
+                                    - spin-360
+                                    - flip
+                                    - vibrate
                             color:
                               label: Effect color
                               selector:
@@ -4797,26 +4477,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     - name: color
                       label: Effect Color
                       selector:
@@ -4845,26 +4515,16 @@ badgy-condition-helper:
                               selector:
                                 select:
                                   options:
-                                    - label: Pulse (Scale)
-                                      value: pulse
-                                    - label: Gentle Rotation
-                                      value: rotate
-                                    - label: Glow Effect
-                                      value: glow
-                                    - label: Gentle Shake
-                                      value: shake
-                                    - label: Float Up & Down
-                                      value: float
-                                    - label: Zoom
-                                      value: zoom
-                                    - label: Heartbeat
-                                      value: heartbeat
-                                    - label: Spin 360
-                                      value: spin-360
-                                    - label: Flip
-                                      value: flip
-                                    - label: Vibrate
-                                      value: vibrate
+                                    - pulse
+                                    - rotate
+                                    - glow
+                                    - shake
+                                    - float
+                                    - zoom
+                                    - heartbeat
+                                    - spin-360
+                                    - flip
+                                    - vibrate
                             color:
                               label: Effect color
                               selector:
@@ -4882,26 +4542,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     - name: color
                       label: Effect Color
                       selector:
@@ -4930,26 +4580,16 @@ badgy-condition-helper:
                               selector:
                                 select:
                                   options:
-                                    - label: Pulse (Scale)
-                                      value: pulse
-                                    - label: Gentle Rotation
-                                      value: rotate
-                                    - label: Glow Effect
-                                      value: glow
-                                    - label: Gentle Shake
-                                      value: shake
-                                    - label: Float Up & Down
-                                      value: float
-                                    - label: Zoom
-                                      value: zoom
-                                    - label: Heartbeat
-                                      value: heartbeat
-                                    - label: Spin 360
-                                      value: spin-360
-                                    - label: Flip
-                                      value: flip
-                                    - label: Vibrate
-                                      value: vibrate
+                                    - pulse
+                                    - rotate
+                                    - glow
+                                    - shake
+                                    - float
+                                    - zoom
+                                    - heartbeat
+                                    - spin-360
+                                    - flip
+                                    - vibrate
                             color:
                               label: Effect color
                               selector:
@@ -4967,26 +4607,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     - name: color
                       label: Effect Color
                       selector:
@@ -5015,26 +4645,16 @@ badgy-condition-helper:
                               selector:
                                 select:
                                   options:
-                                    - label: Pulse (Scale)
-                                      value: pulse
-                                    - label: Gentle Rotation
-                                      value: rotate
-                                    - label: Glow Effect
-                                      value: glow
-                                    - label: Gentle Shake
-                                      value: shake
-                                    - label: Float Up & Down
-                                      value: float
-                                    - label: Zoom
-                                      value: zoom
-                                    - label: Heartbeat
-                                      value: heartbeat
-                                    - label: Spin 360
-                                      value: spin-360
-                                    - label: Flip
-                                      value: flip
-                                    - label: Vibrate
-                                      value: vibrate
+                                    - pulse
+                                    - rotate
+                                    - glow
+                                    - shake
+                                    - float
+                                    - zoom
+                                    - heartbeat
+                                    - spin-360
+                                    - flip
+                                    - vibrate
                             color:
                               label: Effect color
                               selector:
@@ -5052,26 +4672,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     - name: color
                       label: Effect Color
                       selector:
@@ -5100,26 +4710,16 @@ badgy-condition-helper:
                               selector:
                                 select:
                                   options:
-                                    - label: Pulse (Scale)
-                                      value: pulse
-                                    - label: Gentle Rotation
-                                      value: rotate
-                                    - label: Glow Effect
-                                      value: glow
-                                    - label: Gentle Shake
-                                      value: shake
-                                    - label: Float Up & Down
-                                      value: float
-                                    - label: Zoom
-                                      value: zoom
-                                    - label: Heartbeat
-                                      value: heartbeat
-                                    - label: Spin 360
-                                      value: spin-360
-                                    - label: Flip
-                                      value: flip
-                                    - label: Vibrate
-                                      value: vibrate
+                                    - pulse
+                                    - rotate
+                                    - glow
+                                    - shake
+                                    - float
+                                    - zoom
+                                    - heartbeat
+                                    - spin-360
+                                    - flip
+                                    - vibrate
                             color:
                               label: Effect color
                               selector:
@@ -5137,26 +4737,16 @@ badgy-condition-helper:
                       selector:
                         select:
                           options:
-                            - label: Pulse (Scale)
-                              value: pulse
-                            - label: Gentle Rotation
-                              value: rotate
-                            - label: Glow Effect
-                              value: glow
-                            - label: Gentle Shake
-                              value: shake
-                            - label: Float Up & Down
-                              value: float
-                            - label: Zoom
-                              value: zoom
-                            - label: Heartbeat
-                              value: heartbeat
-                            - label: Spin 360
-                              value: spin-360
-                            - label: Flip
-                              value: flip
-                            - label: Vibrate
-                              value: vibrate
+                            - pulse
+                            - rotate
+                            - glow
+                            - shake
+                            - float
+                            - zoom
+                            - heartbeat
+                            - spin-360
+                            - flip
+                            - vibrate
                     - name: color
                       label: Effect Color
                       selector:
@@ -5185,26 +4775,16 @@ badgy-condition-helper:
                               selector:
                                 select:
                                   options:
-                                    - label: Pulse (Scale)
-                                      value: pulse
-                                    - label: Gentle Rotation
-                                      value: rotate
-                                    - label: Glow Effect
-                                      value: glow
-                                    - label: Gentle Shake
-                                      value: shake
-                                    - label: Float Up & Down
-                                      value: float
-                                    - label: Zoom
-                                      value: zoom
-                                    - label: Heartbeat
-                                      value: heartbeat
-                                    - label: Spin 360
-                                      value: spin-360
-                                    - label: Flip
-                                      value: flip
-                                    - label: Vibrate
-                                      value: vibrate
+                                    - pulse
+                                    - rotate
+                                    - glow
+                                    - shake
+                                    - float
+                                    - zoom
+                                    - heartbeat
+                                    - spin-360
+                                    - flip
+                                    - vibrate
                             color:
                               label: Effect color
                               selector:
@@ -5227,26 +4807,16 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color (e.g. for Glow)
                   selector:
@@ -5275,26 +4845,16 @@ badgy-condition-helper:
                           selector:
                             select:
                               options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
+                                - pulse
+                                - rotate
+                                - glow
+                                - shake
+                                - float
+                                - zoom
+                                - heartbeat
+                                - spin-360
+                                - flip
+                                - vibrate
                         color:
                           label: Effect color
                           selector:
@@ -5312,26 +4872,16 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color (e.g. for Glow)
                   selector:
@@ -5360,26 +4910,16 @@ badgy-condition-helper:
                           selector:
                             select:
                               options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
+                                - pulse
+                                - rotate
+                                - glow
+                                - shake
+                                - float
+                                - zoom
+                                - heartbeat
+                                - spin-360
+                                - flip
+                                - vibrate
                         color:
                           label: Effect color
                           selector:
@@ -5397,26 +4937,16 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color (e.g. for Glow)
                   selector:
@@ -5445,26 +4975,16 @@ badgy-condition-helper:
                           selector:
                             select:
                               options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
+                                - pulse
+                                - rotate
+                                - glow
+                                - shake
+                                - float
+                                - zoom
+                                - heartbeat
+                                - spin-360
+                                - flip
+                                - vibrate
                         color:
                           label: Effect color
                           selector:
@@ -5482,26 +5002,16 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color (e.g. for Glow)
                   selector:
@@ -5530,26 +5040,16 @@ badgy-condition-helper:
                           selector:
                             select:
                               options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
+                                - pulse
+                                - rotate
+                                - glow
+                                - shake
+                                - float
+                                - zoom
+                                - heartbeat
+                                - spin-360
+                                - flip
+                                - vibrate
                         color:
                           label: Effect color
                           selector:
@@ -5567,26 +5067,16 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color (e.g. for Glow)
                   selector:
@@ -5615,26 +5105,16 @@ badgy-condition-helper:
                           selector:
                             select:
                               options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
+                                - pulse
+                                - rotate
+                                - glow
+                                - shake
+                                - float
+                                - zoom
+                                - heartbeat
+                                - spin-360
+                                - flip
+                                - vibrate
                         color:
                           label: Effect color
                           selector:
@@ -5652,26 +5132,16 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color (e.g. for Glow)
                   selector:
@@ -5700,26 +5170,16 @@ badgy-condition-helper:
                           selector:
                             select:
                               options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
+                                - pulse
+                                - rotate
+                                - glow
+                                - shake
+                                - float
+                                - zoom
+                                - heartbeat
+                                - spin-360
+                                - flip
+                                - vibrate
                         color:
                           label: Effect color
                           selector:
@@ -5770,57 +5230,9 @@ badgy-condition-helper:
                     ui_color:
                       include_none: true
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 1
               name: '0'
@@ -5830,82 +5242,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 2
               name: '1'
@@ -5915,82 +5269,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 3
               name: '2'
@@ -6000,82 +5296,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 4
               name: '3'
@@ -6085,82 +5323,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 5
               name: '4'
@@ -6170,82 +5350,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 6
               name: '5'
@@ -6255,82 +5377,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
         - type: expandable
           title: Icon Badge Effects
           icon: mdi:tag-outline
@@ -6373,57 +5437,9 @@ badgy-condition-helper:
                     ui_color:
                       include_none: true
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 1
               name: '0'
@@ -6433,82 +5449,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 2
               name: '1'
@@ -6518,82 +5476,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 3
               name: '2'
@@ -6603,82 +5503,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 4
               name: '3'
@@ -6688,82 +5530,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 5
               name: '4'
@@ -6773,82 +5557,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
             - type: expandable
               title: Sub-Button 6
               name: '5'
@@ -6858,82 +5584,24 @@ badgy-condition-helper:
                   selector:
                     select:
                       options:
-                        - label: Pulse (Scale)
-                          value: pulse
-                        - label: Gentle Rotation
-                          value: rotate
-                        - label: Glow Effect
-                          value: glow
-                        - label: Gentle Shake
-                          value: shake
-                        - label: Float Up & Down
-                          value: float
-                        - label: Zoom
-                          value: zoom
-                        - label: Heartbeat
-                          value: heartbeat
-                        - label: Spin 360
-                          value: spin-360
-                        - label: Flip
-                          value: flip
-                        - label: Vibrate
-                          value: vibrate
+                        - pulse
+                        - rotate
+                        - glow
+                        - shake
+                        - float
+                        - zoom
+                        - heartbeat
+                        - spin-360
+                        - flip
+                        - vibrate
                 - name: color
                   label: Effect Color
                   selector:
                     ui_color: {}
                 - name: condition
-                  label: Condition for the static settings (only used without rules or as fallback)
+                  label: Condition (optional)
                   selector:
                     condition: {}
-                - name: rules
-                  label: Rules — first match wins and overrides the static settings
-                  selector:
-                    object:
-                      multiple: true
-                      label_field: label
-                      fields:
-                        label:
-                          label: Rule name
-                          selector:
-                            text: {}
-                        condition:
-                          label: Condition
-                          selector:
-                            condition: {}
-                        effect:
-                          label: Effect
-                          selector:
-                            select:
-                              options:
-                                - label: Pulse (Scale)
-                                  value: pulse
-                                - label: Gentle Rotation
-                                  value: rotate
-                                - label: Glow Effect
-                                  value: glow
-                                - label: Gentle Shake
-                                  value: shake
-                                - label: Float Up & Down
-                                  value: float
-                                - label: Zoom
-                                  value: zoom
-                                - label: Heartbeat
-                                  value: heartbeat
-                                - label: Spin 360
-                                  value: spin-360
-                                - label: Flip
-                                  value: flip
-                                - label: Vibrate
-                                  value: vibrate
-                        color:
-                          label: Effect color
-                          selector:
-                            ui_color: {}
-                - name: fallback_to_static
-                  label: 'Use the static settings above when no rule matches (default: off)'
-                  selector:
-                    boolean: {}
     - type: expandable
       title: Global Defaults
       icon: mdi:tune-variant

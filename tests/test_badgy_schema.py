@@ -93,6 +93,21 @@ def main():
         ("global_defaults", "main_badge_h_pos"),
     }
     assert required <= updated, "New fields missing: " + repr(sorted(required - updated))
+    # Bubble Card Tools refuses module files above 256 KB, and Bubble Card's
+    # YAML import re-serializes the module in block style before saving it,
+    # while still reporting success. Keep the stored size well below the limit.
+    class BlockDumper(yaml.SafeDumper):
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow, False)
+
+    budget = 230 * 1024
+    for module_id, module in ((MODULE, new), (beta_id, isolated)):
+        stored = yaml.dump({module_id: module}, Dumper=BlockDumper, sort_keys=False,
+                           allow_unicode=True, width=10 ** 6, indent=2).encode("utf-8")
+        assert len(stored) < budget, "%s would be stored with %d bytes (budget %d, BCT limit 262144)" % (
+            module_id, len(stored), budget)
+    raw_beta = (ROOT / "Badgy-Conditions/Badgy-Conditions-beta.yaml").read_bytes()
+    assert len(raw_beta) < budget, "Beta YAML has %d bytes" % len(raw_beta)
     code = new["code"]
     node_check = (
         "const fs=require('fs');const code=fs.readFileSync(0,'utf8');"
