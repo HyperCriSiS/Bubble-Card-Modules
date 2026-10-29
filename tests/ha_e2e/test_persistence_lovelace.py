@@ -139,7 +139,8 @@ class PersistenceAndEditor(base.RealLovelace):
             frame.id='vsc-editor-frame';
             frame.style.cssText='position:fixed;inset:0;overflow:auto;z-index:99999;'
                 +'background:var(--card-background-color,#fff);padding:12px';
-            document.body.appendChild(frame);
+            // Inside home-assistant, like HA's editor dialog: pickers read i18n via context.
+            document.querySelector('home-assistant').shadowRoot.appendChild(frame);
             const editor=customElements.get('bubble-card').getConfigElement();
             editor.hass=document.querySelector('home-assistant').hass;
             editor.setConfig({...host.config,modules:['visual_styling_center']});
@@ -191,7 +192,7 @@ class PersistenceAndEditor(base.RealLovelace):
     def dump(self,name):
         """Compact element tree of one field, for diagnosing selector changes."""
         return self.page.evaluate("""n => {
-            const root=document.querySelector('#vsc-editor-frame') && (function find(r){
+            const root=window.__vscEditor && (function find(r){
                 for (const el of r.querySelectorAll('*')) {
                     if (el.dataset?.vscField===n) return el;
                     if (el.shadowRoot) { const f=find(el.shadowRoot); if (f) return f; }
@@ -323,7 +324,7 @@ class PersistenceAndEditor(base.RealLovelace):
 
         # Live CSS update: hand the edited config to the mounted VSC card.
         final=self.page.evaluate("() => window.__vscConfig")
-        self.page.evaluate("() => document.getElementById('vsc-editor-frame').remove()")
+        self.page.evaluate("() => window.__vscEditor.parentElement.remove()")
         card=self.page.locator("bubble-card").first
         card.evaluate("(el,cfg) => el.setConfig(cfg)",final)
         self.wait_value(lambda:card.evaluate(READ_CARD),lambda d:d["owned"])
