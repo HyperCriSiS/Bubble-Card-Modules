@@ -284,7 +284,11 @@ class LayoutThemeMatrix(base.RealLovelace):
                             window.addEventListener(t,log,{capture:true});
                     }""")
                     box=hold.bounding_box()
-                    page.mouse.move(box["x"]+box["width"]*0.5,box["y"]+box["height"]*0.5)
+                    # Approach the card like a user before pressing: Bubble Card
+                    # sets up its action handler on the first pointer contact.
+                    page.mouse.move(box["x"]+box["width"]*0.3,box["y"]+box["height"]*0.5)
+                    page.mouse.move(box["x"]+box["width"]*0.5,box["y"]+box["height"]*0.5,steps=5)
+                    page.wait_for_timeout(400)
                     page.mouse.down()
                     page.wait_for_timeout(1000)
                     page.mouse.up()
