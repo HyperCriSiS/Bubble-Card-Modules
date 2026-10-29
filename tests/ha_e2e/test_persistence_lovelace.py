@@ -93,7 +93,10 @@ class PersistenceAndEditor(base.RealLovelace):
         element=self.open_stored(reload=True)
         data=self.wait_value(lambda:element.evaluate(READ_CARD),lambda d:d["owned"])
         self.page.wait_for_timeout(600)
-        self.assertEqual(element.evaluate(READ_CARD)["icon"],"",data)
+        # Bubble Card's own icon color is back instead of VSC's entity color.
+        icon=element.evaluate(READ_CARD)["icon"]
+        self.assertNotEqual(icon,RED,data)
+        self.assertTrue(icon.startswith("var(--bubble-icon-color"),icon)
         self.assertEqual(self.stored_card()[MODULE_ID],changed)
         self.assertFalse(self.errors,self.errors)
 
@@ -130,9 +133,9 @@ class PersistenceAndEditor(base.RealLovelace):
                 +'background:var(--card-background-color,#fff);padding:12px';
             document.body.appendChild(frame);
             const editor=customElements.get('bubble-card').getConfigElement();
-            frame.appendChild(editor);
-            editor.setConfig({...host.config,modules:['visual_styling_center']});
             editor.hass=document.querySelector('home-assistant').hass;
+            editor.setConfig({...host.config,modules:['visual_styling_center']});
+            frame.appendChild(editor);
             editor._expandedPanelStates={modules_editor_panel:true,visual_styling_center:true};
             // Behave like HA's card editor dialog: feed every change back in.
             editor.addEventListener('config-changed', ev => {
@@ -225,22 +228,39 @@ class PersistenceAndEditor(base.RealLovelace):
         module=module_code()
         fields=[f for f in flat_fields(module["editor"]) if "selector" in f]
         self.assertEqual(len(fields),len(list(flat_fields(module["editor"]))))
+        # Fields with `visible:` rules appear/disappear with their switches.
+        dependents={}
+        for f in fields:
+            for rule in f.get("visible") or []:
+                dependents.setdefault(rule["field"],set()).add(f["name"])
         self.open_editor()
         self.wait_value(lambda:self.page.evaluate("() => !!window.__vscEditor?._modulesLoaded"),bool,timeout=30)
         self.page.wait_for_timeout(500)
-        self.expand_sections()
-        tagged=self.wait_value(self.tag_fields,lambda t:len(t)>=len(fields),timeout=20)
-        self.assertEqual(sorted(tagged),sorted(f["name"] for f in fields))
+        pending={f["name"]:f for f in fields}
         failures={}
-        for field in fields:
+        def run(field):
             name=field["name"]
             try:
                 expected=self.operate(field)
-                got=self.wait_value(lambda n=name:self.config_value(n),
-                                    lambda v,e=expected:v==e or (isinstance(e,(int,float))
-                                        and isinstance(v,(int,float)) and abs(v-e)<1e-6),timeout=6)
+                self.wait_value(lambda n=name:self.config_value(n),
+                                lambda v,e=expected:v==e or (isinstance(e,(int,float))
+                                    and isinstance(v,(int,float)) and abs(v-e)<1e-6),timeout=6)
             except Exception as exc:
                 failures[name]=f"{next(iter(field['selector']))}: {str(exc)[:160]}"
+            del pending[name]
+        for _ in range(6):
+            if not pending: break
+            self.expand_sections()
+            visible=set(self.wait_value(self.tag_fields,bool,timeout=20))
+            progressed=False
+            # Operate plain fields first, then switches whose shown dependents are done.
+            for name in [n for n in list(pending) if n in visible and n not in dependents]:
+                run(pending[name]); progressed=True
+            for name in [n for n in list(pending) if n in visible and n in dependents]:
+                if not (dependents[name]&visible&set(pending)):
+                    run(pending[name]); progressed=True
+            if not progressed: break
+        self.assertEqual(sorted(pending),[],"fields never became visible")
         self.page.screenshot(path=str(base.ARTIFACTS/"test_29_editor.png"),full_page=True,timeout=12000)
         self.assertEqual(failures,{},f"{len(failures)}/{len(fields)} fields failed")
 
