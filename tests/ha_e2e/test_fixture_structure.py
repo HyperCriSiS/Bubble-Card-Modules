@@ -50,6 +50,17 @@ class HAContracts(unittest.TestCase):
         # v3.4.2 drops the main section on sub-buttons cards.
         self.assertEqual(list(cards[3]["sub_button"]),["bottom"])
 
+    def test_layout_theme_matrix_views(self):
+        views={v["path"]:v for v in make_dashboard("VSC","OTHER")["views"]}
+        matrix=views["matrix"]["cards"]
+        self.assertEqual(matrix[1]["card_layout"],"large")
+        self.assertEqual(matrix[2]["type"],"grid")
+        self.assertTrue(matrix[3]["styles"].startswith("VSC") and matrix[3]["styles"].endswith("OTHER"))
+        self.assertEqual(matrix[4]["card_type"],"pop-up")
+        self.assertEqual(views["sections"]["type"],"sections")
+        native=views["sections"]["sections"][0]["cards"][1]
+        self.assertNotIn("styles",native)
+
     def test_ci_isolated_and_verified(self):
         text=(ROOT/".github/workflows/test-vsc-ha-e2e.yml").read_text(encoding="utf-8")
         for must in ("-p 127.0.0.1:8123:8123","--cap-drop=ALL",

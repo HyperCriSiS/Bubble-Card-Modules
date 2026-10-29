@@ -6,15 +6,16 @@ import re
 import yaml
 
 MODULE_ID = "visual_styling_center"
+COMBINED_MODULE_ID = "subbutton_below_normal_layout"
 
-def extract_module(markdown):
+def extract_module(markdown, module_id=MODULE_ID):
     fence = re.escape(chr(96) * 3)
     for match in re.finditer(fence+r"(?:yaml|yml)[ \t]*\n(.*?)\n"+fence, markdown, re.S):
         data = yaml.safe_load(match.group(1))
-        if isinstance(data, dict) and isinstance(data.get(MODULE_ID), dict):
-            if isinstance(data[MODULE_ID].get("code"), str):
-                return data[MODULE_ID]
-    raise ValueError("No executable visual_styling_center YAML found")
+        if isinstance(data, dict) and isinstance(data.get(module_id), dict):
+            if isinstance(data[module_id].get("code"), str):
+                return data[module_id]
+    raise ValueError("No executable "+module_id+" YAML found")
 
 def light(name, slug):
     key = "vsc_" + slug
@@ -61,7 +62,7 @@ def make_config():
         "logger":{"default":"warning"}
     }
 
-def make_dashboard(code):
+def make_dashboard(code, combined_code=""):
     def button(name,entity,options=None,subs=None):
         card={"type":"custom:bubble-card","card_type":"button","button_type":"slider",
               "entity":entity,"name":name}
@@ -73,6 +74,7 @@ def make_dashboard(code):
     single={"main":[{"entity":"light.vsc_child","sub_button_type":"slider","always_visible":True}]}
     options={"enable_entity_colored_main_icon":True,"enable_entity_colored_subicons":True,
              "enable_gradient":True,"gradient_target":"background","gradient_entity":"light.vsc_group"}
+    matrix={"enable_entity_colored_main_icon":True,"enable_entity_colored_subicons":True}
     mixed={"main":[{"entity":"light.vsc_main"},{"group":[{"entity":"light.vsc_child"}]}],
            "bottom":[{"entity":"light.vsc_main"}]}
     return {"title":"VSC isolated E2E","views":[
@@ -88,6 +90,22 @@ def make_dashboard(code):
              "sub_button":{"bottom":[{"entity":"light.vsc_main"},
                                    {"entity":"light.vsc_child","custom_height":44}]}}
         ]},
+        # Layout/theme matrix: the same VSC options in every container type.
+        {"title":"Matrix","path":"matrix","cards":[
+            button("Matrix Normal","light.vsc_main",matrix),
+            dict(button("Matrix Large","light.vsc_main",matrix),card_layout="large"),
+            {"type":"grid","columns":2,"square":False,"cards":[
+                button("Matrix Grid A","light.vsc_main",matrix),
+                button("Matrix Grid B","light.vsc_main",matrix)]},
+            # VSC combined with another styling module of this repository.
+            dict(button("Matrix Combined","light.vsc_main",matrix,
+                        {"main":[{"entity":"light.vsc_child"}]}),styles=code+"\n"+combined_code),
+            {"type":"custom:bubble-card","card_type":"pop-up","hash":"#vsc-matrix","name":"VSC pop-up",
+             "cards":[button("Matrix Popup","light.vsc_main",matrix)]}
+        ]},
+        {"title":"Sections","path":"sections","type":"sections","max_columns":2,"sections":[
+            {"type":"grid","cards":[button("Sections VSC","light.vsc_main",matrix),
+                                    button("Sections Native","light.vsc_main")]}]},
         {"title":"Away","path":"away","cards":[{"type":"markdown","content":"Lifecycle navigation target"}]}
     ]}
 
@@ -97,6 +115,8 @@ def main():
     parser.add_argument("--config-dir",type=Path,required=True)
     args=parser.parse_args()
     module=extract_module((args.repo/"Visual-Styling-Center/Visual-Styling-Center.md").read_text(encoding="utf-8"))
+    combined=extract_module((args.repo/"Sub-Button-Below-Normal-Layout/Sub-button-below-normal-layout.md")
+                            .read_text(encoding="utf-8"),COMBINED_MODULE_ID)
     dest=args.config_dir.resolve()
     dest.mkdir(parents=True,exist_ok=True)
     (dest/"www").mkdir(exist_ok=True)
@@ -108,7 +128,7 @@ def main():
         encoding="utf-8")
     (dest/"configuration.yaml").write_text(yaml.safe_dump(make_config(),sort_keys=False,allow_unicode=True),encoding="utf-8")
     (dest/"ui-lovelace-vsc-e2e.yaml").write_text(
-        yaml.safe_dump(make_dashboard(module["code"]),sort_keys=False,allow_unicode=True,width=120),encoding="utf-8")
+        yaml.safe_dump(make_dashboard(module["code"],combined["code"]),sort_keys=False,allow_unicode=True,width=120),encoding="utf-8")
     print("Generated isolated Home Assistant configuration and Lovelace dashboard")
 
 if __name__=="__main__":
