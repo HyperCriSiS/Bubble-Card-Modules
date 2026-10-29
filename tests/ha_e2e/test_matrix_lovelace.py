@@ -268,15 +268,22 @@ class LayoutThemeMatrix(base.RealLovelace):
                 self.assertEqual(closed["icon"],RED,closed)
                 self.assertTrue(closed["owned"],closed)
 
-                # A real long press fires the card's hold action in HA.
-                hold=page.locator("bubble-card").nth(self.card_index("Gesture Hold"))
-                target=hold.locator(".bubble-name").first
-                box=target.bounding_box()
-                page.mouse.move(box["x"]+box["width"]/2,box["y"]+box["height"]/2)
-                page.mouse.down()
-                page.wait_for_timeout(900)
-                page.mouse.up()
-                self.wait_entity("light.vsc_child",lambda e:e["state"]=="off",timeout=15)
+                # A real long press fires the card's hold action in HA, with
+                # and without VSC (the native card is the harness baseline).
+                for name in ("Gesture Hold Native","Gesture Hold"):
+                    self.service("input_boolean","turn_on","input_boolean.vsc_child_enabled")
+                    self.wait_entity("light.vsc_child",lambda e:e["state"]=="on")
+                    hold=page.locator("bubble-card").nth(self.card_index(name))
+                    hold.scroll_into_view_if_needed()
+                    box=hold.bounding_box()
+                    page.mouse.move(box["x"]+box["width"]*0.5,box["y"]+box["height"]*0.5)
+                    page.mouse.down()
+                    page.wait_for_timeout(1000)
+                    page.mouse.up()
+                    try:
+                        self.wait_entity("light.vsc_child",lambda e:e["state"]=="off",timeout=10)
+                    except AssertionError as exc:
+                        raise AssertionError(f"hold on {name!r} did not fire") from exc
                 self.shot("gestures_"+scheme)
                 self.assertFalse(self.errors,self.errors)
 
