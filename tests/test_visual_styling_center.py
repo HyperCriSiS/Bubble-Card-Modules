@@ -34,7 +34,7 @@ class VisualStylingCenterTests(unittest.TestCase):
         self.assertEqual(self.module["name"], "Visual Styling Center")
         self.assertGreater(len(self.module["code"]), 15000)
         self.assertNotIn("\x97", self.text)
-        self.assertEqual(self.module["version"], "v2026.10.29")
+        self.assertEqual(self.module["version"], "v2026.10.30")
         self.assertNotIn("Ã", self.text)
 
     def test_config_id_and_all_editor_keys_unchanged(self):
