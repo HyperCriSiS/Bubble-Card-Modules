@@ -1,6 +1,6 @@
 # Visual Styling Center
 
-**Version:** v2026.10.30
+**Version:** v2026.11.05
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
 
 > [!IMPORTANT] 
@@ -27,6 +27,9 @@ So generally, if something does not work out as expected, try out a different bu
 
 On **Sub-buttons** and **Calendar** cards there is no main icon, name or slider, so only the
 sub-button options (sizes, spacing, colors, state colors, corner radius) have an effect there.
+**Pop-up** cards are not supported: the module script skips them, so the pop-up and its cards keep
+their colors and sizes. Only the module's default sizes can still reach the pop-up header through
+its stylesheet, so do not add the module there by YAML or as a global module.
 
 ```markdown
 # Visual Styling Center for Bubble Card
@@ -56,14 +59,15 @@ versions, so existing configurations keep working without migration.
 
 ### Main Icon
 - **Main Icon Size Multiplier** and **Icon Background Ratio**
-- **Main Icon Margin**: Spacing around the main icon (applies to all sides)
+- **Main Icon Margin**: Spacing around the main icon (applies to all sides). Until you set it, the large layout keeps its own 8px instead of the shown 6.
 - **Icon Background Corner Radius**: Empty keeps the theme value (a circle)
 - **Icon Color** and **Icon Background Color** (RGB picker or manual CSS value, the manual value wins)
 - **Hide Icon Background**: Remove the background from the main icon
 
 ### Sub-buttons
 - **Sub-icon Size Multiplier** and **Sub-button Background Ratio**
-- **Sub-button Container Outer Margin** (added to the default spacing, on the left in right-to-left languages), **Row Spacing** and **Column Spacing** (also inside sub-button groups)
+- **Sub-button Container Outer Margin** (added to the default spacing, on the left in right-to-left languages; until you set it, the large layout keeps its own 14px instead of the shown 8), **Row Spacing** and **Column Spacing** (also inside sub-button groups)
+- Always visible sub-button sliders follow the sub-button height (32px times the factors, like the sub-buttons; Bubble Card's own default is 36px)
 - **Sub-button Icon Color** and **Sub-button Background Color**
 - **Sub-button Corner Radius**: Empty keeps the theme value
 - A sub-button's own **custom height** (Bubble Card option) always wins over the module size
@@ -162,7 +166,7 @@ visual_styling_center:
 ```yaml
 visual_styling_center:
   name: "Visual Styling Center"
-  version: "v2026.10.30"
+  version: "v2026.11.05"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1314"
   description: Comprehensive customization tool for Bubble Card elements with focus on gradient effects and icon styling for both card and sub-buttons.
@@ -724,6 +728,12 @@ visual_styling_center:
   code: |
    ${(() => {
       const config = this.config.visual_styling_center || {};
+      // "unsupported" only disables the editor checkbox. Applied by YAML or
+      // is_global, a pop-up hands over the pop-up element as "card" and the
+      // selectors below would reach its header and child cards. The static
+      // CSS after this function still reaches the pop-up chrome; Bubble Card
+      // confines it there.
+      if (this.config.card_type === 'pop-up') return '';
       // Keep each inline CSS variable's pre-module value. Without ownership,
       // an unset VSC option would delete another module's or theme's overrides.
       const ownedVariables = card._vscOwnedVariables ?? (card._vscOwnedVariables = new Map());
@@ -950,7 +960,10 @@ visual_styling_center:
         });
       };
       const configuredSubButtons = this.config.sub_button;
-      const mainItems = Array.isArray(configuredSubButtons) ? configuredSubButtons
+      // The sub-buttons card renders only the bottom section and drops a
+      // leftover main section before numbering (cards/sub-buttons/index.js).
+      const mainItems = this.config.card_type === 'sub-buttons' ? []
+        : Array.isArray(configuredSubButtons) ? configuredSubButtons
         : (Array.isArray(configuredSubButtons?.main) ? configuredSubButtons.main : []);
       const bottomItems = Array.isArray(configuredSubButtons?.bottom) ? configuredSubButtons.bottom : [];
       const mainGroups = mainItems.filter(item => Array.isArray(item?.group) && item.group.length > 0);
@@ -1292,6 +1305,12 @@ visual_styling_center:
       height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px)) !important;
       min-height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px)) !important;
     }
+    /* Always visible (inline) sub-sliders are not .bubble-sub-button elements;
+       Bubble Card sizes them with this variable, so they follow the same height. */
+    .bubble-sub-button-container,
+    .bubble-sub-button-bottom-container {
+      --bubble-sub-slider-height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 32px);
+    }
     .vsc-custom-subbutton-background .bubble-sub-button {
       background-color: var(--subbutton-background-color) !important;
     }
@@ -1377,6 +1396,10 @@ visual_styling_center:
     /* Multi-row layout support with independent sub-button sizing */
     .rows-2 .bubble-sub-button {
       height: var(--bubble-sub-button-height, calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 20px)) !important;
+    }
+    .rows-2 .bubble-sub-button-container,
+    .rows-2 .bubble-sub-button-bottom-container {
+      --bubble-sub-slider-height: calc(var(--subbutton-background-ratio, 1) * var(--height-multiplier, 1) * 20px);
     }
     /* Large layout sub-button margin */
     .large .bubble-sub-button-container {

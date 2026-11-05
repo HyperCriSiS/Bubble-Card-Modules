@@ -115,3 +115,18 @@ Neu (alle optional, ohne Wert gilt das Theme bzw. das bisherige Verhalten), dami
 Weiterhin offen: `margin-right` am Sub-Button-Container addiert sich zum nativen `inset-inline-end: 8px` und berücksichtigt kein RTL. Eine Korrektur würde bestehende Layouts verschieben.
 
 Lokal geprüft: Node-Runtime (23 Fälle), Chromium mit nativem CSS (16 Fälle), Fixture-Struktur. Die neuen echten HA-Tests `test_18` (rote Lampe, Icon-Hintergrund mit und ohne Modul) und `test_19` (`sub-buttons`-Karte, `custom_height`) laufen in CI, weil lokal kein Docker läuft.
+
+## Review-Befunde, 5. November 2026 (VSC v2026.11.05)
+
+Unabhängiges Review des gesamten Moduls gegen den Stable-Spiegel v3.4.2. Behoben:
+
+- **Pop-up-Schutz:** `unsupported` wirkt nur als Editor-Checkbox (`modules/editor.js`). Per YAML oder `is_global` lief das Modul auch auf Pop-ups, wo `card` das Pop-up-Element ist und `.bubble-icon` sowie `.bubble-sub-button-N` die Kind-Karten treffen. Der Skriptteil beendet sich jetzt bei `card_type: pop-up` sofort. Der statische CSS-Block bleibt Teil des Templates und erreicht weiterhin das Pop-up-Chrome (Upstream grenzt ihn per `confineCssToPopupChrome` ein); dort gelten dann die Modul-Defaults statt der Nutzerwerte. Ob der Pop-up-Header die Selektoren trägt, ist ohne `cards/pop-up/` im Spiegel nicht prüfbar.
+- **`sub-buttons`-Karte:** Upstream rendert dort nur `bottom` (`cards/sub-buttons/index.js`), das Modul zählte eine per YAML verbliebene `main`-Sektion mit und färbte die falschen Icons. Jetzt wird `main` dort ignoriert.
+- **Inline-Subslider:** Dauerhaft sichtbare Slider sind keine `.bubble-sub-button`-Elemente und blieben 36px, während die Buttons 32px × Faktoren wurden. Das Modul setzt jetzt `--bubble-sub-slider-height` auf dieselbe Formel. Die frühere Aussage "gilt auch für Sub-Button-Slider" war falsch. **Sichtbare Änderung:** Bestehende Karten mit VSC und `always_visible`-Slider werden ohne gesetzte Option von 36px auf 32px niedriger, passend zu den Buttons.
+- **RTL:** Der offene Punkt `margin-right` ist seit PR #14 erledigt (`margin-inline-end`).
+
+Dokumentiert, nicht geändert: Die Schema-Defaults 6 (`icon_vertical_margin`) und 8 (`subbutton_horizontal_margin`) gelten für das normale Layout; das Large-Layout fällt ohne gesetzten Wert auf 8px bzw. 14px zurück. Eine Angleichung würde bestehende Large-Karten verschieben, daher steht der Hinweis jetzt in der Nutzerdoku.
+
+Nicht verifizierbar ohne Spiegel: `tools/icon.js` (Inline-Farben am Icon), `components/base-card/index.js` (DOM der Slider-Füllung), `calendar`-Karte.
+
+Lokal geprüft: Node-Runtime (25 Fälle), Chromium mit nativem CSS (18 Fälle). Neue Fälle: Pop-up bleibt unberührt, `sub-buttons`-Karte nummeriert nur `bottom`, Inline-Subslider folgt der Sub-Button-Höhe.

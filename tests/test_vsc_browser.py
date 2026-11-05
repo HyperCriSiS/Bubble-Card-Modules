@@ -315,3 +315,14 @@ class VSCBrowser(unittest.TestCase):
         self.change(cfg={'manual_name_color':'','name_font_size':None,'card_border_radius':None})
         self.assertEqual(self.cssval('.bubble-name','font-size'),native_size)
         self.assertNotEqual(self.cssval('.bubble-name','color'),'rgb(255, 0, 0)')
+
+    def test_inline_subslider_follows_sub_button_height(self):
+        # Always visible sub-sliders are sized by --bubble-sub-slider-height upstream.
+        self.page.locator('.bubble-sub-button-slider').evaluate("e=>e.classList.add('inline')")
+        self.page.wait_for_timeout(650)
+        self.assertEqual(self.cssval('.bubble-sub-button-slider','height'),'32px')
+        self.assertEqual(self.cssval('.bubble-sub-button-2','height'),'32px')
+        self.change(cfg={'subbutton_background_ratio':1.25,'height_multiplier':1.2})
+        self.page.wait_for_timeout(650)
+        self.assertEqual(self.cssval('.bubble-sub-button-2','height'),'48px')
+        self.assertEqual(self.cssval('.bubble-sub-button-slider','height'),'48px')
