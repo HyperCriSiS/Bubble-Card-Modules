@@ -286,3 +286,24 @@ test("gradient angle keeps the old direction unless set",()=>{
   hass.states["light.a"]=st("off");runD();
   assert.match(dCard.style.getPropertyValue("--card-gradient"),/^linear-gradient\(135deg, #FF0000/);
 });
+// Review 2026-11-05: card types the module must not restyle like a button.
+test("pop-up cards are left untouched even when applied by YAML",()=>{
+  const popCard=makeCard();
+  const popCtx={config:{card_type:"pop-up",entity:"light.a",sub_button:[{entity:"light.b"}],
+    visual_styling_center:{enable_entity_colored_main_icon:true,enable_entity_colored_subicons:true,height_multiplier:1.5}}};
+  hass.states["light.a"]=st("on",[9,8,7]);
+  assert.equal(runner.call(popCtx,popCard,hass,nativeHasChanged,()=>{}),"");
+  assert.equal(popCard.main.style.getPropertyValue("color"),"");
+  assert.equal(popCard.sub[0].style.getPropertyValue("color"),"");
+  assert.equal(popCard.style.getWrites(),0);
+});
+test("sub-buttons card numbers only the bottom section",()=>{
+  const sbCard=makeCard();
+  const sbCtx={config:{card_type:"sub-buttons",entity:"light.a",
+    sub_button:{main:[{entity:"light.a"}],bottom:[{entity:"light.b"}]},
+    visual_styling_center:{enable_entity_colored_subicons:true,enable_function_button_color:false}}};
+  hass.states["light.a"]=st("on",[1,1,1]);hass.states["light.b"]=st("off");
+  runner.call(sbCtx,sbCard,hass,nativeHasChanged,()=>{});
+  assert.equal(sbCard.sub[0].style.getPropertyValue("color"),"rgb(150, 150, 150)");
+  assert.equal(sbCard.sub[1].style.getPropertyValue("color"),"");
+});
