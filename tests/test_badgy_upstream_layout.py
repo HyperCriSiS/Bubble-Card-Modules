@@ -132,6 +132,54 @@ class UpstreamLayoutTest(unittest.TestCase):
             self.assertTrue(data["visible"], mode)
             self.assertGreater(data["width"], 15, mode)
 
+    def test_main_badge_keeps_entity_picture_round(self):
+        # Upstream clips the picture with the container; a badge lifts the clip.
+        data = self.page.evaluate("""() => {
+         const icon=document.querySelector('.bubble-icon-container');
+         const pic=document.createElement('div');pic.className='bubble-entity-picture';icon.append(pic);
+         window.fixture.run();
+         const radius=getComputedStyle(pic).borderRadius;
+         delete window.fixture.cfg.entity_badges.main;delete window.fixture.cfg.icon_badges.main;
+         window.fixture.run();
+         return {withBadge:radius,container:getComputedStyle(icon).borderRadius,
+                 overflow:getComputedStyle(icon).overflow,
+                 withoutBadge:getComputedStyle(pic).borderRadius}; }""")
+        self.assertEqual(data["overflow"], "hidden")
+        self.assertEqual(data["withBadge"], data["container"])
+        self.assertNotEqual(data["withBadge"], "0px")
+        self.assertEqual(data["withoutBadge"], "0px")
+
+    def test_animated_card_glow_keeps_fixed_descendants_in_place(self):
+        data = self.page.evaluate("""() => {
+         const card=document.querySelector('#card');
+         const probe=document.createElement('div');probe.style.cssText='position:fixed;top:170px;left:20px;width:30px;height:30px';
+         card.append(probe);
+         const before=probe.getBoundingClientRect().top;
+         window.fixture.cfg.card_effects={effect:'glow',animate:true,color:'red'};window.fixture.run();
+         const style=getComputedStyle(card);
+         return {before,after:probe.getBoundingClientRect().top,animation:style.animationName,
+                 filter:style.filter,shadow:style.boxShadow,
+                 hit:document.elementFromPoint(35,185)===probe}; }""")
+        self.assertEqual(data["animation"], "badgy-card-glow-pulse")
+        self.assertEqual(data["filter"], "none")
+        self.assertIn("rgb(255, 0, 0)", data["shadow"])
+        self.assertEqual(data["before"], data["after"])
+        self.assertTrue(data["hit"], str(data))
+
+    def test_transform_effects_skip_select_sub_buttons(self):
+        data = self.page.evaluate("""() => {
+         const first=document.querySelector('.bubble-sub-button-1'),second=document.querySelector('.bubble-sub-button-2');
+         second.classList.add('is-select');
+         window.fixture.cfg.sub_button_effects={'0':{effect:'pulse'},'1':{effect:'pulse'}};window.fixture.run();
+         const pulse={first:getComputedStyle(first).animationName,second:getComputedStyle(second).animationName,
+                      secondHasClass:second.classList.contains('badgy-effect-pulse')};
+         window.fixture.cfg.sub_button_effects['1']={effect:'glow'};window.fixture.run();
+         return {pulse,glow:getComputedStyle(second).animationName}; }""")
+        self.assertEqual(data["pulse"]["first"], "badgy-pulse-scale")
+        self.assertEqual(data["pulse"]["second"], "none")
+        self.assertFalse(data["pulse"]["secondHasClass"])
+        self.assertEqual(data["glow"], "badgy-border-pulse")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
