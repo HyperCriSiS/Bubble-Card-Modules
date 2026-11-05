@@ -27,7 +27,9 @@ So generally, if something does not work out as expected, try out a different bu
 
 On **Sub-buttons** and **Calendar** cards there is no main icon, name or slider, so only the
 sub-button options (sizes, spacing, colors, state colors, corner radius) have an effect there.
-On **Pop-up** cards the module does nothing, even when added by YAML or as a global module.
+**Pop-up** cards are not supported: the module script skips them, so the pop-up and its cards keep
+their colors and sizes. Only the module's default sizes can still reach the pop-up header through
+its stylesheet, so do not add the module there by YAML or as a global module.
 
 ```markdown
 # Visual Styling Center for Bubble Card
@@ -65,7 +67,7 @@ versions, so existing configurations keep working without migration.
 ### Sub-buttons
 - **Sub-icon Size Multiplier** and **Sub-button Background Ratio**
 - **Sub-button Container Outer Margin** (added to the default spacing, on the left in right-to-left languages; until you set it, the large layout keeps its own 14px instead of the shown 8), **Row Spacing** and **Column Spacing** (also inside sub-button groups)
-- Always visible sub-button sliders follow the sub-button height
+- Always visible sub-button sliders follow the sub-button height (32px times the factors, like the sub-buttons; Bubble Card's own default is 36px)
 - **Sub-button Icon Color** and **Sub-button Background Color**
 - **Sub-button Corner Radius**: Empty keeps the theme value
 - A sub-button's own **custom height** (Bubble Card option) always wins over the module size
@@ -728,7 +730,9 @@ visual_styling_center:
       const config = this.config.visual_styling_center || {};
       // "unsupported" only disables the editor checkbox. Applied by YAML or
       // is_global, a pop-up hands over the pop-up element as "card" and the
-      // selectors below would reach its header and child cards.
+      // selectors below would reach its header and child cards. The static
+      // CSS after this function still reaches the pop-up chrome; Bubble Card
+      // confines it there.
       if (this.config.card_type === 'pop-up') return '';
       // Keep each inline CSS variable's pre-module value. Without ownership,
       // an unset VSC option would delete another module's or theme's overrides.
