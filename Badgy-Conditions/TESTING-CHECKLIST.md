@@ -1,4 +1,4 @@
-# Badgy beta — Home Assistant acceptance checklist
+# Badgy beta: Home Assistant acceptance checklist
 
 Target: Bubble Card **v3.4.2**, a separate dashboard, and the isolated
 `badgy-condition-helper-beta` module. The original module and existing cards
@@ -80,8 +80,9 @@ full Home Assistant frontend. None of the checkboxes below are considered comple
 
 ## Release decision
 
-Do not merge the beta into `main` or post it to the public Bubble Card
-discussion until the above tests have been performed. Record failures with
+This checklist was the release gate for v2026.10.29 and remains the manual
+acceptance test for later versions. Do not post a new version to the public
+Bubble Card discussion until the above tests have been performed. Record failures with
 Bubble Card version, Home Assistant version, card YAML, browser/device,
 expected/actual behavior, and a screenshot if visual.
 

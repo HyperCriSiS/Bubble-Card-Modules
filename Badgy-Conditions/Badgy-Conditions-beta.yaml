@@ -1,6 +1,6 @@
 badgy-condition-helper-beta:
   name: "Badgy Condition Helper (Beta)"
-  version: "v2026.10.29"
+  version: "v2026.11.05"
   creator: "HyperCriSiS"
   link: "https://github.com/Clooos/Bubble-Card/discussions/1333"
   unsupported:
@@ -47,6 +47,9 @@ badgy-condition-helper-beta:
     }
     .badgy-owned-badge.entity-badge { top: 0; right: 0; }
     .bubble-icon-container:has(> .badgy-owned-badge) { overflow: visible !important; }
+    /* The native entity picture has no radius of its own; keep it round once
+       the container stops clipping. */
+    .bubble-icon-container:has(> .badgy-owned-badge) > .bubble-entity-picture { border-radius: inherit; }
     /* Bubble Card 3.4.2 clips rounded cards. Extend only the clip edge on
        cards with opt-in main icon badges, without turning them into scroll
        containers or changing their pointer/tap behavior. */
@@ -55,9 +58,13 @@ badgy-condition-helper-beta:
         overflow-clip-margin: 16px;
       }
     }
-    .badgy-card-glow { box-shadow: 0 0 var(--badgy-glow-size, 14px) var(--badgy-glow-color, var(--primary-color)) !important; }
+    /* No !important: the pulse animates this box-shadow, and an important
+       declaration would beat the animation. */
+    .badgy-card-glow { box-shadow: 0 0 var(--badgy-glow-size, 14px) var(--badgy-glow-color, var(--primary-color)); }
     .badgy-card-glow.badgy-card-glow-pulse { animation: badgy-card-glow-pulse 2s ease-in-out infinite; }
-    @keyframes badgy-card-glow-pulse { 0%,100% { filter: drop-shadow(0 0 1px var(--badgy-glow-color)); } 50% { filter: drop-shadow(0 0 8px var(--badgy-glow-color)); } }
+    /* box-shadow, never filter: a filter turns the card into the containing
+       block of fixed descendants and buries open menus (upstream #2334). */
+    @keyframes badgy-card-glow-pulse { 0%,100% { box-shadow: 0 0 var(--badgy-glow-size, 14px) var(--badgy-glow-color, var(--primary-color)); } 50% { box-shadow: 0 0 calc(var(--badgy-glow-size, 14px) + 8px) var(--badgy-glow-color, var(--primary-color)); } }
     .badgy-owned-badge.icon-badge { top: 0; left: 0; }
     .badgy-owned-badge.without-background {
       background-color: transparent;
@@ -587,7 +594,11 @@ badgy-condition-helper-beta:
             if (!sb) continue;
             const entry = sBE[i.toString()] || (config.global_defaults?.sub_button_effect ? { effect: config.global_defaults.sub_button_effect, color: config.global_defaults.sub_button_effect_color } : null);
             const eff = chooseRule(entry);
-            setEffect(sb, eff?.effect || null, eff?.color);
+            // A transform on a select sub-button anchors its fixed menu to the
+            // button, and the card clips it. Only glow animates without transform.
+            const effect = eff?.effect || null;
+            const allowed = !sb.classList.contains("is-select") || effect === "glow";
+            setEffect(sb, allowed ? effect : null, eff?.color);
           }
         }
 
@@ -797,7 +808,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -824,7 +835,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -847,7 +858,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -870,7 +881,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -893,7 +904,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -916,7 +927,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -939,7 +950,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -961,10 +972,10 @@ badgy-condition-helper-beta:
           name: main_icon_background
           schema:
             - name: color_template
-              label: Color template (Jinja) — overrides the color entity and the static color
+              label: Color template (Jinja, overrides the color entity and the static color)
               selector: {text: {}}
             - name: color_entity
-              label: Color entity — overrides the static color
+              label: Color entity (overrides the static color)
               selector: {entity: {}}
             - name: color_attribute
               label: Attribute of the color entity that holds the color (empty = state)
@@ -980,7 +991,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -1012,10 +1023,10 @@ badgy-condition-helper-beta:
                         - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
-                  label: Color template (Jinja) — overrides the color entity and the static color
+                  label: Color template (Jinja, overrides the color entity and the static color)
                   selector: {text: {}}
                 - name: color_entity
-                  label: Color entity — overrides the static color
+                  label: Color entity (overrides the static color)
                   selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
@@ -1044,7 +1055,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1088,10 +1099,10 @@ badgy-condition-helper-beta:
                         - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
-                  label: Color template (Jinja) — overrides the color entity and the static color
+                  label: Color template (Jinja, overrides the color entity and the static color)
                   selector: {text: {}}
                 - name: color_entity
-                  label: Color entity — overrides the static color
+                  label: Color entity (overrides the static color)
                   selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
@@ -1120,7 +1131,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1164,10 +1175,10 @@ badgy-condition-helper-beta:
                         - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
-                  label: Color template (Jinja) — overrides the color entity and the static color
+                  label: Color template (Jinja, overrides the color entity and the static color)
                   selector: {text: {}}
                 - name: color_entity
-                  label: Color entity — overrides the static color
+                  label: Color entity (overrides the static color)
                   selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
@@ -1196,7 +1207,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1240,10 +1251,10 @@ badgy-condition-helper-beta:
                         - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
-                  label: Color template (Jinja) — overrides the color entity and the static color
+                  label: Color template (Jinja, overrides the color entity and the static color)
                   selector: {text: {}}
                 - name: color_entity
-                  label: Color entity — overrides the static color
+                  label: Color entity (overrides the static color)
                   selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
@@ -1272,7 +1283,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1316,10 +1327,10 @@ badgy-condition-helper-beta:
                         - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
-                  label: Color template (Jinja) — overrides the color entity and the static color
+                  label: Color template (Jinja, overrides the color entity and the static color)
                   selector: {text: {}}
                 - name: color_entity
-                  label: Color entity — overrides the static color
+                  label: Color entity (overrides the static color)
                   selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
@@ -1348,7 +1359,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1392,10 +1403,10 @@ badgy-condition-helper-beta:
                         - {label: Three-Color Gradient, value: three-color}
                   default: solid
                 - name: color_template
-                  label: Color template (Jinja) — overrides the color entity and the static color
+                  label: Color template (Jinja, overrides the color entity and the static color)
                   selector: {text: {}}
                 - name: color_entity
-                  label: Color entity — overrides the static color
+                  label: Color entity (overrides the static color)
                   selector: {entity: {}}
                 - name: color_attribute
                   label: Attribute of the color entity that holds the color (empty = state)
@@ -1424,7 +1435,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1493,7 +1504,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -1520,7 +1531,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1543,7 +1554,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1566,7 +1577,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1589,7 +1600,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1612,7 +1623,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1635,7 +1646,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -1711,7 +1722,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -1788,7 +1799,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -1865,7 +1876,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -1942,7 +1953,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2019,7 +2030,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2096,7 +2107,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2173,7 +2184,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2235,7 +2246,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2292,7 +2303,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2349,7 +2360,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2406,7 +2417,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2463,7 +2474,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2520,7 +2531,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2577,7 +2588,7 @@ badgy-condition-helper-beta:
               label: Condition for the static settings (only used without rules or as fallback)
               selector: {condition: {}}
             - name: rules
-              label: Rules — first match wins and overrides the static settings
+              label: Rules (first match wins and overrides the static settings)
               selector:
                 object:
                   multiple: true
@@ -2618,7 +2629,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -2651,7 +2662,7 @@ badgy-condition-helper-beta:
                       label: Condition for the static settings (only used without rules or as fallback)
                       selector: {condition: {}}
                     - name: rules
-                      label: Rules — first match wins and overrides the static settings
+                      label: Rules (first match wins and overrides the static settings)
                       selector:
                         object:
                           multiple: true
@@ -2680,7 +2691,7 @@ badgy-condition-helper-beta:
                       label: Condition for the static settings (only used without rules or as fallback)
                       selector: {condition: {}}
                     - name: rules
-                      label: Rules — first match wins and overrides the static settings
+                      label: Rules (first match wins and overrides the static settings)
                       selector:
                         object:
                           multiple: true
@@ -2709,7 +2720,7 @@ badgy-condition-helper-beta:
                       label: Condition for the static settings (only used without rules or as fallback)
                       selector: {condition: {}}
                     - name: rules
-                      label: Rules — first match wins and overrides the static settings
+                      label: Rules (first match wins and overrides the static settings)
                       selector:
                         object:
                           multiple: true
@@ -2738,7 +2749,7 @@ badgy-condition-helper-beta:
                       label: Condition for the static settings (only used without rules or as fallback)
                       selector: {condition: {}}
                     - name: rules
-                      label: Rules — first match wins and overrides the static settings
+                      label: Rules (first match wins and overrides the static settings)
                       selector:
                         object:
                           multiple: true
@@ -2767,7 +2778,7 @@ badgy-condition-helper-beta:
                       label: Condition for the static settings (only used without rules or as fallback)
                       selector: {condition: {}}
                     - name: rules
-                      label: Rules — first match wins and overrides the static settings
+                      label: Rules (first match wins and overrides the static settings)
                       selector:
                         object:
                           multiple: true
@@ -2796,7 +2807,7 @@ badgy-condition-helper-beta:
                       label: Condition for the static settings (only used without rules or as fallback)
                       selector: {condition: {}}
                     - name: rules
-                      label: Rules — first match wins and overrides the static settings
+                      label: Rules (first match wins and overrides the static settings)
                       selector:
                         object:
                           multiple: true
@@ -2830,7 +2841,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -2859,7 +2870,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -2888,7 +2899,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -2917,7 +2928,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -2946,7 +2957,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true
@@ -2975,7 +2986,7 @@ badgy-condition-helper-beta:
                   label: Condition for the static settings (only used without rules or as fallback)
                   selector: {condition: {}}
                 - name: rules
-                  label: Rules — first match wins and overrides the static settings
+                  label: Rules (first match wins and overrides the static settings)
                   selector:
                     object:
                       multiple: true

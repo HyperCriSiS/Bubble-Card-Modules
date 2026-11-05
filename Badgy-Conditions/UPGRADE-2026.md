@@ -1,13 +1,16 @@
-# Badgy Condition Helper — 2026 upgrade
+# Badgy Condition Helper: 2026 upgrade
 
-Released as **v2026.10.29** (module ID `badgy-condition-helper`). The beta
-sections below document how the release was developed and tested.
+Released as **v2026.10.29** (module ID `badgy-condition-helper`), followed by
+v2026.11.05 (see the changelog in [Badgy-Conditions.md](./Badgy-Conditions.md)).
+The beta sections below are kept as history of how the release was developed
+and tested; the beta feature branch no longer exists.
 
 ## Test the beta alongside the stable version
 
-The working branch contains a [separate importable beta](./Badgy-Conditions-beta.yaml).
+The repository contains a [separate importable beta](./Badgy-Conditions-beta.yaml)
+with the same code and editor under the module ID `badgy-condition-helper-beta`.
 
-- Open the raw YAML: https://raw.githubusercontent.com/HyperCriSiS/Bubble-Card-Modules/feature/badgy-v2026-upgrade/Badgy-Conditions/Badgy-Conditions-beta.yaml
+- Open the raw YAML of `Badgy-Conditions/Badgy-Conditions-beta.yaml` on the `main` branch.
 - In a Bubble Card editor, open Modules -> My Modules -> Import from YAML.
 - Paste the entire YAML, then select Import Module. The module ID is `badgy-condition-helper-beta`.
 - Duplicate an existing card and activate the beta *only on the duplicate*. If necessary, change the card's `modules` entry and per-card configuration namespace from `badgy-condition-helper` to `badgy-condition-helper-beta`.
@@ -290,8 +293,8 @@ color configuration. Colors from dynamic sources are not JavaScript-evaluated.
   by Bubble Card. Layout-specific DOM differences still require HA UI testing.
 - The native template/condition helpers depend on the installed Bubble Card
   version; no unsupported helpers are referenced without typeof checks.
-- No direct production HA UI test has been performed yet. This is a beta and
-  should be tested on a representative dashboard before release.
+- Before the release, the module was tested manually on a representative
+  dashboard following [TESTING-CHECKLIST.md](./TESTING-CHECKLIST.md).
 
 ## Verification
 
