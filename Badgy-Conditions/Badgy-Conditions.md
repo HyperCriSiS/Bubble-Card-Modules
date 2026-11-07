@@ -3521,7 +3521,6 @@ badgy-condition-helper:
 ---
 
 ### Screenshots:
-![Options](https://github.com/user-attachments/assets/05af8dac-5a6b-4c0d-8edc-5572ff2836e2)
-![Badgy_sample](https://github.com/user-attachments/assets/8983ea13-0adb-4e94-ac95-d465ef2c94f4)
+<img width="441" height="534" alt="waterfox_7mfNUO8FBK" src="https://github.com/user-attachments/assets/eb7c03f6-46df-4324-89c3-d12db0f3abe8" />
 
-- [X] I really enjoyed working on this module ❤️
+![Badgy_sample](https://github.com/user-attachments/assets/8983ea13-0adb-4e94-ac95-d465ef2c94f4)
