@@ -2,8 +2,8 @@
   "upstream_repository": "Clooos/Bubble-Card",
   "channel": "main",
   "release_tag": null,
-  "source_commit_sha": "91a5c77ddbd563d2586368905ead6ded8b1c9fda",
-  "source_tree_sha": "93d5a723bfe19b3363ad191bb7a8593e94d927df",
+  "source_commit_sha": "2c3b43d1168ca05701be15fd96e416609601ecfa",
+  "source_tree_sha": "adf6a05a1feabdebeb8d5002468f7141a64a39b5",
   "tracked_files": [
     {
       "path": "DEVELOPERS.md",
@@ -62,8 +62,8 @@
     },
     {
       "path": "src/cards/sub-buttons/editor.js",
-      "sha": "e3931172890f490a00a797eb7dd6bd3574b5d4ec",
-      "bytes": 6294
+      "sha": "a1b902805e33e1ae555216c69a2526f100ef5a01",
+      "bytes": 6318
     },
     {
       "path": "src/cards/sub-buttons/index.js",
@@ -102,13 +102,13 @@
     },
     {
       "path": "src/components/sub-button/editor/sectioned.js",
-      "sha": "f908fe905ab10778e2065373c4f23ae17beb13b6",
-      "bytes": 41851
+      "sha": "f122feef732e22e9c7297d6a562b77e07659074e",
+      "bytes": 41859
     },
     {
       "path": "src/components/sub-button/editor/utils.js",
-      "sha": "5cd289b18a46cf668128644f8cb1134cd8cd60e3",
-      "bytes": 27710
+      "sha": "c25fbf4656924e25c5da64345f4839b9fe338242",
+      "bytes": 27742
     },
     {
       "path": "src/components/sub-button/index.js",
@@ -142,8 +142,8 @@
     },
     {
       "path": "src/editor/bubble-card-editor.js",
-      "sha": "fcf1e06d291c8fb89dbf777c2a397a0a822ebb25",
-      "bytes": 147122
+      "sha": "3bb4eeaa9b8342fa052781ce92ed8e763c86b574",
+      "bytes": 148381
     },
     {
       "path": "src/editor/styles.css",
@@ -167,8 +167,8 @@
     },
     {
       "path": "src/modules/editor.js",
-      "sha": "231c42e699c44d8b60adaf8f04a6994c4af7cea4",
-      "bytes": 56078
+      "sha": "af481b57f28dab3e4b6e1979a3522a7c42244e3b",
+      "bytes": 56086
     },
     {
       "path": "src/modules/export.js",
@@ -187,8 +187,8 @@
     },
     {
       "path": "src/modules/module-editor.js",
-      "sha": "da36c3db0bc8f4645aa1fd6d98d3b94f82b35ca6",
-      "bytes": 70725
+      "sha": "3012b916c7784d968459ef5f37b6745f5023eb36",
+      "bytes": 70749
     },
     {
       "path": "src/modules/parser.js",
@@ -202,13 +202,13 @@
     },
     {
       "path": "src/modules/store.js",
-      "sha": "14f5ceba3c63455263e90a3e81040630be8ab62e",
-      "bytes": 51019
+      "sha": "f63cf9fc97e7723aa4bbb59e6d9a0489c5b74380",
+      "bytes": 51027
     },
     {
       "path": "src/modules/styles.css",
-      "sha": "2d4d1b248efbeba073121bdb1621c9e969270ae6",
-      "bytes": 26999
+      "sha": "38b0ad37d73dad0faa091e703b9a48122b94049c",
+      "bytes": 27007
     },
     {
       "path": "src/modules/suggestions.js",
