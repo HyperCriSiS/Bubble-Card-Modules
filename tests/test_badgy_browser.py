@@ -5,11 +5,11 @@ import shutil
 import unittest
 from pathlib import Path
 
-import yaml
 from playwright.sync_api import sync_playwright
+from test_badgy_schema import read_module
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULE = 'badgy-condition-helper-beta'
+MODULE = 'badgy-condition-helper'
 HTML = '''<!doctype html><style>
 :root {--red-color:red; --blue-color:blue; --primary-color:#09f}
 .bubble-container {position:relative;width:320px;height:130px;overflow:clip}
@@ -53,8 +53,7 @@ BOOT = '''([code,id]) => {
 class BadgyBrowserTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        obj=yaml.safe_load((ROOT/'Badgy-Conditions/Badgy-Conditions-beta.yaml').read_text(encoding='utf-8'))
-        cls.code=obj[MODULE]['code']
+        cls.code=read_module((ROOT/'Badgy-Conditions/Badgy-Conditions.md').read_text(encoding='utf-8'))['code']
         cls.playwright=sync_playwright().start()
         executable=next((str(p) for p in (
             os.environ.get('CHROMIUM_EXECUTABLE'),shutil.which('chromium'),

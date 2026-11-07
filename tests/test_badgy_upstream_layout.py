@@ -9,13 +9,13 @@ import os
 import shutil
 import unittest
 
-import yaml
 from playwright.sync_api import sync_playwright
 from test_badgy_browser import BOOT, MODULE
+from test_badgy_schema import read_module
 
 ROOT = Path(__file__).resolve().parents[1]
 UPSTREAM = ROOT / "docs/upstream/bubble-card/stable/src/components/base-card/styles.css"
-BETA = ROOT / "Badgy-Conditions/Badgy-Conditions-beta.yaml"
+MARKDOWN = ROOT / "Badgy-Conditions/Badgy-Conditions.md"
 
 DOM = '''<meta name="viewport" content="width=device-width, initial-scale=1">
 <div style="width:300px;margin:60px"><div class="bubble-button-container bubble-container" id="card">
@@ -36,8 +36,7 @@ DOM = '''<meta name="viewport" content="width=device-width, initial-scale=1">
 class UpstreamLayoutTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        obj = yaml.safe_load(BETA.read_text(encoding="utf8"))
-        cls.code = obj[MODULE]["code"]
+        cls.code = read_module(MARKDOWN.read_text(encoding="utf8"))["code"]
         cls.css = UPSTREAM.read_text(encoding="utf8")
         assert "overflow: clip;" in cls.css
         assert ".bubble-icon-container {" in cls.css

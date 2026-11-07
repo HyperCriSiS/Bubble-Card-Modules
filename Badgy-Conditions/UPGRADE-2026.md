@@ -3,21 +3,10 @@
 Released as **v2026.10.29** (module ID `badgy-condition-helper`), followed by
 v2026.11.05 (see the changelog in [Badgy-Conditions.md](./Badgy-Conditions.md)).
 The beta sections below are kept as history of how the release was developed
-and tested; the beta feature branch no longer exists.
-
-## Test the beta alongside the stable version
-
-The repository contains a [separate importable beta](./Badgy-Conditions-beta.yaml)
-with the same code and editor under the module ID `badgy-condition-helper-beta`.
-
-- Open the raw YAML of `Badgy-Conditions/Badgy-Conditions-beta.yaml` on the `main` branch.
-- In a Bubble Card editor, open Modules -> My Modules -> Import from YAML.
-- Paste the entire YAML, then select Import Module. The module ID is `badgy-condition-helper-beta`.
-- Duplicate an existing card and activate the beta *only on the duplicate*. If necessary, change the card's `modules` entry and per-card configuration namespace from `badgy-condition-helper` to `badgy-condition-helper-beta`.
-- Disable the old Badgy module on the duplicate. All other cards continue using the stable installation.
-
-This special beta ID is for testing only. The eventual release retains the
-original ID `badgy-condition-helper`, so stored configuration paths remain unchanged.
+and tested. The beta feature branch and the separate beta YAML
+(`badgy-condition-helper-beta`, a copy of the module under its own ID for
+side-by-side testing) no longer exist; the module YAML in
+[Badgy-Conditions.md](./Badgy-Conditions.md) is the only source.
 
 
 This document describes the update proposed in the 2026 Badgy PR.
@@ -70,8 +59,7 @@ Home Assistant's real editor, entity subscriptions or shadow DOM.
   - the separate Entity/Icon Badge Effects entries no longer offer their own
     rule lists in the editor. Use the effect on the badge and badge rules
     instead. Rules already written there in YAML keep working.
-- A schema test now fails if the stored size of the module or the beta
-  exceeds 230 KB.
+- A schema test now fails if the stored size of the module exceeds 230 KB.
 - CI: the Chromium job runs on `ubuntu-24.04`, because Playwright 1.57 cannot
   install its browser dependencies on Ubuntu 26.04 (`ubuntu-latest`).
 
