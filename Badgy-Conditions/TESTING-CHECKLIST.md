@@ -1,8 +1,8 @@
-# Badgy beta: Home Assistant acceptance checklist
+# Badgy: Home Assistant acceptance checklist
 
-Target: Bubble Card **v3.4.2**, a separate dashboard, and the isolated
-`badgy-condition-helper-beta` module. The original module and existing cards
-must not be modified during the tests.
+Target: Bubble Card **v3.4.2** and a separate test dashboard. Existing cards
+must not be modified during the tests. (Until v2026.10.29 a copy of the module
+under the ID `badgy-condition-helper-beta` was used for this; it was removed.)
 
 This is a **manual** release gate. The Node tests and the headless Chromium
 Playwright smoke tests now run automatically in GitHub Actions. Chromium tests
@@ -13,10 +13,10 @@ full Home Assistant frontend. None of the checkboxes below are considered comple
 
 ## Installation and editor
 
-- [ ] Import the beta YAML from the branch in **Modules → My Modules → Import from YAML**.
-- [ ] Add a duplicate card using only the beta module and confirm it can be saved/reloaded.
-- [ ] After importing, reload the browser: the beta module must still be listed
-      (file `modules/badgy-condition-helper-beta.yaml` written by Bubble Card Tools).
+- [ ] Import the module YAML from the Markdown in **Modules → My Modules → Import from YAML**.
+- [ ] Add a duplicate card using the new version and confirm it can be saved/reloaded.
+- [ ] After importing, reload the browser: the module must still be listed
+      (file `modules/badgy-condition-helper.yaml` written by Bubble Card Tools).
 - [ ] Open every editor group (Icon Colors, Backgrounds, Icons, Entity Badges,
       Icon Badges, Effects, Global Defaults); confirm nested fields appear.
 - [ ] Save a list of 2+ condition rules, reorder them, reopen the card and
@@ -59,7 +59,7 @@ full Home Assistant frontend. None of the checkboxes below are considered comple
 
 ## Lifecycle, compatibility and multi-module safety
 
-- [ ] Put the beta card in a pop-up and repeatedly open/close the pop-up.
+- [ ] Put the test card in a pop-up and repeatedly open/close the pop-up.
       No badges or effect classes should leak, and each reopen should render.
 - [ ] Change card entity state/native icon while Badgy overrides it; after
       disabling the rule the *new* native icon/color should reappear.
@@ -75,8 +75,7 @@ full Home Assistant frontend. None of the checkboxes below are considered comple
       spam, or lingering animation effects.
 - [ ] Open browser devtools and check for JavaScript errors and unsupported
       CSS features (`color-mix`, `overflow-clip-margin`).
-- [ ] Confirm an existing **stable** Badgy card remains unchanged and that
-      removing the **beta** does not remove stable settings.
+- [ ] Confirm an existing Badgy card remains unchanged after the update.
 
 ## Release decision
 

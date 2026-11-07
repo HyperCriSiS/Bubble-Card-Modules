@@ -50,20 +50,7 @@ def main():
     assert "entity_badges" in example[MODULE]
     assert example[MODULE]["entity_badges"][0]["condition"]["entity_id"] == "sensor.living_room_temperature"
     new = read_module(md)
-    # Parallel install must have a distinct ID but exactly the same runtime/editor.
-    beta_id = "badgy-condition-helper-beta"
-    beta = yaml.safe_load(
-        (ROOT / "Badgy-Conditions/Badgy-Conditions-beta.yaml").read_text(encoding="utf-8")
-    )
-    assert list(beta) == [beta_id]
-    isolated = beta[beta_id]
-    assert isolated["name"] == "Badgy Condition Helper (Beta)"
-    assert isolated["version"] == new["version"]
-    assert isolated["editor"] == new["editor"]
     assert "suggestions_code" not in new, "Card Picker suggestion was removed in beta.7"
-    assert "suggestions_code" not in isolated
-    assert isolated["code"] == new["code"].replace(MODULE, beta_id)
-    print("Verified isolated test module matches source without sharing its module ID")
     old_md = subprocess.check_output(
         ["git", "show", "origin/main:" + PATH], cwd=ROOT, text=True, errors="replace"
     )
@@ -101,16 +88,13 @@ def main():
             return super().increase_indent(flow, False)
 
     budget = 230 * 1024
-    for module_id, module in ((MODULE, new), (beta_id, isolated)):
-        stored = yaml.dump({module_id: module}, Dumper=BlockDumper, sort_keys=False,
-                           allow_unicode=True, width=10 ** 6, indent=2).encode("utf-8")
-        assert len(stored) < budget, "%s would be stored with %d bytes (budget %d, BCT limit 262144)" % (
-            module_id, len(stored), budget)
+    stored = yaml.dump({MODULE: new}, Dumper=BlockDumper, sort_keys=False,
+                       allow_unicode=True, width=10 ** 6, indent=2).encode("utf-8")
+    assert len(stored) < budget, "%s would be stored with %d bytes (budget %d, BCT limit 262144)" % (
+        MODULE, len(stored), budget)
     # The whole Markdown file is the Module Store post (GitHub discussion #1333).
     # GitHub rejects very long bodies; the previous post had about 100k characters.
     assert len(md) < 200000, "Store post has %d characters" % len(md)
-    raw_beta = (ROOT / "Badgy-Conditions/Badgy-Conditions-beta.yaml").read_bytes()
-    assert len(raw_beta) < budget, "Beta YAML has %d bytes" % len(raw_beta)
     code = new["code"]
     node_check = (
         "const fs=require('fs');const code=fs.readFileSync(0,'utf8');"
