@@ -1506,8 +1506,13 @@ visual_styling_center:
 ```
 </details>
 
-### Screenshots
+### Screenshots:
+<img width="406" height="633" alt="waterfox_VjDlqItfQ1" src="https://github.com/user-attachments/assets/dc3c4c4c-bc92-4827-a4dd-2a39479619d2" />
 
-![Options](./Options.png)
-![Gradient slider](./Gradient_Slider.png)
-![Gradient background helper](./Gradient_Background_Helper.png)
+![waterfox_bF9E7AZtjY](https://github.com/user-attachments/assets/d940315b-7254-443c-ba35-a4342f4419fe)
+![waterfox_hzipGGgXu0](https://github.com/user-attachments/assets/ea2f70c0-2e8c-4875-801f-4a9c03252c29)
+![waterfox_4A6TiysRhb](https://github.com/user-attachments/assets/cf6af9a5-76b5-495e-8388-7c13581a5221)
+
+
+
+
