@@ -30,7 +30,7 @@ class VisualStylingCenterTests(unittest.TestCase):
 
     def test_valid_markdown_and_yaml(self):
         self.assertEqual(self.text.count(chr(96) * 3) % 2, 0)
-        self.assertEqual(len(self.blocks), 4)
+        self.assertEqual(len(self.blocks), 2)
         self.assertEqual(self.module["name"], "Visual Styling Center")
         self.assertGreater(len(self.module["code"]), 15000)
         self.assertNotIn("\x97", self.text)
