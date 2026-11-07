@@ -14,16 +14,9 @@
 >  - Separator
 
 
-## Overview
+--> The sections layout sizes cards itself, so the Card Height Multiplier only works in the other layouts. With two sub-button rows in a sections view, use Bubble Card's grid layout. If something does not look as expected, try another Bubble Card layout.
 
-The Visual Styling Center module offers advanced customization options for Bubble Card elements with a focus on visual enhancements.
-It provides precise control over Icon and card sizes, spacing, colors, and visual effects like gradients.
-
-## IMPORTANT
-Due to the nature of the sections layout, you have to use the HA internal mechanism to resize the card.
-It means that the "Card Height Multiplier" only works with the other layouts.
-Also with sections layout, you need to use the bubble-card grid layout if you use two row sub-buttons layout.
-So generally, if something does not work out as expected, try out a different bubble-card layout.
+Visual Styling Center gives you precise control over the look of your Bubble Card buttons: sizes and spacing of the card, the main icon and the sub-buttons, colors for every element, entity state colors, contrast helpers behind icons and sliders, and dynamic gradients that follow your lights.
 
 On **Sub-buttons** and **Calendar** cards there is no main icon, name or slider, so only the
 sub-button options (sizes, spacing, colors, state colors, corner radius) have an effect there.
@@ -31,22 +24,7 @@ sub-button options (sizes, spacing, colors, state colors, corner radius) have an
 their colors and sizes. Only the module's default sizes can still reach the pop-up header through
 its stylesheet, so do not add the module there by YAML or as a global module.
 
-```markdown
-# Visual Styling Center for Bubble Card
-
-## Core Features
-- **Comprehensive size and margin adjustments** for cards, icons, and sub-buttons
-- **Advanced color options** for all elements
-- **Entity state-based icon coloring** for both main and sub-button icons
-- **Function button styling** for inactive states and functional entities
-- **Icon Contrast Helper** for better readability with radial background effects
-- **Dynamic gradient effects** based on light entities
-- **Slider Contrast Helper** for improved visibility with background gradients
-- **Hover effects** for improved user experience (switchable)
-- **Automatic adjustments** for optimal display
-- **Custom Slider** to see more of the visuals 
-
-## Detailed Feature Description
+## Feature Overview
 
 The editor sections follow this order. All option keys are unchanged from earlier
 versions, so existing configurations keep working without migration.
@@ -73,84 +51,127 @@ versions, so existing configurations keep working without migration.
 - A sub-button's own **custom height** (Bubble Card option) always wins over the module size
 - **Hide Sub-button Backgrounds**
 
-### Name & State Text
+### Name and State Text
 - **Name Color**, **Name Font Size**, **State Color**, **State Font Size**: Empty keeps the theme
 
 ### State Colors
 - **Use Home Assistant Theme State Colors**: Use the theme's `--state-*-color` instead of fixed green/grey
 - **Color Main Icon / Sub-button Icons by Entity State**: Light color when on, otherwise a color per state
 - **Custom Off/Offline/Function Color**: Apply a custom color to icons for inactive states, functional entities (scenes, scripts, automations), or entities without states
+- Entities without states and non-existent entities are handled without errors
 
 ### Icon Contrast Helper
-The Icon Contrast Helper adds circular background behind icons to improve visibility and contrast regardless of the card's background color.
-- **Enable Icon Contrast Helper**: Toggle the helper feature on/off
+Adds a circular background behind icons to improve visibility and contrast regardless of the card's background color.
+- **Enable Icon Contrast Helper**: Toggle the helper on and off (sub-button backgrounds are hidden while it is on, to avoid visual conflicts)
 - **Apply to Main/Sub Icons**: Choose which icons get the contrast helper
-- **Helper Color**: Select the background color for the helper
-- **Helper Opacity**: Control the transparency of the helper background 
-- **Helper Size Ratio**: Adjust how much of the icon the background covers 
-- **Radial Fade Effect**: Enable a smooth fade from color to transparent (off unless enabled)
-- **Fade Strength**: Control how gradual the fade effect is 
+- **Helper Color**: Background color of the helper
+- **Helper Opacity**: Transparency of the helper background
+- **Helper Size Ratio**: How much of the icon the background covers
+- **Radial Fade Effect**: Smooth fade from color to transparent (off unless enabled)
+- **Fade Strength**: How gradual the fade is
 
 ### Gradient Effects
-- **Enable Gradient Effects**: Toggle dynamic gradients on/off
-- **Apply Gradient to**: Choose between slider fill or card background
+- **Enable Gradient Effects**: Toggle dynamic gradients on and off
+- **Apply Gradient to**: Slider fill or card background
 - **Gradient Direction**: Angle in degrees, 90 is left to right as before
-- **Gradient Entity**: Select a light group or single light to base the gradient on (empty uses the card's light)
+- **Gradient Entity**: Light group or single light the gradient follows (empty uses the card's light)
 - **Hide Rainbow Fallback**: Without it, a rainbow gradient is shown while no colored light is on
-- **Slider Brightness**: Adjust the opacity of the slider when using background gradients
+- **Slider Brightness**: Opacity of the slider when using background gradients
 
 ### Slider Contrast Helper
-Only active together with a card background gradient, it improves the visibility of the slider element.
-- **Enable Slider Contrast Helper**: Toggle the helper for slider with background gradients
-- **Slider Helper Color**: Select the background/glow color for the slider
-- **Slider Helper Opacity**: Control the transparency of the helper effect
-- **Slider Helper Size Ratio**: Adjust the size of the helper effect
-- **Enable Radial Fade Effect**: Add a smooth fade to the slider glow (off unless enabled)
-- **Slider Fade Strength**: Control the intensity of the fade effect
+Only active together with a card background gradient, it improves the visibility of the slider.
+- **Enable Slider Contrast Helper**: Toggle the helper for sliders with background gradients
+- **Slider Helper Color**: Background/glow color of the slider
+- **Slider Helper Opacity**: Transparency of the helper effect
+- **Slider Helper Size Ratio**: Size of the helper effect
+- **Enable Radial Fade Effect**: Smooth fade of the slider glow (off unless enabled)
+- **Slider Fade Strength**: Intensity of the fade
 
 ### Interaction Effects
 - **Hover Highlight, Brighter Active Icon and Sub-icon Opacity**: On by default as in earlier versions, set `enable_interaction_effects: false` to use Bubble Card's native look
 
 ### Compatibility
 - Works with all button layouts (normal, large, multi-row)
-- Compatible with entity state tracking for dynamic changes
-- Handles entities without states or non-existent entities
-```
+- Entity state tracking for dynamic changes, without extra Home Assistant subscriptions or polling
+- Built against Bubble Card v3.4.2
 
-> **Note**: When enabling the Icon Contrast Helper, sub-button backgrounds are automatically hidden to prevent visual conflicts.
+## Changelog
 
-## Usage Examples
+### v2026.11.05
 
-### Basic Height Adjustment
+**Fixed**
+- Pop-up cards are skipped by the module script. `unsupported` only disables the editor checkbox, so a module added by YAML or as a global module used to restyle the pop-up header and its cards.
+- On the `sub-buttons` card a leftover `main` section in YAML no longer shifts the sub-button numbering, so the right icons get their colors.
+- Always visible sub-button sliders follow the sub-button height instead of staying at 36px.
+
+### v2026.10.30
+
+**Fixed**
+- The sub-button container margin follows the text direction (right-to-left languages).
+
+### v2026.10.29
+
+No migration needed: the module ID and every existing setting keep working.
+
+**New**
+- Name and state text: color and font size.
+- Corner radius for card, icon background and sub-buttons through Bubble Card's own variables.
+- Card background color and opacity.
+- Gradient direction (angle), 90 keeps the previous left-to-right gradient.
+- Optional Home Assistant theme state colors instead of fixed green/grey.
+
+**Fixed**
+- Without a Bubble theme the icon background circle is visible again; use **Hide Icon Background** to remove it.
+- A sub-button's own `custom_height` wins over the module size.
+- `sub-buttons` and `calendar` cards stay supported; the sub-button options work there.
+
+### v2026.10.15
+
+**Fixed**
+- Repaired the module definition and display units.
+- Native Bubble Card v3.4.2 sliders are used; the module's own slider update was removed.
+- Entity colors, CSS overrides and entity inheritance work again, also in mixed main/bottom sub-button groups.
+- Numeric zero values are kept and the saved configuration is never modified.
+- The module only resets styles it set itself and cleans up when the card is removed or the module is disabled.
+
+Configure this module via the editor or in YAML, for example:
 
 ```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+entity: light.living_room
+icon: mdi:lightbulb
+name: Living Room Light
+show_state: true
+sub_button:
+  - entity: fan.living_room
+    icon: mdi:fan
+  - entity: switch.living_room_plug
+    icon: mdi:power-socket-eu
+modules:
+  - visual_styling_center
 visual_styling_center:
   height_multiplier: 1.5
-```
-
-### Custom Colors with Icon Helper
-
-```yaml
-visual_styling_center:
+  icon_size_multiplier: 1.2
   custom_icon_color: [255, 255, 255]
   custom_icon_background_color: [0, 0, 0]
+  enable_entity_colored_main_icon: true
+  enable_entity_colored_subicons: true
   enable_icon_helper: true
   helper_color: [255, 255, 255]
   helper_opacity: 0.7
   helper_size_ratio: 1.2
   enable_helper_fade: true
   fade_strength: 1.2
-```
-
-### Dynamic Gradient Effects
-
-```yaml
-visual_styling_center:
   enable_gradient: true
   gradient_target: background
   gradient_entity: light.living_room_group
   disable_default_gradient: false
   slider_bg_opacity: 0.8
+  enable_slider_helper: true
+  slider_helper_color: [0, 0, 0]
+  slider_helper_opacity: 0.5
 ```
 
 ---
