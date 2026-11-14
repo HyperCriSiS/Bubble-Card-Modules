@@ -1,4 +1,4 @@
-"""HBS Gestures on the real horizontal buttons stack in an isolated Home Assistant.
+"""Button Stack Gestures on the real horizontal buttons stack in an isolated Home Assistant.
 
 Mouse gestures go through Playwright, touch gestures through CDP touch events,
 so touch-action and pointer cancellation behave like on a phone.
@@ -16,7 +16,7 @@ from test_lovelace import ARTIFACTS, BASE
 CHILD = "input_boolean.vsc_child_enabled"
 
 
-class HbsGestures(unittest.TestCase):
+class ButtonStackGestures(unittest.TestCase):
     api = classmethod(base.RealLovelace.api.__func__)
     service = classmethod(base.RealLovelace.service.__func__)
     entity = classmethod(base.RealLovelace.entity.__func__)
@@ -46,7 +46,7 @@ class HbsGestures(unittest.TestCase):
         self.errors = []
         self.page.on("pageerror", lambda e: self.errors.append(str(e)))
         self.page.goto(BASE + "/lovelace-vsc-e2e/hbs", wait_until="domcontentloaded", timeout=65000)
-        expect(self.page.get_by_text("HBS gestures")).to_be_visible(timeout=65000)
+        expect(self.page.get_by_text("Button stack gestures")).to_be_visible(timeout=65000)
         for index in (1, 2, 3):
             expect(self.button(index)).to_be_visible(timeout=30000)
         # The stack rises in with an animation; wait until it stands still.
