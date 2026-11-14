@@ -8,6 +8,7 @@ import yaml
 MODULE_ID = "visual_styling_center"
 COMBINED_MODULE_ID = "subbutton_below_normal_layout"
 BADGY_MODULE_ID = "badgy-condition-helper"
+HBS_MODULE_ID = "hbs_gestures"
 THEME = "VSC E2E Theme"
 
 def extract_module(markdown, module_id=MODULE_ID):
@@ -70,7 +71,28 @@ def make_config():
         "logger":{"default":"warning"}
     }
 
-def make_dashboard(code, combined_code="", badgy_code=""):
+def hbs_view(hbs_code):
+    def toggle_child(service):
+        return {"action":"perform-action","perform_action":"input_boolean."+service,
+                "target":{"entity_id":"input_boolean.vsc_child_enabled"}}
+    def popup(hash_, text):
+        return {"type":"custom:bubble-card","card_type":"pop-up","hash":hash_,"name":text,
+                "cards":[{"type":"markdown","content":text}]}
+    stack={"type":"custom:bubble-card","card_type":"horizontal-buttons-stack","styles":hbs_code,
+           "1_name":"Gesture","1_icon":"mdi:gesture","1_link":"#hbs-native","1_entity":"light.vsc_main",
+           "2_name":"Default","2_icon":"mdi:star","2_link":"#hbs-native",
+           "3_name":"Tap","3_icon":"mdi:gesture-tap","3_link":"#hbs-native",
+           HBS_MODULE_ID:{"hold_time":400,"buttons":[
+               {"button":1,"hold_action":{"action":"toggle"},
+                "swipe_up_action":{"action":"navigate","navigation_path":"#hbs-swipe"}},
+               {"button":3,"tap_action":toggle_child("toggle"),"swipe_down_action":{"action":"none"}},
+               # No button number: the fallback for every button.
+               {"swipe_down_action":toggle_child("turn_off")}]}}
+    return {"title":"HBS","path":"hbs","cards":[
+        {"type":"markdown","content":"HBS gestures"},
+        popup("#hbs-native","Native HBS link"),popup("#hbs-swipe","Swipe pop-up"),stack]}
+
+def make_dashboard(code, combined_code="", badgy_code="", hbs_code=""):
     def button(name,entity,options=None,subs=None):
         card={"type":"custom:bubble-card","card_type":"button","button_type":"slider",
               "entity":entity,"name":name}
@@ -132,6 +154,7 @@ def make_dashboard(code, combined_code="", badgy_code=""):
                    button_action={"tap_action":{"action":"none"},
                                   "hold_action":{"action":"toggle"}})
               for name,opts in (("Gesture Hold",matrix),("Gesture Hold Native",None))]]},
+        hbs_view(hbs_code),
         {"title":"Away","path":"away","cards":[{"type":"markdown","content":"Lifecycle navigation target"}]}
     ]}
 
@@ -145,6 +168,7 @@ def main():
                             .read_text(encoding="utf-8"),COMBINED_MODULE_ID)
     badgy=extract_module((args.repo/"Badgy-Conditions/Badgy-Conditions.md").read_text(encoding="utf-8"),
                          BADGY_MODULE_ID)
+    hbs=extract_module((args.repo/"HBS-Gestures/HBS-Gestures.md").read_text(encoding="utf-8"),HBS_MODULE_ID)
     dest=args.config_dir.resolve()
     dest.mkdir(parents=True,exist_ok=True)
     (dest/"www").mkdir(exist_ok=True)
@@ -156,7 +180,7 @@ def main():
         encoding="utf-8")
     (dest/"configuration.yaml").write_text(yaml.safe_dump(make_config(),sort_keys=False,allow_unicode=True),encoding="utf-8")
     (dest/"ui-lovelace-vsc-e2e.yaml").write_text(
-        yaml.safe_dump(make_dashboard(module["code"],combined["code"],badgy["code"]),sort_keys=False,allow_unicode=True,width=120),encoding="utf-8")
+        yaml.safe_dump(make_dashboard(module["code"],combined["code"],badgy["code"],hbs["code"]),sort_keys=False,allow_unicode=True,width=120),encoding="utf-8")
     print("Generated isolated Home Assistant configuration and Lovelace dashboard")
 
 if __name__=="__main__":
