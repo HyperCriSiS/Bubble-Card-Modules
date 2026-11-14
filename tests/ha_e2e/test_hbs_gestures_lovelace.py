@@ -79,7 +79,7 @@ class HbsGestures(unittest.TestCase):
 
     def assert_no_native_tap(self):
         self.page.wait_for_timeout(700)
-        self.assertNotEqual(self.hash(), "#hbs-native")
+        self.assertNotIn(self.hash(), ("#hbs-one", "#hbs-two", "#hbs-three"))
 
     def mouse_drag(self, index, dy, hold_ms=0):
         x, y = self.center(index)
@@ -108,7 +108,7 @@ class HbsGestures(unittest.TestCase):
 
     def test_01_native_tap_unchanged(self):
         self.button(2).click()
-        self.wait_hash("#hbs-native")
+        self.wait_hash("#hbs-two")
 
     def test_02_mouse_hold_toggles_without_native_tap(self):
         self.mouse_drag(1, 0, hold_ms=900)
@@ -118,6 +118,7 @@ class HbsGestures(unittest.TestCase):
     def test_03_mouse_swipe_up_opens_popup(self):
         self.mouse_drag(1, -120)
         self.wait_hash("#hbs-swipe")
+        expect(self.page.get_by_text("Swipe pop-up").first).to_be_visible(timeout=10000)
 
     def test_04_touch_swipe_down_uses_fallback_entry(self):
         self.touch_drag(2, 34)
@@ -132,6 +133,7 @@ class HbsGestures(unittest.TestCase):
     def test_06_touch_swipe_up_opens_popup(self):
         self.touch_drag(1, -120)
         self.wait_hash("#hbs-swipe")
+        expect(self.page.get_by_text("Swipe pop-up").first).to_be_visible(timeout=10000)
 
     def test_07_tap_override_and_none_blocks_fallback(self):
         self.button(3).click()
@@ -146,7 +148,7 @@ class HbsGestures(unittest.TestCase):
 
     def test_08_short_hold_is_a_native_tap(self):
         self.mouse_drag(1, 0, hold_ms=100)
-        self.wait_hash("#hbs-native")
+        self.wait_hash("#hbs-one")
         self.assertEqual(self.entity("light.vsc_main")["state"], "on")
 
 

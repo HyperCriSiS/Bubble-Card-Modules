@@ -79,9 +79,9 @@ def hbs_view(hbs_code):
         return {"type":"custom:bubble-card","card_type":"pop-up","hash":hash_,"name":text,
                 "cards":[{"type":"markdown","content":text}]}
     stack={"type":"custom:bubble-card","card_type":"horizontal-buttons-stack","styles":hbs_code,
-           "1_name":"Gesture","1_icon":"mdi:gesture","1_link":"#hbs-native","1_entity":"light.vsc_main",
-           "2_name":"Default","2_icon":"mdi:star","2_link":"#hbs-native",
-           "3_name":"Tap","3_icon":"mdi:gesture-tap","3_link":"#hbs-native",
+           "1_name":"Gesture","1_icon":"mdi:gesture","1_link":"#hbs-one","1_entity":"light.vsc_main",
+           "2_name":"Default","2_icon":"mdi:star","2_link":"#hbs-two",
+           "3_name":"Tap","3_icon":"mdi:gesture-tap","3_link":"#hbs-three",
            HBS_MODULE_ID:{"hold_time":400,"buttons":[
                {"button":1,"hold_action":{"action":"toggle"},
                 "swipe_up_action":{"action":"navigate","navigation_path":"#hbs-swipe"}},
@@ -90,7 +90,7 @@ def hbs_view(hbs_code):
                {"swipe_down_action":toggle_child("turn_off")}]}}
     return {"title":"HBS","path":"hbs","cards":[
         {"type":"markdown","content":"HBS gestures"},
-        popup("#hbs-native","Native HBS link"),popup("#hbs-swipe","Swipe pop-up"),stack]}
+        popup("#hbs-one","Native HBS link"),popup("#hbs-swipe","Swipe pop-up"),stack]}
 
 def make_dashboard(code, combined_code="", badgy_code="", hbs_code=""):
     def button(name,entity,options=None,subs=None):
