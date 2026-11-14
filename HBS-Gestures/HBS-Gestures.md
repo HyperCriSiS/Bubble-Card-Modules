@@ -24,7 +24,9 @@ Every gesture accepts any Home Assistant action: open a pop-up (navigate to its 
 - A gesture that fires never also triggers the native tap, so a hold or swipe does not open the button's pop-up as well.
 - Without a `tap_action` the native tap stays exactly as it is.
 - Swipes left and right are not offered, because they scroll the stack.
-- While a swipe gesture is configured, a vertical drag that starts on a button no longer scrolls the page. The stack is fixed to the bottom of the screen, so this only affects drags that start on it.
+- On a button with a swipe gesture, a vertical drag or pinch zoom that starts on it no longer moves the page. The stack is fixed to the bottom of the screen, so this only affects gestures that start on such a button.
+- The space below the stack is small, so keep the swipe distance low (default 30 px) if you use swipe down.
+- Avoid a gesture that opens the button's own `link` pop-up. The native tap does not notice it, so the first tap afterwards does nothing and only the second one closes the pop-up.
 
 Configure this module via the editor or in YAML, for example:
 
@@ -85,9 +87,10 @@ hbs_gestures:
       if (!host) return '';
       const options = () => this.config?.hbs_gestures ?? {};
       const items = () => (Array.isArray(options().buttons) ? options().buttons : []).filter((item) => item && typeof item === 'object');
+      const real = (action) => (action && action.action && action.action !== 'none' ? action : null);
+      const number = (value, fallback, min) => (Number.isFinite(Number(value)) && Number(value) >= min ? Number(value) : fallback);
 
       if (!host._hbsGestures) {
-        const real = (action) => (action && action.action && action.action !== 'none' ? action : null);
         const findButton = (event) => {
           const button = event.target?.closest?.('.bubble-button');
           return button && host.contains(button) ? button : null;
@@ -122,6 +125,7 @@ hbs_gestures:
           window.removeEventListener('pointermove', move);
           window.removeEventListener('pointerup', up);
           window.removeEventListener('pointercancel', cancel);
+          document.removeEventListener('visibilitychange', end);
         };
         const move = (event) => {
           const gesture = state.gesture;
@@ -135,7 +139,7 @@ hbs_gestures:
           if (gesture.held) return;
           const dx = event.clientX - gesture.x;
           const dy = event.clientY - gesture.y;
-          if (Math.abs(dy) < Number(options().swipe_distance ?? 30) || Math.abs(dy) <= Math.abs(dx)) return;
+          if (Math.abs(dy) < number(options().swipe_distance, 30, 5) || Math.abs(dy) <= Math.abs(dx)) return;
           const action = dy < 0 ? gesture.actions.up : gesture.actions.down;
           if (!action) return;
           state.suppress = true;
@@ -159,12 +163,14 @@ hbs_gestures:
               gesture.held = true;
               state.suppress = true;
               fire(button, actions.hold, actions.entity);
-            }, Number(options().hold_time ?? 500));
+            }, number(options().hold_time, 500, 100));
           }
           state.gesture = gesture;
           window.addEventListener('pointermove', move);
           window.addEventListener('pointerup', up);
           window.addEventListener('pointercancel', cancel);
+          // A press cut short by leaving the app never fires the hold on return.
+          document.addEventListener('visibilitychange', end);
         };
         const click = (event) => {
           const button = findButton(event);
@@ -199,10 +205,13 @@ hbs_gestures:
       if (typeof onTeardown === 'function') onTeardown(() => host._hbsGestures?.());
 
       const list = items();
-      const swipes = list.some((item) => item.swipe_up_action || item.swipe_down_action);
       if (!list.length) return '';
-      return '.bubble-button { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;'
-        + (swipes ? ' touch-action: pan-x;' : '') + ' }';
+      // Vertical page drags stay possible on buttons without a swipe gesture.
+      const swipes = list.filter((item) => real(item.swipe_up_action) || real(item.swipe_down_action));
+      const all = swipes.some((item) => item.button === undefined || item.button === null || item.button === '');
+      const selectors = all ? ['.bubble-button'] : swipes.map((item) => '.bubble-button-' + Number(item.button));
+      return '.bubble-button { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }'
+        + (selectors.length ? ' ' + selectors.join(', ') + ' { touch-action: pan-x; }' : '');
     })()}
   editor:
     - name: hold_time

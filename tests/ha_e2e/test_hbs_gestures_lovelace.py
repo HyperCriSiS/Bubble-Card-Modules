@@ -9,24 +9,26 @@ import unittest
 
 from playwright.sync_api import expect
 
-from test_lovelace import ARTIFACTS, AUTH_FILE, BASE, RealLovelace
+# A module import, so unittest discovery does not run RealLovelace a second time.
+import test_lovelace as base
+from test_lovelace import ARTIFACTS, BASE
 
 CHILD = "input_boolean.vsc_child_enabled"
 
 
 class HbsGestures(unittest.TestCase):
-    api = classmethod(RealLovelace.api.__func__)
-    service = classmethod(RealLovelace.service.__func__)
-    entity = classmethod(RealLovelace.entity.__func__)
-    wait_entity = classmethod(RealLovelace.wait_entity.__func__)
+    api = classmethod(base.RealLovelace.api.__func__)
+    service = classmethod(base.RealLovelace.service.__func__)
+    entity = classmethod(base.RealLovelace.entity.__func__)
+    wait_entity = classmethod(base.RealLovelace.wait_entity.__func__)
 
     @classmethod
     def setUpClass(cls):
-        RealLovelace.setUpClass.__func__(cls)
+        base.RealLovelace.setUpClass.__func__(cls)
 
     @classmethod
     def tearDownClass(cls):
-        RealLovelace.tearDownClass.__func__(cls)
+        base.RealLovelace.tearDownClass.__func__(cls)
 
     def setUp(self):
         self.service("input_boolean", "turn_on", "input_boolean.vsc_main_enabled")
@@ -118,7 +120,7 @@ class HbsGestures(unittest.TestCase):
         self.wait_hash("#hbs-swipe")
 
     def test_04_touch_swipe_down_uses_fallback_entry(self):
-        self.touch_drag(2, 38)
+        self.touch_drag(2, 34)
         self.wait_entity(CHILD, lambda e: e["state"] == "off")
         self.assert_no_native_tap()
 
@@ -138,7 +140,7 @@ class HbsGestures(unittest.TestCase):
         # Button 3 sets swipe down to none, so the fallback must not turn it off again.
         self.service("input_boolean", "turn_on", CHILD)
         self.wait_entity(CHILD, lambda e: e["state"] == "on")
-        self.mouse_drag(3, 38)
+        self.mouse_drag(3, 34)
         self.page.wait_for_timeout(1200)
         self.assertEqual(self.entity(CHILD)["state"], "on")
 
