@@ -8,7 +8,7 @@ import yaml
 MODULE_ID = "visual_styling_center"
 COMBINED_MODULE_ID = "subbutton_below_normal_layout"
 BADGY_MODULE_ID = "badgy-condition-helper"
-HBS_MODULE_ID = "hbs_gestures"
+HBS_MODULE_ID = "button_stack_gestures"
 THEME = "VSC E2E Theme"
 
 def extract_module(markdown, module_id=MODULE_ID):
@@ -89,7 +89,7 @@ def hbs_view(hbs_code):
                # No button number: the fallback for every button.
                {"swipe_down_action":toggle_child("turn_off")}]}}
     return {"title":"HBS","path":"hbs","cards":[
-        {"type":"markdown","content":"HBS gestures"},
+        {"type":"markdown","content":"Button stack gestures"},
         popup("#hbs-one","Native HBS link"),popup("#hbs-swipe","Swipe pop-up"),stack]}
 
 def make_dashboard(code, combined_code="", badgy_code="", hbs_code=""):
@@ -168,7 +168,7 @@ def main():
                             .read_text(encoding="utf-8"),COMBINED_MODULE_ID)
     badgy=extract_module((args.repo/"Badgy-Conditions/Badgy-Conditions.md").read_text(encoding="utf-8"),
                          BADGY_MODULE_ID)
-    hbs=extract_module((args.repo/"HBS-Gestures/HBS-Gestures.md").read_text(encoding="utf-8"),HBS_MODULE_ID)
+    hbs=extract_module((args.repo/"Button-Stack-Gestures/Button-Stack-Gestures.md").read_text(encoding="utf-8"),HBS_MODULE_ID)
     dest=args.config_dir.resolve()
     dest.mkdir(parents=True,exist_ok=True)
     (dest/"www").mkdir(exist_ok=True)

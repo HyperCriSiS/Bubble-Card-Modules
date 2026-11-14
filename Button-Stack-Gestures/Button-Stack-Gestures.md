@@ -1,4 +1,4 @@
-# HBS Gestures
+# Button Stack Gestures
 
 **Version:** v2026.11.14
 **Creator:** [HyperCriSiS](https://github.com/HyperCriSiS)
@@ -34,7 +34,7 @@ Configure this module via the editor or in YAML, for example:
 type: custom:bubble-card
 card_type: horizontal-buttons-stack
 modules:
-  - hbs_gestures
+  - button_stack_gestures
 1_name: Kitchen
 1_icon: mdi:fridge
 1_link: '#kitchen'
@@ -42,7 +42,7 @@ modules:
 2_name: Living room
 2_icon: mdi:sofa
 2_link: '#living-room'
-hbs_gestures:
+button_stack_gestures:
   hold_time: 500
   swipe_distance: 30
   buttons:
@@ -70,11 +70,11 @@ hbs_gestures:
 > To use this module, simply copy and paste the following configuration into your `/www/bubble/bubble-modules.yaml` file.
 
 ```yaml
-hbs_gestures:
-  name: HBS Gestures
+button_stack_gestures:
+  name: Button Stack Gestures
   version: "v2026.11.14"
   creator: HyperCriSiS
-  link: https://github.com/HyperCriSiS/Bubble-Card-Modules/tree/main/HBS-Gestures
+  link: https://github.com/HyperCriSiS/Bubble-Card-Modules/tree/main/Button-Stack-Gestures
   supported:
     - horizontal-buttons-stack
   description: |
@@ -85,12 +85,12 @@ hbs_gestures:
     ${(() => {
       const host = card;
       if (!host) return '';
-      const options = () => this.config?.hbs_gestures ?? {};
+      const options = () => this.config?.button_stack_gestures ?? {};
       const items = () => (Array.isArray(options().buttons) ? options().buttons : []).filter((item) => item && typeof item === 'object');
       const real = (action) => (action && action.action && action.action !== 'none' ? action : null);
       const number = (value, fallback, min) => (Number.isFinite(Number(value)) && Number(value) >= min ? Number(value) : fallback);
 
-      if (!host._hbsGestures) {
+      if (!host._buttonStackGestures) {
         const findButton = (event) => {
           const button = event.target?.closest?.('.bubble-button');
           return button && host.contains(button) ? button : null;
@@ -194,15 +194,15 @@ hbs_gestures:
         host.addEventListener('pointerdown', down);
         host.addEventListener('click', click, true);
         host.addEventListener('contextmenu', menu);
-        host._hbsGestures = () => {
+        host._buttonStackGestures = () => {
           end();
           host.removeEventListener('pointerdown', down);
           host.removeEventListener('click', click, true);
           host.removeEventListener('contextmenu', menu);
-          delete host._hbsGestures;
+          delete host._buttonStackGestures;
         };
       }
-      if (typeof onTeardown === 'function') onTeardown(() => host._hbsGestures?.());
+      if (typeof onTeardown === 'function') onTeardown(() => host._buttonStackGestures?.());
 
       const list = items();
       if (!list.length) return '';
