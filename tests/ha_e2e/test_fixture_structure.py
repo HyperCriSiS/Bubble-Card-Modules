@@ -68,6 +68,17 @@ class HAContracts(unittest.TestCase):
         native=views["sections"]["sections"][0]["cards"][1]
         self.assertNotIn("styles",native)
 
+    def test_hbs_gestures_view(self):
+        module=extract_module((ROOT/"HBS-Gestures/HBS-Gestures.md").read_text(encoding="utf-8"),"hbs_gestures")
+        self.assertEqual(module["supported"],["horizontal-buttons-stack"])
+        self.assertEqual([f["name"] for f in module["editor"]],["hold_time","swipe_distance","buttons"])
+        views={v["path"]:v for v in make_dashboard("VSC",hbs_code=module["code"])["views"]}
+        stack=views["hbs"]["cards"][-1]
+        self.assertEqual(stack["card_type"],"horizontal-buttons-stack")
+        self.assertEqual(stack["styles"],module["code"])
+        buttons=stack["hbs_gestures"]["buttons"]
+        self.assertEqual([b.get("button") for b in buttons],[1,3,None])
+
     def test_ci_isolated_and_verified(self):
         text=(ROOT/".github/workflows/test-vsc-ha-e2e.yml").read_text(encoding="utf-8")
         for must in ("-p 127.0.0.1:8123:8123","--cap-drop=ALL",
