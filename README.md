@@ -27,7 +27,7 @@ Bubble Card can be extended with modules: YAML snippets that bring their own edi
 |---|---|
 | [Visual Styling Center](Visual-Styling-Center/Visual-Styling-Center.md) | Sizes, spacing, colors, state colors, contrast helpers and gradients for buttons and sub-buttons. |
 | [Badgy Condition Helper](Badgy-Conditions/Badgy-Conditions.md) | Value and icon badges, condition-based backgrounds, icons and animations. |
-| [Button Stack Gestures](Button-Stack-Gestures/Button-Stack-Gestures.md) | Hold, swipe and tap actions for the buttons of the horizontal buttons stack. |
+| [Button Stack Gestures](Button-Stack-Gestures/Button-Stack-Gestures.md) | Experimental. Hold, swipe and tap actions for the buttons of the horizontal buttons stack. |
 
 ### Visual Styling Center
 
@@ -64,6 +64,9 @@ Badges, condition-based colors, icons and animations that react to the state of 
 Not supported: cover, horizontal buttons stack, media player, pop-up and separator cards. The large layout is recommended.
 
 ### Button Stack Gestures
+
+> [!WARNING]
+> Experimental and not yet available in the Module Store. Install it with **My Modules → Import from YAML** using the YAML from its [documentation](Button-Stack-Gestures/Button-Stack-Gestures.md).
 
 Extra gestures for the buttons of the horizontal buttons stack.
 
