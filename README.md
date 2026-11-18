@@ -13,9 +13,13 @@ Bubble Card can be extended with modules: YAML snippets that bring their own edi
 
 ## 📦 Installation
 
-1. Open a Bubble Card in the dashboard editor and go to **Modules**.
-2. Install the module from the **Module Store**, or copy the YAML from the module's documentation and use **My Modules → Import from YAML** (requires Bubble Card Tools).
-3. Enable the module on the card and configure it in the editor.
+1. Install [Bubble Card Tools](https://github.com/Clooos/Bubble-Card-Tools). The integration enables the Module Store.
+2. Open a Bubble Card in the dashboard editor, go to **Modules** and switch to the **Module Store** tab.
+3. Search for the module and click **Install**. The Module Store also shows updates for installed modules.
+4. Apply the module to the card in the **My Modules** tab and configure it in the editor.
+
+> [!TIP]
+> Without the Module Store, copy the YAML from the module's documentation and use **My Modules → Import from YAML**.
 
 ## 🧩 Available modules
 
